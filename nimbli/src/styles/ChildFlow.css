@@ -740,11 +740,59 @@
   object-fit: cover;
   border-radius: 24px;
   background: #111827;
+  transform: scaleX(-1);
+}
+
+.pose-camera-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #111827;
+}
+
+.pose-camera-video,
+.pose-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pose-canvas {
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+.pose-status {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  background: white;
+  color: #111827;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.pose-status.success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.pose-status.warning {
+  background: #fffbeb;
+  color: #b45309;
 }
 
 .exercise-execution-page {
-  min-height: 100vh;
   background: var(--bg-light);
+  overflow-x: hidden;
+
 }
 
 .execution-header {
@@ -763,28 +811,10 @@
   object-fit: contain;
 }
 
-.progress-bar-container {
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.progress-bar {
-  height: 9px;
-  background: #e5e9ed;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-}
-
 .execution-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 42px 24px;
+  padding: 32px 24px;
 }
 
 .execution-layout {
