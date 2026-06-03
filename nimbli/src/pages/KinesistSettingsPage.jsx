@@ -8,6 +8,7 @@ export default function KinesistSettingsPage({ onNavigate }) {
     const [kinesist, setKinesist] = useState(null)
     const [subscription, setSubscription] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const [form, setForm] = useState({
         name: '',
@@ -72,7 +73,7 @@ export default function KinesistSettingsPage({ onNavigate }) {
 
         if (error) {
             console.error(error)
-            alert('Fout bij opslaan')
+            setErrorMessage('Fout bij opslaan')
             return
         }
 
@@ -163,7 +164,17 @@ export default function KinesistSettingsPage({ onNavigate }) {
                                 />
                             </label>
                         </div>
-
+                        {errorMessage && (
+                            <p
+                                style={{
+                                    color: '#dc2626',
+                                    fontSize: '14px',
+                                    marginTop: '12px',
+                                }}
+                            >
+                                {errorMessage}
+                            </p>
+                        )}
                         <button
                             className="primary-btn settings-save-btn"
                             onClick={saveProfile}
