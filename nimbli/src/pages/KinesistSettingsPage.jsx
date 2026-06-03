@@ -9,6 +9,7 @@ export default function KinesistSettingsPage({ onNavigate }) {
     const [subscription, setSubscription] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [successMessage, setSuccessMessage] = useState('')
 
     const [form, setForm] = useState({
         name: '',
@@ -78,7 +79,7 @@ export default function KinesistSettingsPage({ onNavigate }) {
         }
 
         setKinesist(data)
-        alert('Profiel opgeslagen')
+        setSuccessMessage('Profiel opgeslagen')
     }
 
     const currentPlan = subscription?.plan || 'free'
@@ -173,6 +174,17 @@ export default function KinesistSettingsPage({ onNavigate }) {
                                 }}
                             >
                                 {errorMessage}
+                            </p>
+                        )}
+                        {successMessage && (
+                            <p
+                                style={{
+                                    color: '#16a34a',
+                                    fontSize: '14px',
+                                    marginTop: '12px',
+                                }}
+                            >
+                                {successMessage}
                             </p>
                         )}
                         <button
