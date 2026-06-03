@@ -17,6 +17,14 @@ import ChildMissionsPage from './pages/ChildMissionsPage'
 import ChildProfilePage from './pages/ChildProfilePage'
 import KinesistDashboardPage from './pages/KinesistDashboardPage'
 import NewPatientFlowPage from './pages/NewPatientFlowPage'
+import KinesistPatientDetailPage from './pages/KinesistPatientDetailPage'
+import KinesistExercisesPage from './pages/KinesistExercisesPage'
+import KinesistExerciseDetailPage from './pages/KinesistExerciseDetailPage'
+import AssignExercisePage from './pages/AssignExercisePage'
+import NewExercisePage from './pages/NewExercisePage'
+import KinesistSettingsPage from './pages/KinesistSettingsPage'
+import PremiumTeamSignupPage from './pages/PremiumTeamSignupPage'
+import PremiumCheckoutPage from './pages/PremiumCheckoutPage'
 
 const pageComponents = {
   login: LoginPage,
@@ -33,10 +41,18 @@ const pageComponents = {
   childProfile: ChildProfilePage,
   kinesistDashboard: KinesistDashboardPage,
   newPatientFlow: NewPatientFlowPage,
+  kinesistPatientDetail: KinesistPatientDetailPage,
+  kinesistExercises: KinesistExercisesPage,
+  kinesistExerciseDetail: KinesistExerciseDetailPage,
+  assignExercise: AssignExercisePage,
+  newExercise: NewExercisePage,
+  kinesistSettings: KinesistSettingsPage,
+  premiumTeamSignup: PremiumTeamSignupPage,
+  premiumCheckout: PremiumCheckoutPage,
 }
 
 function App() {
-  const [page, setPage] = useState('login')
+  const [page, setPage] = useState('kinesistDashboard') // Start on kinesist dashboard for testing
 
   // Parse page string for parameterized routes (e.g., 'exerciseDetails-1')
   const parsePageRoute = (pageRoute) => {

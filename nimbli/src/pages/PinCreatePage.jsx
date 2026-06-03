@@ -21,7 +21,7 @@ export default function PinCreatePage({ onNavigate }) {
       <div className="status-bar" />
       <div className="hero-copy">
         <h1>Kies een pincode</h1>
-        <p>Maak een code aan om het ouderdasboard raad te plegen.</p>
+        <p>Maak een code aan om het dashboard raad te plegen </p>
       </div>
 
       <div className="pin-preview">

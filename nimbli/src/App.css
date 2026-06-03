@@ -24,40 +24,58 @@ input {
   font: inherit;
 }
 
+/* ===== LOGIN FLOW BASE ===== */
+
 .app-shell {
   min-height: 100vh;
-  padding: 56px 40px;
+  padding: 32px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at top left, rgba(25, 163, 131, 0.18), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(16, 120, 100, 0.12), transparent 20%),
+  background:
+    radial-gradient(circle at top left, rgba(25, 163, 131, 0.16), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(16, 120, 100, 0.1), transparent 20%),
     #f4f9f6;
 }
 
 .login-card {
-  width: min(700px, 100%);
+  width: min(620px, 100%);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
   background: #ffffff;
-  border-radius: 40px;
-  padding: 56px 48px;
-  box-shadow: 0 32px 90px rgba(24, 68, 56, 0.08);
+  border-radius: 32px;
+  padding: 42px;
+  box-shadow: 0 24px 70px rgba(24, 68, 56, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 26px;
 }
 
 .brand-logo {
   display: block;
+  width: 190px;
   max-width: 100%;
-  margin: 20px auto 0;
-  width: 250px;
   height: auto;
-  margin-bottom: 24px;
+  margin: 8px auto 10px;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 900;
+  color: #1d232a;
+}
+
+.login-card p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .login-form {
   display: grid;
-  gap: 18px;
+  gap: 14px;
 }
 
 .input-label {
@@ -66,10 +84,10 @@ input {
 
 .login-field {
   width: 100%;
-  min-height: 56px;
-  padding: 0 18px;
+  min-height: 52px;
+  padding: 0 16px;
   border: 1px solid #dfe3e7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fbfcfd;
   color: #1f3038;
   outline: none;
@@ -84,46 +102,67 @@ input {
   color: #9aa1ab;
 }
 
+/* ===== BUTTONS ===== */
+
 .primary-button,
-.secondary-button {
+.secondary-button,
+.button {
   width: 100%;
-  min-height: 56px;
-  border-radius: 18px;
-  font-weight: 700;
+  min-height: 52px;
+  border-radius: 16px;
+  font-weight: 800;
   font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: 0.2s ease;
 }
 
-.primary-button {
+.primary-button,
+.button.primary {
   background: #19a383;
   border: none;
   color: #ffffff;
-  box-shadow: 0 16px 32px rgba(25, 163, 131, 0.22);
+  box-shadow: 0 12px 24px rgba(25, 163, 131, 0.18);
 }
 
-.primary-button:hover {
+.primary-button:hover,
+.button.primary:hover {
   transform: translateY(-1px);
   background: #178f75;
 }
 
-.secondary-button {
+.secondary-button,
+.button.secondary {
   background: transparent;
   border: 1px solid #19a383;
   color: #1a4940;
 }
 
-.secondary-button:hover {
+.secondary-button:hover,
+.button.secondary:hover {
   background: rgba(25, 163, 131, 0.08);
 }
+
+.button.icon {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f9f6;
+  border: 1px solid #dfe3e7;
+}
+
+/* ===== SMALL ELEMENTS ===== */
 
 .footer-links {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 12px;
   color: #67707b;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .footer-links a {
@@ -145,101 +184,10 @@ input {
   overflow: hidden;
 }
 
-@media (max-width: 720px) {
-  .app-shell {
-    padding: 32px 20px;
-  }
-
-  .login-card {
-    width: 100%;
-    padding: 36px 28px;
-    gap: 30px;
-  }
-
-  .hero-graphic {
-    width: 180px;
-    height: 180px;
-  }
-
-  .hero-graphic .circle.large {
-    width: 180px;
-    height: 180px;
-  }
-
-  .hero-graphic .circle.small {
-    width: 88px;
-    height: 88px;
-    top: 52px;
-    left: 54px;
-  }
-
-  .hero-graphic .bar-1 {
-    left: 64px;
-    top: 52px;
-    height: 100px;
-  }
-
-  .hero-graphic .bar-2 {
-    left: 98px;
-    top: 24px;
-    height: 140px;
-  }
-
-  .hero-graphic .bar-3 {
-    left: 126px;
-    top: 64px;
-    height: 82px;
-  }
-}
-
-.button {
-  width: 100%;
-  min-height: 56px;
-  border-radius: 18px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.button.primary {
-  background: #19a383;
-  border: none;
-  color: #ffffff;
-  box-shadow: 0 16px 32px rgba(25, 163, 131, 0.22);
-}
-
-.button.primary:hover {
-  transform: translateY(-1px);
-  background: #178f75;
-}
-
-.button.secondary {
-  background: transparent;
-  border: 1px solid #19a383;
-  color: #1a4940;
-}
-
-.button.secondary:hover {
-  background: rgba(25, 163, 131, 0.08);
-}
-
-.button.icon {
-  width: 40px;
-  min-height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #f4f9f6;
-  border: 1px solid #dfe3e7;
-}
-
 .page-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .page-row--spaced {
@@ -251,31 +199,34 @@ input {
   color: #55616c;
 }
 
-.help-link {
+.help-link,
+.link-button {
   background: transparent;
   border: none;
   color: #19a383;
   text-decoration: underline;
   font-weight: 700;
   padding: 0;
-  margin: 0;
+  cursor: pointer;
 }
+
+/* ===== ACTIVATION CODE ===== */
 
 .code-inputs {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .code-digit {
-  min-height: 56px;
+  min-height: 52px;
   padding: 0;
   text-align: center;
   border: 1px solid #dfe3e7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fbfcfd;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   outline: none;
 }
 
@@ -284,11 +235,13 @@ input {
   box-shadow: 0 0 0 4px rgba(25, 163, 131, 0.08);
 }
 
+/* ===== CHECKBOX ===== */
+
 .checkbox-field {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #55616c;
   font-size: 0.95rem;
 }
@@ -300,20 +253,23 @@ input {
   accent-color: #19a383;
 }
 
+/* ===== PROFILE SELECTION ===== */
+
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin: 24px 0;
+  gap: 16px;
+  margin: 18px 0;
 }
 
 .profile-card {
   display: grid;
   place-items: center;
-  gap: 18px;
-  padding: 32px 18px;
+  gap: 14px;
+  padding: 26px 18px;
+  min-height: 150px;
   border: 1px solid #dfe3e7;
-  border-radius: 28px;
+  border-radius: 24px;
   background: #fbfcfd;
   color: #1f3038;
   text-align: center;
@@ -322,59 +278,81 @@ input {
 
 .profile-card.selected {
   border-color: #19a383;
-  box-shadow: 0 16px 32px rgba(25, 163, 131, 0.12);
+  box-shadow: 0 12px 24px rgba(25, 163, 131, 0.1);
 }
 
 .profile-card__icon {
-  width: 68px;
-  height: 68px;
-  border-radius: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
   background: #eaf8f2;
 }
 
 .profile-card__label {
-  font-weight: 700;
+  font-weight: 800;
 }
+
+/* ===== PIN ===== */
 
 .pin-preview {
   display: flex;
   justify-content: center;
-  gap: 18px;
-  margin: 32px 0 20px;
+  gap: 14px;
+  margin: 18px 0 12px;
 }
 
 .pin-circle {
-  width: 66px;
-  height: 66px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   border: 1px solid #dfe3e7;
   display: grid;
   place-items: center;
   background: #fbfcfd;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 .pin-keypad {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .pin-key {
-  min-height: 68px;
-  border-radius: 18px;
+  min-height: 58px;
+  border-radius: 16px;
   border: 1px solid #dfe3e7;
   background: #f4f9f6;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.15rem;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.link-button {
-  background: transparent;
-  border: none;
-  color: #19a383;
-  text-decoration: underline;
-  cursor: pointer;
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 24px 16px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-height: none;
+    padding: 32px 24px;
+    gap: 22px;
+    border-radius: 26px;
+  }
+
+  .brand-logo {
+    width: 160px;
+  }
+
+  .login-card h1 {
+    font-size: 28px;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
 }
