@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import profileIcon from '../assets/logos/profile.png'
 import exitIcon from '../assets/logos/exit.png'
@@ -10,27 +11,61 @@ import '../styles/ParentDashboard.css'
 
 export default function ParentDashboardPage({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [patient, setPatient] = useState(null)
+  const [assignedExercises, setAssignedExercises] = useState([])
+
+  useEffect(() => {
+    async function loadParentData() {
+      const patientId = localStorage.getItem('patientId')
+
+      if (!patientId) return
+
+      const { data: patientData, error: patientError } = await supabase
+        .from('patients')
+        .select('*')
+        .eq('id', patientId)
+        .single()
+
+      if (!patientError) {
+        setPatient(patientData)
+      }
+
+      const { data: exerciseData, error: exerciseError } = await supabase
+        .from('patient_exercises')
+        .select(`
+          *,
+          exercises (*)
+        `)
+        .eq('patient_id', patientId)
+
+      if (!exerciseError) {
+        setAssignedExercises(exerciseData || [])
+      }
+    }
+
+    loadParentData()
+  }, [])
 
   const weekData = [
     { day: 'ZA', date: '01', exercises: 2, status: 'done' },
     { day: 'ZO', date: '02', exercises: 1, status: 'done' },
-    { day: 'MA', date: '03', exercises: 3, status: 'current' },
+    { day: 'MA', date: '03', exercises: assignedExercises.length, status: 'current' },
     { day: 'DI', date: '04', exercises: 2, status: 'pending' },
     { day: 'WO', date: '05', exercises: 0, status: 'pending' },
     { day: 'DO', date: '06', exercises: 2, status: 'pending' },
     { day: 'VR', date: '07', exercises: 1, status: 'pending' },
   ]
 
-  const activities = [
-    { title: 'Jumping Jacks', date: '11 dec 2025 14:30', xp: '+10XP' },
-    { title: 'Superheld Pose', date: '11 dec 2025 13:10', xp: '+10XP' },
-    { title: 'Stretch naar de sterren', date: '10 dec 2025 18:20', xp: '+10XP' },
-  ]
+  const activities = assignedExercises.map((item) => ({
+    title: item.exercises?.title || 'Oefening',
+    date: 'Vandaag',
+    xp: '+10XP',
+  }))
 
   const metrics = [
-    { label: 'Balans', value: '+8%', progress: 75 },
     { label: 'Mobiliteit', value: '+5%', progress: 60 },
-    { label: 'Kracht', value: '+3%', progress: 45 },
+    { label: 'Kracht', value: '+8%', progress: 75 },
+    { label: 'Balans', value: '+3%', progress: 45 },
   ]
 
   return (
@@ -38,7 +73,7 @@ export default function ParentDashboardPage({ onNavigate }) {
       <aside className="parent-sidebar">
         <img src={logo} alt="Nimbli logo" className="parent-logo" />
 
-        <button className="sidebar-link active" onClick={() => onNavigate('ParentDashboard')}>
+        <button className="sidebar-link active" onClick={() => onNavigate('parentDashboard')}>
           Dashboard
         </button>
 
@@ -55,32 +90,36 @@ export default function ParentDashboardPage({ onNavigate }) {
         {activeTab === 'overview' && (
           <div className="parent-content">
             <section className="parent-child-card">
-              <div className="parent-child-avatar"><img src={profileIcon} alt="Profiel" className="parent-profile-icon" /></div>
+              <div className="parent-child-avatar">
+                <img src={profileIcon} alt="Profiel" className="parent-profile-icon" />
+              </div>
 
-                <div>
-                  <h2>Liam De Broeck</h2>
+              <div>
+                <h2>
+                  {patient
+                    ? `${patient.first_name} ${patient.last_name}`
+                    : 'Kindprofiel laden...'}
+                </h2>
 
-                  <div className="parent-child-meta">
-                    <div>
-                      <strong>14</strong>
-                      <span>Leeftijd</span>
-                    </div>
+                <div className="parent-child-meta">
+                  <div>
+                    <strong>{patient?.age || '-'}</strong>
+                    <span>Leeftijd</span>
+                  </div>
 
-                    <div>
-                      <strong>knie revalidatie</strong>
-                      <span>Doel</span>
-                    </div>
+                  <div>
+                    <strong>{patient?.goal || '-'}</strong>
+                    <span>Doel</span>
                   </div>
                 </div>
-
-                <button className="parent-edit-btn">✎</button>
+              </div>
             </section>
 
             <section className="parent-grid">
               <div className="parent-card parent-progress-card">
                 <div>
                   <p>Voortgang t.o.v. vorige week</p>
-                  <span>Improved compared to last week</span>
+                  <span>Verbeterd tegenover vorige week</span>
                 </div>
 
                 <strong>+23%</strong>
@@ -122,21 +161,25 @@ export default function ParentDashboardPage({ onNavigate }) {
 
             <section className="parent-bottom-grid">
               <div className="parent-card">
-                <h3>Recente activiteiten</h3>
+                <h3>Toegewezen oefeningen</h3>
 
                 <div className="parent-activity-list">
-                  {activities.map((activity, index) => (
-                    <div className="parent-activity" key={index}>
-                      <img src={checkIcon} alt="" />
+                  {activities.length > 0 ? (
+                    activities.map((activity, index) => (
+                      <div className="parent-activity" key={index}>
+                        <img src={checkIcon} alt="" />
 
-                      <div>
-                        <strong>{activity.title}</strong>
-                        <span>{activity.date}</span>
+                        <div>
+                          <strong>{activity.title}</strong>
+                          <span>{activity.date}</span>
+                        </div>
+
+                        <p>{activity.xp}</p>
                       </div>
-
-                      <p>{activity.xp}</p>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>Nog geen oefeningen toegewezen.</p>
+                  )}
                 </div>
               </div>
 

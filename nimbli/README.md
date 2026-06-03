@@ -1,16 +1,45 @@
-# React + Vite
+# Nimbli
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Nimbli is een gamified revalidatie-app voor kinderen tussen 6 en 12 jaar. De applicatie helpt kinderen om kinesitherapie-oefeningen thuis correct uit te voeren en geeft kinesisten meer inzicht in de voortgang van hun patiënten.
 
-Currently, two official plugins are available:
+## Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+https://nimbli-five.vercel.app/
 
-## React Compiler
+## Test Accounts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Kinesist
 
-## Expanding the ESLint configuration
+E-mail: testkinesist@nimbli.com  
+Wachtwoord: demo123
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Ouder
+Eerst aanmelden via code: 042RMH
+E-mail: testouder@nimbli.com  
+Wachtwoord: demo123
+
+## Functionaliteiten
+
+- Kinesist dashboard
+- Patiëntenbeheer
+- Oefeningenbibliotheek
+- Oefeningen toewijzen aan patiënten
+- Kindvriendelijke oefenflow
+- Activatiecodes
+- Video-instructies
+- MediaPipe Pose Detection
+- Supabase database-integratie
+
+## Technologieën
+
+- React
+- Vite
+- Supabase
+- MediaPipe Pose Landmarker
+- Vercel
+
+## Auteur
+
+Arnout Versé
+Bachelorproef Digital Experience Design
+Thomas More Hogeschool

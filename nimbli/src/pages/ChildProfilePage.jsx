@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
 import logo from '../assets/logos/nimbli-logo.png'
@@ -10,6 +12,30 @@ import lockIcon from '../assets/logos/lock.png'
 import exitIcon from '../assets/logos/exit.png'
 
 export default function ChildProfilePage({ onNavigate }) {
+    const [patient, setPatient] = useState(null)
+
+    useEffect(() => {
+        async function loadPatient() {
+            const patientId = localStorage.getItem('patientId')
+
+            if (!patientId) return
+
+            const { data, error } = await supabase
+                .from('patients')
+                .select('*')
+                .eq('id', patientId)
+                .single()
+
+            if (error) {
+                console.error(error)
+                return
+            }
+
+            setPatient(data)
+        }
+
+        loadPatient()
+    }, [])
     return (
         <main className="child-road-page">
             <section className="child-dashboard-shell">
@@ -46,8 +72,12 @@ export default function ChildProfilePage({ onNavigate }) {
                     <div className="profile-content">
                         <section className="profile-main-card">
                             <img src={mascotte} alt="Mascotte" className="profile-mascot" />
-                            <h2>Liam De Broeck</h2>
-
+                            <h2>
+                                {patient
+                                    ? `${patient.first_name} ${patient.last_name}`
+                                    : 'Profiel laden...'}
+                            </h2>
+                            
                             <div className="profile-stats-grid">
                                 <div><strong>20</strong><span>dagen streak</span></div>
                                 <div><strong>12</strong><span>XP verzameld</span></div>
