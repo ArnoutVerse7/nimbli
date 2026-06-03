@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
 import checkIcon from '../assets/logos/check.png'
@@ -7,18 +8,8 @@ import moonIcon from '../assets/logos/moon.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
 import trophyIcon from '../assets/logos/trophy.png'
-import profileIcon from '../assets/logos/profile.png'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
-
-const exercises = [
-    { id: 1, label: 'MA', icon: checkIcon, status: 'done', title: 'Jumping Jacks' },
-    { id: 2, label: 'DI', icon: checkIcon, status: 'done', title: 'Superheld Pose' },
-    { id: 3, label: 'VANDAAG', icon: starIcon, status: 'active', title: 'Jumping Jacks' },
-    { id: 4, label: 'DO', icon: moonIcon, status: 'open', title: 'Superheld Pose' },
-    { id: 5, label: 'VR', icon: lockIcon, status: 'locked', title: 'Nieuwe oefening' },
-    { id: 6, label: 'ZA', icon: lockIcon, status: 'locked', title: 'Bonus oefening' },
-]
 
 const missions = [
     { title: 'Complete 1 oefening', progress: '80%', icon: checkIcon },
@@ -28,6 +19,98 @@ const missions = [
 
 export default function ChildDashboardPage({ onNavigate }) {
     const [selectedExercise, setSelectedExercise] = useState(null)
+    const [patient, setPatient] = useState(null)
+    const [assignedExercises, setAssignedExercises] = useState([])
+
+    useEffect(() => {
+        async function loadPatientData() {
+            const patientId = localStorage.getItem('patientId')
+
+            if (!patientId) return
+
+            const { data: patientData, error: patientError } = await supabase
+                .from('patients')
+                .select('*')
+                .eq('id', patientId)
+                .single()
+
+            if (!patientError) {
+                setPatient(patientData)
+            }
+
+            const { data: exerciseData, error: exerciseError } = await supabase
+                .from('patient_exercises')
+                .select(`
+                    *,
+                    exercises (*)
+                `)
+                .eq('patient_id', patientId)
+
+            if (exerciseError) {
+                console.error(exerciseError)
+                return
+            }
+
+            const mappedExercises =
+                exerciseData?.map((item) => ({
+                    id: item.exercises.id,
+                    title: item.exercises.title,
+                    duration: item.exercises.duration,
+                    reps: item.exercises.reps,
+                    cover_image: item.exercises.cover_image,
+                    video_url: item.exercises.video_url,
+                })) || []
+
+            setAssignedExercises(mappedExercises)
+        }
+
+        loadPatientData()
+    }, [])
+
+    const roadNodes = [
+        {
+            id: 'ma',
+            label: 'MA',
+            icon: checkIcon,
+            status: 'done',
+            exercise: assignedExercises[0] || null,
+        },
+        {
+            id: 'di',
+            label: 'DI',
+            icon: checkIcon,
+            status: 'done',
+            exercise: assignedExercises[1] || null,
+        },
+        {
+            id: 'today',
+            label: 'VANDAAG',
+            icon: starIcon,
+            status: 'active',
+            exercise: assignedExercises[2] || assignedExercises[0] || null,
+        },
+        {
+            id: 'do',
+            label: 'DO',
+            icon: moonIcon,
+            status: assignedExercises[3] ? 'open' : 'open',
+            exercise: assignedExercises[3] || null,
+        },
+        {
+            id: 'vr',
+            label: 'VR',
+            icon: lockIcon,
+            status: 'locked',
+            exercise: null,
+        },
+        {
+            id: 'za',
+            label: 'ZA',
+            icon: lockIcon,
+            status: 'locked',
+            exercise: null,
+        },
+    ]
 
     return (
         <main className="child-road-page">
@@ -46,6 +129,7 @@ export default function ChildDashboardPage({ onNavigate }) {
                     <button className="sidebar-link" onClick={() => onNavigate('childProfile')}>
                         Profiel
                     </button>
+
                     <button className="sidebar-link" onClick={() => onNavigate('login')}>
                         <img src={exitIcon} alt="Uitloggen" />
                     </button>
@@ -53,7 +137,7 @@ export default function ChildDashboardPage({ onNavigate }) {
 
                 <section className="child-main-area">
                     <header className="child-road-header">
-                        <h1>Dashboard</h1>
+                        <h1>Hallo {patient?.first_name || 'vriend'}!</h1>
 
                         <div className="child-road-stats">
                             <span><img src={trophyIcon} alt="" /> 3</span>
@@ -78,22 +162,22 @@ export default function ChildDashboardPage({ onNavigate }) {
                             <div className="child-road-map compact-map">
                                 <div className="progress-line"></div>
 
-                                {exercises.map((exercise, index) => (
+                                {roadNodes.map((node, index) => (
                                     <button
-                                        key={exercise.id}
+                                        key={node.id}
                                         type="button"
-                                        className={`road-node road-node-${index + 1} ${exercise.status} ${selectedExercise?.id === exercise.id ? 'selected' : ''
+                                        className={`road-node road-node-${index + 1} ${node.status} ${selectedExercise?.id === node.exercise?.id ? 'selected' : ''
                                             }`}
                                         onClick={() => {
-                                            if (exercise.status !== 'locked') {
-                                                setSelectedExercise(exercise)
+                                            if (node.status !== 'locked' && node.exercise) {
+                                                setSelectedExercise(node.exercise)
                                             }
                                         }}
                                     >
                                         <span className="road-node-circle">
-                                            <img src={exercise.icon} alt="" />
+                                            <img src={node.icon} alt="" />
                                         </span>
-                                        <span className="road-node-label">{exercise.label}</span>
+                                        <span className="road-node-label">{node.label}</span>
                                     </button>
                                 ))}
 
@@ -102,7 +186,7 @@ export default function ChildDashboardPage({ onNavigate }) {
                                         <div className="road-popup-item">
                                             <div>
                                                 <strong>{selectedExercise.title}</strong>
-                                                <p>+10 XP · 5 min</p>
+                                                <p>{selectedExercise.duration || '2 min'} · {selectedExercise.reps || '10 herhalingen'}</p>
                                             </div>
 
                                             <button

@@ -1,44 +1,86 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 import mascotIcon from '../assets/logos/mascotte.png'
 
 export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
-  const [timeLeft, setTimeLeft] = useState(300)
-  const [repsLeft, setRepsLeft] = useState(10)
+  const videoRef = useRef(null)
+
+  const [exercise, setExercise] = useState(null)
+  const [timeLeft, setTimeLeft] = useState(120)
   const [isRunning, setIsRunning] = useState(true)
-
-  const exercises = {
-    1: { name: 'Jumping Jacks', type: 'reps', totalReps: 10 },
-    2: { name: 'Superheld Pose', type: 'time', totalTime: 180 },
-  }
-
-  const exercise = exercises[parseInt(exerciseId)] || exercises[1]
+  const [cameraError, setCameraError] = useState('')
 
   useEffect(() => {
-    if (!isRunning) return
+    async function loadExercise() {
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('id', exerciseId)
+        .single()
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      setExercise(data)
+
+      const durationNumber = parseInt(data.duration) || 120
+      setTimeLeft(durationNumber)
+    }
+
+    if (exerciseId) {
+      loadExercise()
+    }
+  }, [exerciseId])
+
+  useEffect(() => {
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+        }
+      } catch (error) {
+        console.error(error)
+        setCameraError('Camera kon niet gestart worden.')
+      }
+    }
+
+    startCamera()
+
+    return () => {
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isRunning || !exercise) return
 
     const timer = setInterval(() => {
-      if (exercise.type === 'reps') {
-        setRepsLeft((prev) => {
-          if (prev <= 1) {
-            onNavigate(`exerciseCompletion-${exerciseId}`)
-            return 0
-          }
-          return prev - 1
-        })
-      } else {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            onNavigate(`exerciseCompletion-${exerciseId}`)
-            return 0
-          }
-          return prev - 1
-        })
-      }
-    }, 1000)
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          onNavigate(`exerciseCompletion-${exerciseId}`)
+          return 0
+        }
+
+        return prev - 1
+      })
+    }, 1500)
 
     return () => clearInterval(timer)
-  }, [isRunning, exercise.type, exerciseId, onNavigate])
+  }, [isRunning, exercise, exerciseId, onNavigate])
+
+  const totalDuration = (parseInt(exercise?.duration) || 2)
+  const progress =
+    ((totalDuration - timeLeft) / totalDuration) * 100
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
@@ -46,10 +88,13 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const progress =
-    exercise.type === 'reps'
-      ? ((exercise.totalReps - repsLeft) / exercise.totalReps) * 100
-      : ((exercise.totalTime - timeLeft) / exercise.totalTime) * 100
+  if (!exercise) {
+    return (
+      <div className="exercise-execution-page">
+        <p>Oefening laden...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="exercise-execution-page">
@@ -63,11 +108,21 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
 
       <main className="execution-container execution-layout">
         <section className="pose-camera-card">
-          <div className="camera-placeholder">
-            <span className="camera-icon">📷</span>
-            <h2>Camera preview</h2>
-            <p>Hier komt later MediaPipe Pose detectie.</p>
-          </div>
+          {cameraError ? (
+            <div className="camera-placeholder">
+              <span className="camera-icon">📷</span>
+              <h2>Camera niet beschikbaar</h2>
+              <p>{cameraError}</p>
+            </div>
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="pose-camera-video"
+            />
+          )}
         </section>
 
         <section className="exercise-live-panel">
@@ -79,24 +134,15 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
             />
           </div>
 
-          <h1>{exercise.name}</h1>
+          <h1>{exercise.title}</h1>
 
           <section className="counter-section">
-            {exercise.type === 'reps' ? (
-              <>
-                <div className="counter-large">{repsLeft}</div>
-                <div className="counter-label">Herhalingen</div>
-              </>
-            ) : (
-              <>
-                <div className="timer-large">{formatTime(timeLeft)}</div>
-                <div className="counter-label">Tijd over</div>
-              </>
-            )}
+            <div className="timer-large">{formatTime(timeLeft)}</div>
+            <div className="counter-label">Tijd over</div>
           </section>
 
           <div className="execution-instructions">
-            <p>Goed bezig! Blijf doorgaan</p>
+            <p>Goed bezig! Blijf rustig en gecontroleerd bewegen.</p>
           </div>
 
           <div className="execution-controls">

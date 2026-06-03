@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
 import mascotIcon from '../assets/logos/mascotte.png'
@@ -5,12 +7,36 @@ import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 
 export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
-  const exercises = {
-    1: { name: 'Jumping Jacks', xp: 50, accuracy: 89 },
-    2: { name: 'Superheld Pose', xp: 50, accuracy: 95 },
-  }
+  const [exercise, setExercise] = useState(null)
 
-  const exercise = exercises[parseInt(exerciseId)] || exercises[1]
+  useEffect(() => {
+    async function loadExercise() {
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('id', exerciseId)
+        .single()
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      setExercise(data)
+    }
+
+    if (exerciseId) {
+      loadExercise()
+    }
+  }, [exerciseId])
+
+  if (!exercise) {
+    return (
+      <div className="exercise-completion-page">
+        <p>Resultaat laden...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="exercise-completion-page">
@@ -21,7 +47,10 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
 
         <section className="completion-right">
           <h1 className="completion-title">Fantastisch werk!</h1>
-          <p className="completion-subtitle">Je hebt de oefening goed afgewerkt!</p>
+
+          <p className="completion-subtitle">
+            Je hebt {exercise.title} succesvol afgerond!
+          </p>
 
           <div className="results-cards">
             <div className="result-card">
@@ -29,7 +58,7 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
                 <img src={starIcon} alt="" className="result-icon-img" />
               </div>
               <span className="result-label">XP verdiend</span>
-              <span className="result-value">+{exercise.xp}</span>
+              <span className="result-value">+50</span>
             </div>
 
             <div className="result-card">
@@ -37,11 +66,14 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
                 <img src={trophyIcon} alt="" className="result-icon-img" />
               </div>
               <span className="result-label">Juistheid</span>
-              <span className="result-value">{exercise.accuracy}%</span>
+              <span className="result-value">95%</span>
             </div>
           </div>
 
-          <button className="completion-cta" onClick={() => onNavigate('childDashboard')}>
+          <button
+            className="completion-cta"
+            onClick={() => onNavigate('childDashboard')}
+          >
             Dat was het voor vandaag!
           </button>
         </section>

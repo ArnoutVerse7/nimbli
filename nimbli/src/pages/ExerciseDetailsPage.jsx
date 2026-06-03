@@ -1,44 +1,38 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
 export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
-  const exercises = {
-    1: {
-      id: 1,
-      name: 'Jumping Jacks',
-      description: 'Spring met je armen en benen open en dicht.',
-      difficulty: 'Easy',
-      space: 'Standing, 1m²',
-      reward: 50,
-      time: '5 min',
-      reps: '10×',
-      emoji: '🤸',
-      instructions: [
-        'Ga rechtop staan met je voeten samen.',
-        'Spring terwijl je armen en benen opent.',
-        'Spring terug naar de startpositie.',
-        'Herhaal dit 10 keer.',
-      ],
-    },
-    2: {
-      id: 2,
-      name: 'Superheld Pose',
-      description: 'Sta stevig en houd de superheldpose vast.',
-      difficulty: 'Medium',
-      space: 'Standing, 1m²',
-      reward: 50,
-      time: '3 min',
-      reps: '3× hold',
-      emoji: '🦸',
-      instructions: [
-        'Zet je voeten op schouderbreedte.',
-        'Plaats je handen op je heupen.',
-        'Borst vooruit en kijk recht voor je.',
-        'Houd dit 30 seconden vast.',
-      ],
-    },
-  }
+  const [exercise, setExercise] = useState(null)
 
-  const exercise = exercises[parseInt(exerciseId)] || exercises[1]
+  useEffect(() => {
+    async function loadExercise() {
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('id', exerciseId)
+        .single()
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      setExercise(data)
+    }
+
+    if (exerciseId) {
+      loadExercise()
+    }
+  }, [exerciseId])
+
+  if (!exercise) {
+    return (
+      <div className="exercise-details-page">
+        <p>Oefening laden...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="exercise-details-page">
@@ -46,47 +40,62 @@ export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
         <button className="back-btn" onClick={() => onNavigate('childDashboard')}>
           ← Terug
         </button>
-        <h1>{exercise.name}</h1>
+
+        <h1>{exercise.title}</h1>
       </header>
 
       <main className="exercise-details-container exercise-details-layout">
         <section className="exercise-visual-card">
-          <div className="exercise-video-placeholder">
-            <div className="play-button">▶</div>
-            <p>Instructievideo komt hier</p>
-          </div><h2>{exercise.name}</h2>
-          <p>{exercise.description}</p>
+          {exercise.video_url ? (
+            <video className="child-exercise-video" controls>
+              <source src={exercise.video_url} />
+            </video>
+          ) : (
+            <div className="exercise-video-placeholder">
+              <div className="play-button">▶</div>
+              <p>Geen instructievideo beschikbaar</p>
+            </div>
+          )}
+
+          <h2>{exercise.title}</h2>
+          <p>
+            Bekijk de oefening rustig en start daarna wanneer je klaar bent.
+          </p>
         </section>
 
         <section className="exercise-content-card">
           <div className="exercise-info-cards">
             <div className="info-card">
               <span className="info-card-label">Beloning</span>
-              <span className="info-card-value">+{exercise.reward} XP</span>
+              <span className="info-card-value">+50 XP</span>
             </div>
 
             <div className="info-card">
               <span className="info-card-label">Niveau</span>
-              <span className="info-card-value">{exercise.difficulty}</span>
+              <span className="info-card-value">{exercise.level || 'Makkelijk'}</span>
             </div>
 
             <div className="info-card">
-              <span className="info-card-label">Ruimte</span>
-              <span className="info-card-value">{exercise.space}</span>
+              <span className="info-card-label">Duur</span>
+              <span className="info-card-value">{exercise.duration || '2 min'}</span>
             </div>
           </div>
 
           <div className="description-section">
             <h3>Hoe doe je deze oefening?</h3>
-            <p className="exercise-desc-text">{exercise.description}</p>
+            <p className="exercise-desc-text">
+              Volg de instructievideo en voer de beweging rustig en gecontroleerd uit.
+            </p>
           </div>
 
           <div className="instructions-section">
             <h3>Stap-voor-stap</h3>
+
             <ol className="instructions-list">
-              {exercise.instructions.map((instruction, idx) => (
-                <li key={idx}>{instruction}</li>
-              ))}
+              <li>Zorg dat je voldoende ruimte hebt.</li>
+              <li>Kijk eerst goed naar de instructievideo.</li>
+              <li>Voer de oefening rustig uit.</li>
+              <li>Herhaal: {exercise.reps || '10 herhalingen'}.</li>
             </ol>
           </div>
 
