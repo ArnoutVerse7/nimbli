@@ -1,15 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
-import profileIcon from '../assets/logos/profile.png'
 import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
-import starIcon from '../assets/logos/star.png'
 import profile from '../assets/logos/profile.png'
 import '../styles/KinesistFlow.css'
 
 export default function NewPatientFlowPage({ onNavigate }) {
     const [step, setStep] = useState(1)
+    const [exercises, setExercises] = useState([])
     const [selectedExercises, setSelectedExercises] = useState([])
+    const [isSaving, setIsSaving] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
+
+    const [activationCode] = useState(
+        Math.random().toString(36).substring(2, 8).toUpperCase()
+    )
 
     const [patientForm, setPatientForm] = useState({
         firstName: '',
@@ -18,23 +24,108 @@ export default function NewPatientFlowPage({ onNavigate }) {
         goal: '',
     })
 
-    const exercises = [
-        { title: 'Stretch naar de sterren', category: 'Mobiliteit', time: '2 min', reps: '10 herhalingen' },
-        { title: 'Superheld Pose', category: 'Balans', time: '2 min', reps: '30 seconden' },
-        { title: 'Jumping Jacks', category: 'Kracht', time: '2 min', reps: '10 herhalingen' },
-        { title: 'Balans oefening', category: 'Balans', time: '3 min', reps: '5 herhalingen' },
-    ]
+    useEffect(() => {
+        async function loadExercises() {
+            const { data, error } = await supabase
+                .from('exercises')
+                .select('*')
+                .order('created_at', { ascending: true })
+
+            if (error) {
+                console.error(error)
+                return
+            }
+
+            setExercises(data || [])
+        }
+
+        loadExercises()
+    }, [])
 
     const toggleExercise = (exercise) => {
         setSelectedExercises((prev) => {
-            const exists = prev.find((item) => item.title === exercise.title)
+            const exists = prev.find((item) => item.id === exercise.id)
 
             if (exists) {
-                return prev.filter((item) => item.title !== exercise.title)
+                return prev.filter((item) => item.id !== exercise.id)
             }
 
             return [...prev, exercise]
         })
+    }
+
+    const checkPatientAndGoNext = async () => {
+        setErrorMessage('')
+
+        if (!patientForm.firstName.trim() || !patientForm.lastName.trim()) {
+            setErrorMessage('Vul minstens voornaam en achternaam in.')
+            return
+        }
+
+        const { data: existingPatient, error } = await supabase
+            .from('patients')
+            .select('*')
+            .ilike('first_name', patientForm.firstName.trim())
+            .ilike('last_name', patientForm.lastName.trim())
+            .maybeSingle()
+
+        if (error) {
+            console.error(error)
+            setErrorMessage('Er ging iets mis bij het controleren van de patiënt.')
+            return
+        }
+
+        if (existingPatient) {
+            setErrorMessage('Deze patiënt bestaat al.')
+            return
+        }
+
+        setStep(2)
+    }
+
+    const savePatient = async () => {
+        setIsSaving(true)
+        setErrorMessage('')
+
+        try {
+            const { data: patientData, error: patientError } = await supabase
+                .from('patients')
+                .insert([
+                    {
+                        first_name: patientForm.firstName.trim(),
+                        last_name: patientForm.lastName.trim(),
+                        age: parseInt(patientForm.age || '7'),
+                        goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
+                        activation_code: activationCode,
+                    },
+                ])
+                .select()
+                .single()
+
+            if (patientError) throw patientError
+
+            if (selectedExercises.length > 0) {
+                const exerciseRows = selectedExercises.map((exercise) => ({
+                    patient_id: patientData.id,
+                    exercise_id: exercise.id,
+                    completed: false,
+                    completion_percentage: 0,
+                }))
+
+                const { error: assignError } = await supabase
+                    .from('patient_exercises')
+                    .insert(exerciseRows)
+
+                if (assignError) throw assignError
+            }
+
+            onNavigate('kinesistDashboard')
+        } catch (error) {
+            console.error('SAVE PATIENT ERROR:', error)
+            setErrorMessage(error.message || 'Er ging iets mis bij het opslaan.')
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     return (
@@ -42,10 +133,19 @@ export default function NewPatientFlowPage({ onNavigate }) {
             <aside className="child-sidebar">
                 <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
 
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}> Dashboard</button>
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>Oefeningen</button>
-                <button className="sidebar-link">Instellingen</button>
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+                <button className="sidebar-link active" onClick={() => onNavigate('kinesistDashboard')}>
+                    Dashboard
+                </button>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
+                    Oefeningen
+                </button>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
+                    Instellingen
+                </button>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
@@ -61,10 +161,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                         <div className="step-progress">
                             {[1, 2, 3, 4].map((number) => (
-                                <div
-                                    key={number}
-                                    className={number <= step ? 'active' : ''}
-                                />
+                                <div key={number} className={number <= step ? 'active' : ''} />
                             ))}
                         </div>
 
@@ -76,36 +173,44 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     <label>
                                         Voornaam van het kind
                                         <input
-                                            placeholder="Bijv. Liam"
+                                            placeholder="Bijv. Finn"
                                             value={patientForm.firstName}
-                                            onChange={(e) => setPatientForm({ ...patientForm, firstName: e.target.value })}
+                                            onChange={(e) =>
+                                                setPatientForm({ ...patientForm, firstName: e.target.value })
+                                            }
                                         />
                                     </label>
 
                                     <label>
                                         Achternaam van het kind
                                         <input
-                                            placeholder="Bijv. Huismans"
+                                            placeholder="Bijv. Janssens"
                                             value={patientForm.lastName}
-                                            onChange={(e) => setPatientForm({ ...patientForm, lastName: e.target.value })}
+                                            onChange={(e) =>
+                                                setPatientForm({ ...patientForm, lastName: e.target.value })
+                                            }
                                         />
                                     </label>
 
                                     <label>
                                         Leeftijd
                                         <input
-                                            placeholder="Bijv. 7"
+                                            placeholder="Bijv. 9"
                                             value={patientForm.age}
-                                            onChange={(e) => setPatientForm({ ...patientForm, age: e.target.value })}
+                                            onChange={(e) =>
+                                                setPatientForm({ ...patientForm, age: e.target.value })
+                                            }
                                         />
                                     </label>
 
                                     <label>
                                         Behandeldoel
                                         <input
-                                            placeholder="Bijv. knie revalidatie"
+                                            placeholder="Bijv. achillespees revalidatie"
                                             value={patientForm.goal}
-                                            onChange={(e) => setPatientForm({ ...patientForm, goal: e.target.value })}
+                                            onChange={(e) =>
+                                                setPatientForm({ ...patientForm, goal: e.target.value })
+                                            }
                                         />
                                     </label>
                                 </div>
@@ -114,10 +219,13 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     <span>Knie revalidatie</span>
                                     <span>Problemen met evenwicht</span>
                                     <span>Motorische ontwikkeling ondersteunen</span>
-                                    <span>Revalidatie na ziekte</span>
+                                    <span>Achillespees revalidatie</span>
                                 </div>
+                                {errorMessage && (
+                                    <p className="form-error-message">{errorMessage}</p>
+                                )}
 
-                                <button className="primary-btn" onClick={() => setStep(2)}>
+                                <button className="primary-btn" onClick={checkPatientAndGoNext}>
                                     Volgende
                                 </button>
                             </section>
@@ -128,30 +236,37 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                 <h2>Startprogramma</h2>
                                 <p>Voeg al starteroefeningen toe of sla dit voorlopig over.</p>
 
-                                <div className="kine-search full">
-                                    Zoek oefeningen...
-                                </div>
+                                <div className="kine-search full">Zoek oefeningen...</div>
 
                                 <div className="exercise-select-grid">
-                                    {exercises.map((exercise, index) => {
+                                    {exercises.map((exercise) => {
                                         const isSelected = selectedExercises.some(
-                                            (item) => item.title === exercise.title
+                                            (item) => item.id === exercise.id
                                         )
 
                                         return (
                                             <div
-                                                key={index}
-                                                className={`exercise-select-card ${isSelected ? 'selected' : ''
-                                                    }`}
+                                                key={exercise.id}
+                                                className={`exercise-select-card ${isSelected ? 'selected' : ''}`}
                                                 onClick={() => toggleExercise(exercise)}
                                             >
-                                                <div className="exercise-thumb" />
+                                                <div className="exercise-thumb">
+                                                    {exercise.cover_image ? (
+                                                        <img
+                                                            src={exercise.cover_image}
+                                                            alt={exercise.title}
+                                                            className="exercise-thumb-image"
+                                                        />
+                                                    ) : (
+                                                        <div className="exercise-thumb-placeholder"></div>
+                                                    )}
+                                                </div>
 
                                                 <div>
                                                     <strong>{exercise.title}</strong>
                                                     <span>{exercise.category}</span>
                                                     <p>
-                                                        {exercise.time} · {exercise.reps}
+                                                        {exercise.duration} · {exercise.reps}
                                                     </p>
                                                 </div>
                                             </div>
@@ -160,20 +275,13 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                 </div>
 
                                 <div className="button-row">
-                                    <button
-                                        className="secondary-btn"
-                                        onClick={() => setStep(1)}
-                                    >
+                                    <button className="secondary-btn" onClick={() => setStep(1)}>
                                         Terug
                                     </button>
 
-                                    <button
-                                        className="primary-btn"
-                                        onClick={() => setStep(3)}
-                                    >
+                                    <button className="primary-btn" onClick={() => setStep(3)}>
                                         Volgende
-                                        {selectedExercises.length > 0 &&
-                                            ` (${selectedExercises.length})`}
+                                        {selectedExercises.length > 0 && ` (${selectedExercises.length})`}
                                     </button>
                                 </div>
                             </section>
@@ -187,8 +295,10 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                                     <div className="patient-preview-card">
                                         <img src={profile} alt="Nimbli profiel" />
-                                        <h3>{patientForm.firstName || 'Liam'} {patientForm.lastName || 'Huismans'}</h3>
-                                        <span>{patientForm.age || '7'} jaar</span>
+                                        <h3>
+                                            {patientForm.firstName || 'Finn'} {patientForm.lastName || 'Janssens'}
+                                        </h3>
+                                        <span>{patientForm.age || '9'} jaar</span>
                                     </div>
 
                                     <div className="info-box">
@@ -202,19 +312,30 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                                 <div>
                                     <h3>Behandeldoel</h3>
-                                    <p>{patientForm.goal || 'Motorische ontwikkeling ondersteunen'}</p>
+                                    <p>{patientForm.goal || 'Achillespees revalidatie'}</p>
+
                                     <h3>Startprogramma</h3>
 
                                     <div className="selected-exercises">
                                         {selectedExercises.length > 0 ? (
-                                            selectedExercises.map((exercise, index) => (
-                                                <div className="selected-exercise" key={index}>
-                                                    <div className="exercise-thumb" />
+                                            selectedExercises.map((exercise) => (
+                                                <div className="selected-exercise" key={exercise.id}>
+                                                    <div className="exercise-thumb">
+                                                        {exercise.cover_image ? (
+                                                            <img
+                                                                src={exercise.cover_image}
+                                                                alt={exercise.title}
+                                                                className="exercise-thumb-image"
+                                                            />
+                                                        ) : (
+                                                            <div className="exercise-thumb-placeholder"></div>
+                                                        )}
+                                                    </div>
 
                                                     <div>
                                                         <strong>{exercise.title}</strong>
                                                         <p>
-                                                            {exercise.time} · {exercise.reps}
+                                                            {exercise.duration} · {exercise.reps}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -244,17 +365,10 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                 <h2>Patiënt toegevoegd!</h2>
                                 <p>Deel deze activatiecode met de ouders:</p>
 
-                                <div className="activation-code">
-                                    5AZ-63B
-                                </div>
-
-                                <div className="share-options">
-                                    <button>Email</button>
-                                    <button>SMS</button>
-                                </div>
+                                <div className="activation-code">{activationCode}</div>
 
                                 <div className="next-steps-box">
-                                    <strong>Niet moeten ouders doen?</strong>
+                                    <strong>Wat moeten ouders doen?</strong>
                                     <ul>
                                         <li>Ga naar de website.</li>
                                         <li>Open de website en kies “Aanmelden met code”.</li>
@@ -262,25 +376,14 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     </ul>
                                 </div>
 
+
+
                                 <button
                                     className="primary-btn"
-                                    onClick={() => {
-                                        const currentPatients = JSON.parse(localStorage.getItem('nimbliPatients')) || []
-
-                                        const newPatient = {
-                                            id: Date.now(),
-                                            firstName: patientForm.firstName || 'Liam',
-                                            lastName: patientForm.lastName || 'Huismans',
-                                            age: patientForm.age || '7',
-                                            goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
-                                            exercises: selectedExercises,
-                                        }
-
-                                        localStorage.setItem('nimbliPatients', JSON.stringify([...currentPatients, newPatient]))
-                                        onNavigate('kinesistDashboard')
-                                    }}
+                                    disabled={isSaving}
+                                    onClick={savePatient}
                                 >
-                                    Terugkeren naar het dashboard
+                                    {isSaving ? 'Opslaan...' : 'Terugkeren naar het dashboard'}
                                 </button>
                             </section>
                         )}

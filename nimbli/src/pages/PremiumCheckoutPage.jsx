@@ -1,20 +1,66 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
 import '../styles/KinesistFlow.css'
 
-export default function PremiumCheckoutPage({ onNavigate }) {
+export default function PremiumCheckoutPage({ memberId, onNavigate }) {
     const [member, setMember] = useState(null)
+    const [mainKinesist, setMainKinesist] = useState(null)
     const [success, setSuccess] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
-        const savedMember = JSON.parse(localStorage.getItem('premiumTeamMember'))
-        setMember(savedMember)
-    }, [])
+        async function loadData() {
+            const { data: mainData } = await supabase
+                .from('kinesists')
+                .select('*')
+                .eq('email', 'testkinesist@nimbli.com')
+                .single()
 
-    const confirmUpgrade = () => {
-        localStorage.setItem('nimbliPlan', 'premium')
+            setMainKinesist(mainData)
+
+            if (memberId) {
+                const { data: memberData, error: memberError } = await supabase
+                    .from('kinesists')
+                    .select('*')
+                    .eq('id', memberId)
+                    .single()
+
+                if (!memberError) {
+                    setMember(memberData)
+                }
+            }
+        }
+
+        loadData()
+    }, [memberId])
+
+    const confirmUpgrade = async () => {
+        if (!mainKinesist?.id) return
+
+        setIsSaving(true)
+
+        const { error } = await supabase
+            .from('subscriptions')
+            .upsert(
+                {
+                    kinesist_id: mainKinesist.id,
+                    plan: 'premium',
+                    status: 'active',
+                },
+                { onConflict: 'kinesist_id' }
+            )
+
+        setIsSaving(false)
+
+        if (error) {
+            console.error(error)
+            alert('Fout bij activeren van premium')
+            return
+        }
+
         setSuccess(true)
     }
 
@@ -35,7 +81,7 @@ export default function PremiumCheckoutPage({ onNavigate }) {
                     Instellingen
                 </button>
 
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
@@ -64,7 +110,7 @@ export default function PremiumCheckoutPage({ onNavigate }) {
                                     <div className="checkout-user-card">
                                         <strong>{member?.name || 'Nieuwe kinesist'}</strong>
                                         <span>{member?.email || 'kinesist@email.com'}</span>
-                                        <p>{member?.role || 'Kinesist'}</p>
+                                        <p>{member?.role || 'kinesist'}</p>
                                     </div>
 
                                     <h3>Betaalmethode</h3>
@@ -81,14 +127,16 @@ export default function PremiumCheckoutPage({ onNavigate }) {
 
                                     <div>
                                         <span>Praktijkaccount</span>
-                                        <strong> €250</strong>
+                                        <strong>€250</strong>
                                     </div>
+
                                     <div className="checkout-actions">
                                         <button
                                             className="primary-btn"
                                             onClick={confirmUpgrade}
+                                            disabled={isSaving}
                                         >
-                                            Bevestigen
+                                            {isSaving ? 'Activeren...' : 'Bevestigen'}
                                         </button>
                                     </div>
                                 </aside>
@@ -98,7 +146,7 @@ export default function PremiumCheckoutPage({ onNavigate }) {
                         <section className="assign-success-card">
                             <img src={checkIcon} alt="" />
                             <h2>Praktijkaccount geactiveerd!</h2>
-                            <p>Je extra kinesist werd toegevoegd aan je praktijk.</p>
+                            <p>Je abonnement werd bijgewerkt naar Premium.</p>
 
                             <button className="primary-btn" onClick={() => onNavigate('kinesistSettings')}>
                                 Terug naar instellingen

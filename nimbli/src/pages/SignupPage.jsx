@@ -9,7 +9,7 @@ export default function SignupPage({ onNavigate }) {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    onNavigate('pinCreate')
+    onNavigate('profileSelection')
   }
 
   return (

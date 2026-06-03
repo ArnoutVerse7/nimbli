@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import profileIcon from '../assets/logos/profile.png'
 import exitIcon from '../assets/logos/exit.png'
@@ -9,10 +10,36 @@ import '../styles/KinesistFlow.css'
 
 export default function KinesistDashboardPage({ onNavigate }) {
     const [patients, setPatients] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
+    const [kinesist, setKinesist] = useState(null)
 
+    const filteredPatients = patients.filter((patient) =>
+        `${patient.first_name} ${patient.last_name} ${patient.goal}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+    )
     useEffect(() => {
-        const savedPatients = JSON.parse(localStorage.getItem('nimbliPatients')) || []
-        setPatients(savedPatients)
+        async function loadData() {
+            const { data: patientsData, error: patientsError } = await supabase
+                .from('patients')
+                .select('*')
+
+            if (!patientsError) {
+                setPatients(patientsData || [])
+            }
+
+            const { data: kinesistData, error: kinesistError } = await supabase
+                .from('kinesists')
+                .select('*')
+                .eq('email', 'testkinesist@nimbli.com')
+                .single()
+
+            if (!kinesistError) {
+                setKinesist(kinesistData)
+            }
+        }
+
+        loadData()
     }, [])
 
     return (
@@ -23,7 +50,7 @@ export default function KinesistDashboardPage({ onNavigate }) {
                 <button className="sidebar-link active">Dashboard</button>
                 <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>Oefeningen</button>
                 <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>Instellingen</button>
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
@@ -34,17 +61,16 @@ export default function KinesistDashboardPage({ onNavigate }) {
 
                 <div className="kine-content">
                     <section className="kine-welcome">
-                        <h2>Goedemiddag Anne!</h2>
-
+                        <h2>Goedemiddag {kinesist?.name || 'Kinesist'}!</h2>
                         <div className="kine-practice-card">
                             <div className="practice-avatar">
                                 <img src={user} alt="" />
                             </div>
 
                             <div className="practice-info">
-                                <h3>Anne Peeters</h3>
+                                <h3>{kinesist?.name || 'Kinesist'}</h3>
                                 <p>Kinderkinesitherapeut</p>
-                                <span>Stationsstraat 12, Mechelen</span>
+                                <span>Teststraat 12, Mechelen</span>
                             </div>
                         </div>
 
@@ -55,12 +81,12 @@ export default function KinesistDashboardPage({ onNavigate }) {
                             </div>
 
                             <div className="kine-stat-card">
-                                <strong>{patients.length > 0 ? '25%' : '0%'}</strong>
+                                <strong>{patients.length > 0 ? '97%' : '0%'}</strong>
                                 <span>Gemiddelde therapietrouw</span>
                             </div>
 
                             <div className="kine-stat-card">
-                                <strong>{patients.length > 0 ? '20' : '0'}</strong>
+                                <strong>{patients.length > 0 ? '1' : '0'}</strong>
                                 <span>Actieve programma's</span>
                             </div>
                         </div>
@@ -78,15 +104,20 @@ export default function KinesistDashboardPage({ onNavigate }) {
                             Patiënt toevoegen
                         </button>
 
-                        <div className="kine-search">Zoek patiënt...</div>
-
+                        <input
+                            className="kine-search"
+                            type="text"
+                            placeholder="Zoek patiënt..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                         {patients.length === 0 ? (
                             <div className="empty-patients">
                                 <img src={mascotte2} alt="Nimbli mascotte2" />
                                 <h3>Je hebt nog geen patiënten</h3>
                             </div>) : (
                             <div className="patient-list">
-                                {patients.map((patient) => (
+                                {filteredPatients.map((patient) => (
                                     <button
                                         key={patient.id}
                                         className="patient-list-card"
@@ -96,12 +127,15 @@ export default function KinesistDashboardPage({ onNavigate }) {
                                         }}>
                                         <div className="patient-list-top">
                                             <div className="patient-list-avatar">
-                                                {`${patient.firstName?.[0] || 'L'}${patient.lastName?.[0] || 'H'}`}
+                                                <img
+                                                    src={profileIcon}
+                                                    alt=""
+                                                    className="patient-list-profile-img"
+                                                />
                                             </div>
-
                                             <div>
                                                 <strong>
-                                                    {patient.firstName} {patient.lastName}
+                                                    {patient.first_name} {patient.last_name}
                                                 </strong>
                                                 <span>{patient.age} jaar</span>
                                             </div>

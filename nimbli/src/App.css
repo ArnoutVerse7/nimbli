@@ -102,6 +102,13 @@ input {
   color: #9aa1ab;
 }
 
+.form-error-message {
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 700;
+  margin: -6px 0 8px;
+}
+
 /* ===== BUTTONS ===== */
 
 .primary-button,
@@ -211,7 +218,6 @@ input {
 }
 
 /* ===== ACTIVATION CODE ===== */
-
 .code-inputs {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -236,7 +242,6 @@ input {
 }
 
 /* ===== CHECKBOX ===== */
-
 .checkbox-field {
   display: flex;
   align-items: flex-start;
@@ -254,7 +259,6 @@ input {
 }
 
 /* ===== PROFILE SELECTION ===== */
-
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -290,43 +294,6 @@ input {
 
 .profile-card__label {
   font-weight: 800;
-}
-
-/* ===== PIN ===== */
-
-.pin-preview {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  margin: 18px 0 12px;
-}
-
-.pin-circle {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  border: 1px solid #dfe3e7;
-  display: grid;
-  place-items: center;
-  background: #fbfcfd;
-  font-size: 1.3rem;
-}
-
-.pin-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.pin-key {
-  min-height: 58px;
-  border-radius: 16px;
-  border: 1px solid #dfe3e7;
-  background: #f4f9f6;
-  font-size: 1.15rem;
-  font-weight: 800;
-  cursor: pointer;
 }
 
 /* ===== RESPONSIVE ===== */

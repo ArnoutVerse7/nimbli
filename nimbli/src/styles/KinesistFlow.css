@@ -181,12 +181,17 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #8d8d8d;
     color: white;
     display: grid;
     place-items: center;
     font-size: 13px;
     font-weight: 900;
+}
+
+.patient-list-profile-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
 }
 
 .patient-list-card strong {
@@ -534,6 +539,20 @@
     padding-left: 20px;
 }
 
+.exercise-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.exercise-thumb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* ===== PATIENT DETAIL ===== */
 
 .patient-back-btn {
@@ -562,18 +581,18 @@
 }
 
 .patient-photo-placeholder {
-    width: 90px;
-    height: 90px;
     border-radius: 50%;
-    background: #a0a0a0;
-
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
 
-    color: white;
-    font-size: 28px;
-    font-weight: 900;
+.patient-photo-placeholder img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
 .patient-main-info {
@@ -1025,6 +1044,22 @@
     font-size: 13px;
 }
 
+.cover-preview-wrapper {
+    position: relative;
+    width: 260px;
+    margin-top: 24px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #f3f5f6;
+}
+
+.cover-preview-wrapper img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
 /* ===== EXERCISE LIBRARY ===== */
 
 .exercise-library-header {
@@ -1047,6 +1082,13 @@
     display: flex;
     gap: 10px;
     margin-bottom: 24px;
+}
+
+.exercise-cover-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
 }
 
 .exercise-library-tabs button {
@@ -1124,10 +1166,24 @@
 
 .exercise-detail-video,
 .exercise-detail-info {
+    width: 100%;
     background: white;
     border-radius: 18px;
     padding: 24px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
+}
+
+.exercise-detail-video {
+    width: 100%;
+    overflow: hidden;
+}
+
+.exercise-detail-video video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 16px;
 }
 
 .video-placeholder {
@@ -1179,20 +1235,65 @@
     line-height: 1.6;
 }
 
+.exercise-preview-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 620px;
+    margin-top: 28px;
+}
+
 .video-preview-wrapper {
     position: relative;
-    width: 100%;
-    max-width: 520px;
-    margin: 24px 0 18px;
+    background: #f3f5f6;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #e5e9ed;
+}
+
+.video-preview-wrapper::before {
+    display: block;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 900;
+    color: #67707b;
+    background: white;
+    border-bottom: 1px solid #e5e9ed;
 }
 
 .video-preview-wrapper video {
     width: 100%;
-    height: 280px;
-    border-radius: 16px;
-    background: #1d232a;
+    height: 170px;
     object-fit: cover;
     display: block;
+}
+
+.delete-video-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 900;
+}
+
+.delete-video-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 900;
 }
 
 .delete-video-btn {
@@ -1225,7 +1326,7 @@
 }
 
 .exercise-save-btn {
-    margin-top: 4px;
+    margin-top: 26px;
 }
 
 /* ===== ASSIGN EXERCISE ===== */

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import '../styles/KinesistFlow.css'
@@ -10,32 +11,95 @@ export default function NewExercisePage({ onNavigate }) {
         level: '',
         duration: '',
         reps: '',
-        videoUrl: '',
     })
 
+    const [coverFile, setCoverFile] = useState(null)
     const [videoPreview, setVideoPreview] = useState(null)
+    const [videoFile, setVideoFile] = useState(null)
 
-    const saveExercise = () => {
-        const savedExercises =
-            JSON.parse(localStorage.getItem('customExercises')) || []
+    const [isSaving, setIsSaving] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
-        const newExercise = {
-            id: Date.now(),
-            title: form.title || 'Nieuwe oefening',
-            category: form.category || 'Mobiliteit',
-            level: form.level || 'Makkelijk',
-            duration: form.duration || '2 min',
-            reps: form.reps || '10 herhalingen',
-            videoUrl: form.videoUrl || null,
-            custom: true,
+    const uploadFile = async (bucketName, folderName, file) => {
+        if (!file) return null
+
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+        const filePath = `${folderName}/${fileName}`
+
+        const { error } = await supabase.storage
+            .from(bucketName)
+            .upload(filePath, file)
+
+        if (error) throw error
+
+        const { data } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(filePath)
+
+        return data.publicUrl
+    }
+
+    const saveExercise = async () => {
+        setIsSaving(true)
+        setErrorMessage('')
+
+        if (!form.title.trim()) {
+            setErrorMessage('Geef de oefening eerst een naam.')
+            setIsSaving(false)
+            return
         }
 
-        localStorage.setItem(
-            'customExercises',
-            JSON.stringify([...savedExercises, newExercise])
-        )
+        try {
+            const { data: existingExercise, error: existingError } = await supabase
+                .from('exercises')
+                .select('*')
+                .ilike('title', form.title.trim())
+                .maybeSingle()
 
-        onNavigate('kinesistExercises')
+            if (existingError) throw existingError
+
+            if (existingExercise) {
+                setErrorMessage('Deze oefening bestaat al.')
+                setIsSaving(false)
+                return
+            }
+
+            const uploadedCoverUrl = await uploadFile(
+                'exercise-videos',
+                'exercise-covers',
+                coverFile
+            )
+
+            const uploadedVideoUrl = await uploadFile(
+                'exercise-videos',
+                'exercise-videos',
+                videoFile
+            )
+
+            const { error } = await supabase
+                .from('exercises')
+                .insert([
+                    {
+                        title: form.title.trim(),
+                        category: form.category || 'Mobiliteit',
+                        level: form.level || 'Makkelijk',
+                        duration: form.duration || '2 min',
+                        reps: form.reps || '10 herhalingen',
+                        cover_image: uploadedCoverUrl,
+                        video_url: uploadedVideoUrl,
+                    },
+                ])
+
+            if (error) throw error
+
+            onNavigate('kinesistExercises')
+        } catch (error) {
+            console.error('SAVE ERROR:', error)
+            setErrorMessage(error.message || 'Er ging iets mis bij het opslaan.')
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     return (
@@ -50,16 +114,19 @@ export default function NewExercisePage({ onNavigate }) {
                 <button className="sidebar-link active" onClick={() => onNavigate('kinesistExercises')}>
                     Oefeningen
                 </button>
+
                 <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
                     Instellingen
                 </button>
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
 
             <section className="kine-main">
                 <header className="child-road-header">
+                    <h1>Nieuwe oefening</h1>
                 </header>
 
                 <div className="kine-content">
@@ -74,7 +141,7 @@ export default function NewExercisePage({ onNavigate }) {
                             <label>
                                 Naam oefening
                                 <input
-                                    placeholder="Bijv. Knie heffen"
+                                    placeholder="Bijv. Heel Drop"
                                     value={form.title}
                                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                                 />
@@ -83,7 +150,7 @@ export default function NewExercisePage({ onNavigate }) {
                             <label>
                                 Categorie
                                 <input
-                                    placeholder="Bijv. Balans"
+                                    placeholder="Bijv. Kracht"
                                     value={form.category}
                                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                                 />
@@ -101,7 +168,7 @@ export default function NewExercisePage({ onNavigate }) {
                             <label>
                                 Duur
                                 <input
-                                    placeholder="Bijv. 3 min"
+                                    placeholder="Bijv. 2 min"
                                     value={form.duration}
                                     onChange={(e) => setForm({ ...form, duration: e.target.value })}
                                 />
@@ -117,8 +184,20 @@ export default function NewExercisePage({ onNavigate }) {
                             </label>
 
                             <label>
-                                Instructievideo
+                                Cover image
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0]
+                                        if (!file) return
+                                        setCoverFile(file)
+                                    }}
+                                />
+                            </label>
 
+                            <label>
+                                Instructievideo
                                 <input
                                     type="file"
                                     accept="video/*"
@@ -126,39 +205,44 @@ export default function NewExercisePage({ onNavigate }) {
                                         const file = e.target.files[0]
                                         if (!file) return
 
-                                        const videoUrl = URL.createObjectURL(file)
-
-                                        setVideoPreview(videoUrl)
-                                        setForm({
-                                            ...form,
-                                            videoUrl
-                                        })
+                                        setVideoFile(file)
+                                        setVideoPreview(URL.createObjectURL(file))
                                     }}
                                 />
                             </label>
                         </div>
 
-                        {videoPreview && (
-                            <div className="video-preview-wrapper">
-                                <video controls>
-                                    <source src={videoPreview} />
-                                </video>
+                        <div className="exercise-preview-row">
+                            {videoPreview && (
+                                <div className="video-preview-wrapper">
+                                    <video controls>
+                                        <source src={videoPreview} />
+                                    </video>
 
-                                <button
-                                    type="button"
-                                    className="delete-video-btn"
-                                    onClick={() => {
-                                        setVideoPreview(null)
-                                        setForm({ ...form, videoUrl: '' })
-                                    }}
-                                >
-                                    ✕
-                                </button>
-                            </div>
+                                    <button
+                                        type="button"
+                                        className="delete-video-btn"
+                                        onClick={() => {
+                                            setVideoFile(null)
+                                            setVideoPreview(null)
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {errorMessage && (
+                            <p className="form-error-message">{errorMessage}</p>
                         )}
 
-                        <button className="primary-btn exercise-save-btn" onClick={saveExercise}>
-                            Oefening opslaan
+                        <button
+                            className="primary-btn exercise-save-btn"
+                            onClick={saveExercise}
+                            disabled={isSaving}
+                        >
+                            {isSaving ? 'Opslaan...' : 'Oefening opslaan'}
                         </button>
                     </section>
                 </div>

@@ -3,10 +3,7 @@ import './App.css'
 import LoginPage from './LoginPage'
 import ActivationCodePage from './pages/ActivationCodePage'
 import SignupPage from './pages/SignupPage'
-import PinCreatePage from './pages/PinCreatePage'
-import PinEntryPage from './pages/PinEntryPage'
 import ProfileSelectionPage from './pages/ProfileSelectionPage'
-import ProfileManagementPage from './pages/ProfileManagementPage'
 import ParentDashboardPage from './pages/ParentDashboardPage'
 import ChildDashboardPage from './pages/ChildDashboardPage'
 import ExerciseDetailsPage from './pages/ExerciseDetailsPage'
@@ -25,15 +22,18 @@ import NewExercisePage from './pages/NewExercisePage'
 import KinesistSettingsPage from './pages/KinesistSettingsPage'
 import PremiumTeamSignupPage from './pages/PremiumTeamSignupPage'
 import PremiumCheckoutPage from './pages/PremiumCheckoutPage'
+import StartPage from './pages/StartPage'
+import KinesistLoginPage from './pages/KinesistLoginPage'
+import KinesistSignupPage from './pages/KinesistSignupPage'
 
 const pageComponents = {
   login: LoginPage,
   activation: ActivationCodePage,
   signup: SignupPage,
-  pinCreate: PinCreatePage,
-  pinEntry: PinEntryPage,
+  kinesistLogin: KinesistLoginPage,
+  kinesistSignup: KinesistSignupPage,
+  start: StartPage,
   profileSelection: ProfileSelectionPage,
-  manageProfiles: ProfileManagementPage,
   parentDashboard: ParentDashboardPage,
   childDashboard: ChildDashboardPage,
   progress: ProgressPage,
@@ -43,8 +43,6 @@ const pageComponents = {
   newPatientFlow: NewPatientFlowPage,
   kinesistPatientDetail: KinesistPatientDetailPage,
   kinesistExercises: KinesistExercisesPage,
-  kinesistExerciseDetail: KinesistExerciseDetailPage,
-  assignExercise: AssignExercisePage,
   newExercise: NewExercisePage,
   kinesistSettings: KinesistSettingsPage,
   premiumTeamSignup: PremiumTeamSignupPage,
@@ -52,24 +50,44 @@ const pageComponents = {
 }
 
 function App() {
-  const [page, setPage] = useState('kinesistDashboard') // Start on kinesist dashboard for testing
+  const [page, setPage] = useState('start')
 
-  // Parse page string for parameterized routes (e.g., 'exerciseDetails-1')
   const parsePageRoute = (pageRoute) => {
     if (pageRoute.startsWith('exerciseDetails-')) {
-      const exerciseId = pageRoute.split('-')[1]
+      const exerciseId = pageRoute.replace('exerciseDetails-', '')
       return { component: ExerciseDetailsPage, props: { exerciseId } }
     }
+
     if (pageRoute.startsWith('exerciseExecution-')) {
-      const exerciseId = pageRoute.split('-')[1]
+      const exerciseId = pageRoute.replace('exerciseExecution-', '')
       return { component: ExerciseExecutionPage, props: { exerciseId } }
     }
+
     if (pageRoute.startsWith('exerciseCompletion-')) {
-      const exerciseId = pageRoute.split('-')[1]
+      const exerciseId = pageRoute.replace('exerciseCompletion-', '')
       return { component: ExerciseCompletionPage, props: { exerciseId } }
     }
 
-    // Regular page
+    if (pageRoute.startsWith('kinesistExerciseDetail-')) {
+      const exerciseId = pageRoute.replace('kinesistExerciseDetail-', '')
+      return { component: KinesistExerciseDetailPage, props: { exerciseId } }
+    }
+
+    if (pageRoute.startsWith('assignExercise-')) {
+      const exerciseId = pageRoute.replace('assignExercise-', '')
+      return { component: AssignExercisePage, props: { exerciseId } }
+    }
+
+    if (pageRoute.startsWith('premiumCheckout-')) {
+      const memberId = pageRoute.replace('premiumCheckout-', '')
+      return { component: PremiumCheckoutPage, props: { memberId } }
+    }
+
+    if (pageRoute.startsWith('premiumCheckout-')) {
+      const memberId = pageRoute.replace('premiumCheckout-', '')
+      return { component: PremiumCheckoutPage, props: { memberId } }
+    }
+
     const Component = pageComponents[pageRoute] || LoginPage
     return { component: Component, props: {} }
   }

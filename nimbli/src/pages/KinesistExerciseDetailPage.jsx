@@ -1,22 +1,42 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import '../styles/KinesistFlow.css'
 
-export default function KinesistExerciseDetailPage({ onNavigate }) {
+export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
     const [exercise, setExercise] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const savedExercise = JSON.parse(localStorage.getItem('selectedExercise'))
-        setExercise(savedExercise)
-    }, [])
+        async function loadExercise() {
+            const { data, error } = await supabase
+                .from('exercises')
+                .select('*')
+                .eq('id', exerciseId)
+                .single()
 
-    const currentExercise = exercise || {
-        title: 'Stretch naar de sterren',
-        category: 'Mobiliteit',
-        level: 'Makkelijk',
-        duration: '2 min',
-        reps: '10 herhalingen',
+            if (error) {
+                console.error(error)
+                setExercise(null)
+            } else {
+                setExercise(data)
+            }
+
+            setLoading(false)
+        }
+
+        if (exerciseId) {
+            loadExercise()
+        }
+    }, [exerciseId])
+
+    if (loading) {
+        return <p>Oefening laden...</p>
+    }
+
+    if (!exercise) {
+        return <p>Oefening niet gevonden.</p>
     }
 
     return (
@@ -24,10 +44,19 @@ export default function KinesistExerciseDetailPage({ onNavigate }) {
             <aside className="child-sidebar">
                 <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
 
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>Dashboard</button>
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistExercises')}>Oefeningen</button>
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>Instellingen</button>
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
+                    Dashboard
+                </button>
+
+                <button className="sidebar-link active" onClick={() => onNavigate('kinesistExercises')}>
+                    Oefeningen
+                </button>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
+                    Instellingen
+                </button>
+
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
@@ -47,29 +76,35 @@ export default function KinesistExerciseDetailPage({ onNavigate }) {
 
                     <section className="exercise-detail-layout">
                         <div className="exercise-detail-video">
-                            <div className="video-placeholder">
-                                <button>▶</button>
-                                <p>Instructievideo komt hier</p>
-                            </div>
+                            {exercise.video_url ? (
+                                <video className="exercise-detail-video-player" controls>
+                                    <source src={exercise.video_url} />
+                                </video>
+                            ) : (
+                                <div className="video-placeholder">
+                                    <button>▶</button>
+                                    <p>Nog geen video toegevoegd</p>
+                                </div>
+                            )}
                         </div>
 
                         <aside className="exercise-detail-info">
-                            <h2>{currentExercise.title}</h2>
+                            <h2>{exercise.title}</h2>
 
                             <div className="exercise-card-badges">
-                                <span>{currentExercise.level}</span>
-                                <span>{currentExercise.category}</span>
+                                <span>{exercise.level || 'Makkelijk'}</span>
+                                <span>{exercise.category || 'Algemeen'}</span>
                             </div>
 
                             <div className="exercise-info-list">
                                 <div>
                                     <small>Duur</small>
-                                    <strong>{currentExercise.duration}</strong>
+                                    <strong>{exercise.duration || '2 min'}</strong>
                                 </div>
 
                                 <div>
                                     <small>Herhalingen</small>
-                                    <strong>{currentExercise.reps}</strong>
+                                    <strong>{exercise.reps || '10 herhalingen'}</strong>
                                 </div>
 
                                 <div>
@@ -80,7 +115,7 @@ export default function KinesistExerciseDetailPage({ onNavigate }) {
 
                             <button
                                 className="primary-btn"
-                                onClick={() => onNavigate('assignExercise')}
+                                onClick={() => onNavigate(`assignExercise-${exercise.id}`)}
                             >
                                 Toewijzen aan patiënt
                             </button>
@@ -90,8 +125,8 @@ export default function KinesistExerciseDetailPage({ onNavigate }) {
                     <section className="patient-detail-card exercise-description-card">
                         <h3>Beschrijving</h3>
                         <p>
-                            Deze oefening helpt kinderen om controle, balans en lichaamsbewustzijn op te bouwen.
-                            De kinesist kan deze oefening toevoegen aan het persoonlijke oefenprogramma van een patiënt.
+                            {exercise.description ||
+                                'Deze oefening helpt kinderen om controle, balans en lichaamsbewustzijn op te bouwen.'}
                         </p>
 
                         <h3>Stappen</h3>

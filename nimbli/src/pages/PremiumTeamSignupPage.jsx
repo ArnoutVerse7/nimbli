@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import '../styles/KinesistFlow.css'
@@ -10,16 +11,33 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
         role: '',
     })
 
-    const saveTeamMember = () => {
-        const member = {
-            id: Date.now(),
-            name: teamMember.name || 'Nieuwe kinesist',
-            email: teamMember.email || 'kinesist@email.com',
-            role: teamMember.role || 'Kinesist',
+    const [isSaving, setIsSaving] = useState(false)
+
+    const saveTeamMember = async () => {
+        setIsSaving(true)
+
+        const { data, error } = await supabase
+            .from('kinesists')
+            .upsert(
+                {
+                    name: teamMember.name || 'Nieuwe kinesist',
+                    email: teamMember.email || 'kinesist@email.com',
+                    role: teamMember.role || 'kinesist',
+                },
+                { onConflict: 'email' }
+            )
+            .select()
+            .single()
+
+        if (error) {
+            console.error(error)
+            alert('Fout bij opslaan van teamlid')
+            setIsSaving(false)
+            return
         }
 
-        localStorage.setItem('premiumTeamMember', JSON.stringify(member))
-        onNavigate('premiumCheckout')
+        setIsSaving(false)
+        onNavigate(`premiumCheckout-${data.id}`)
     }
 
     return (
@@ -39,7 +57,7 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
                     Instellingen
                 </button>
 
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
+                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
                     <img src={exitIcon} alt="" />
                 </button>
             </aside>
@@ -87,7 +105,7 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
                             <label>
                                 Rol
                                 <input
-                                    placeholder="Bijv. Kinesist"
+                                    placeholder="Bijv. kinesist"
                                     value={teamMember.role}
                                     onChange={(e) => setTeamMember({ ...teamMember, role: e.target.value })}
                                 />
@@ -96,10 +114,11 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
 
                         <div className="upgrade-actions">
                             <button
-                                className="primary-btn add-patient-btn"
+                                className="primary-btn"
                                 onClick={saveTeamMember}
+                                disabled={isSaving}
                             >
-                                Volgende
+                                {isSaving ? 'Opslaan...' : 'Volgende'}
                             </button>
                         </div>
                     </section>
