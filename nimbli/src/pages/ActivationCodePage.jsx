@@ -52,8 +52,6 @@ export default function ActivationCodePage({ onNavigate }) {
 
   return (
     <PageShell>
-      <div className="status-bar" />
-
       <div className="page-row">
         <Button
           variant="icon"
@@ -65,21 +63,16 @@ export default function ActivationCodePage({ onNavigate }) {
       </div>
 
       <div className="hero-copy">
-        <h1>Voer je activatiecode in:</h1>
-        <p>Deze app werkt enkel met een code van je kinesist.</p>
+        <span className="auth-eyebrow">Koppel je kindprofiel</span>
+        <h1>Voer je activatiecode in</h1>
+        <p>Je ontvangt deze persoonlijke code van je kinesist.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
         <CodeInput values={code} onChange={setCode} />
 
         {errorMessage && (
-          <p
-            style={{
-              color: '#dc2626',
-              textAlign: 'center',
-              marginTop: '12px',
-            }}
-          >
+          <p className="form-error-message">
             {errorMessage}
           </p>
         )}
@@ -89,7 +82,7 @@ export default function ActivationCodePage({ onNavigate }) {
           type="button"
           className="help-link"
         >
-          Geen code gekregen? Opnieuw versturen
+          Geen code ontvangen? Neem contact op met je kinesist
         </Button>
 
         <Button type="submit" disabled={isLoading}>

@@ -84,7 +84,6 @@ export default function SignupPage({ onNavigate }) {
 
   return (
     <PageShell>
-      <div className="status-bar" />
       <div className="page-row">
         <Button variant="icon" type="button" onClick={() => onNavigate('login')}>
           ←
@@ -93,8 +92,9 @@ export default function SignupPage({ onNavigate }) {
       </div>
 
       <div className="hero-copy">
-        <h1>Maak een account aan.</h1>
-        <p>We hebben je code herkend.</p>
+        <span className="auth-eyebrow">Ouderaccount</span>
+        <h1>Maak je account aan</h1>
+        <p>Je activatiecode is herkend. Vul je gegevens aan om verder te gaan.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
@@ -102,6 +102,7 @@ export default function SignupPage({ onNavigate }) {
           label="Naam"
           placeholder="Naam"
           value={name}
+          autoComplete="name"
           onChange={(event) => setName(event.target.value)}
         />
         <TextInput
@@ -109,6 +110,7 @@ export default function SignupPage({ onNavigate }) {
           type="email"
           placeholder="E-mail"
           value={email}
+          autoComplete="email"
           onChange={(event) => setEmail(event.target.value)}
         />
         <TextInput
@@ -116,6 +118,7 @@ export default function SignupPage({ onNavigate }) {
           type="password"
           placeholder="Minstens 8 tekens"
           value={password}
+          autoComplete="new-password"
           onChange={(event) => setPassword(event.target.value)}
         />
         <CheckboxField

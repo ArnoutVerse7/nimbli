@@ -69,8 +69,6 @@ export default function KinesistSignupPage({ onNavigate }) {
 
     return (
         <PageShell>
-            <div className="status-bar" />
-
             <div className="page-row">
                 <Button variant="icon" type="button" onClick={() => onNavigate('kinesistLogin')}>
                     ←
@@ -79,15 +77,17 @@ export default function KinesistSignupPage({ onNavigate }) {
             </div>
 
             <div className="hero-copy">
-                <h1>Maak een kinesistaccount aan.</h1>
-                <p>Registreer je praktijk en start met Nimbli.</p>
+                <span className="auth-eyebrow">Nieuwe praktijk</span>
+                <h1>Maak je kinesistaccount aan</h1>
+                <p>Registreer je praktijk en beheer je eerste patiënt in enkele minuten.</p>
             </div>
 
-            <form className="login-form" onSubmit={handleSubmit}>
+            <form className="login-form login-form--signup" onSubmit={handleSubmit}>
                 <TextInput
                     label="Naam"
                     placeholder="Bijv. Anne Peeters"
                     value={form.name}
+                    autoComplete="name"
                     onChange={(event) => setForm({ ...form, name: event.target.value })}
                 />
 
@@ -95,13 +95,16 @@ export default function KinesistSignupPage({ onNavigate }) {
                     label="Praktijknaam"
                     placeholder="Bijv. Kinderkine Mechelen"
                     value={form.practiceName}
+                    autoComplete="organization"
                     onChange={(event) => setForm({ ...form, practiceName: event.target.value })}
                 />
 
                 <TextInput
+                    className="field-span-2"
                     label="Locatie"
                     placeholder="Bijv. Stationsstraat 12, Mechelen"
                     value={form.location}
+                    autoComplete="street-address"
                     onChange={(event) => setForm({ ...form, location: event.target.value })}
                 />
 
@@ -110,6 +113,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     type="email"
                     placeholder="E-mail"
                     value={form.email}
+                    autoComplete="email"
                     onChange={(event) => setForm({ ...form, email: event.target.value })}
                 />
 
@@ -118,6 +122,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     type="password"
                     placeholder="Wachtwoord"
                     value={form.password}
+                    autoComplete="new-password"
                     onChange={(event) => setForm({ ...form, password: event.target.value })}
                 />
 
