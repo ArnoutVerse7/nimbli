@@ -1,187 +1,136 @@
-.start-page {
+.start-page,
+.start-layout {
     min-height: 100vh;
-    padding: 34px;
-    display: grid;
-    place-items: center;
-    background:
-        radial-gradient(circle at 8% 8%, rgba(33, 176, 144, 0.16), transparent 25%),
-        radial-gradient(circle at 92% 88%, rgba(246, 188, 54, 0.13), transparent 22%),
-        #eff6f3;
 }
 
 .start-layout {
-    width: min(1240px, 100%);
-    min-height: min(760px, calc(100vh - 68px));
     display: grid;
-    grid-template-columns: minmax(430px, 1fr) minmax(520px, 1fr);
-    overflow: hidden;
-    border: 1px solid rgba(20, 86, 72, 0.08);
-    border-radius: 28px;
+    grid-template-columns: minmax(310px, 34%) minmax(0, 66%);
     background: #ffffff;
-    box-shadow: 0 28px 80px rgba(25, 67, 57, 0.12);
 }
 
 .start-hero {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    padding: 48px;
+    min-height: 100vh;
+    padding: 48px clamp(32px, 4vw, 68px) 34px;
     display: flex;
     flex-direction: column;
-    color: #173d35;
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.45), transparent 45%),
-        #dff3eb;
+    color: #ffffff;
+    background: #2db69f;
 }
 
 .start-logo {
-    position: relative;
-    z-index: 2;
-    width: 174px;
+    width: 145px;
     height: auto;
-    padding: 12px 16px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 8px 24px rgba(25, 113, 93, 0.08);
+    filter: brightness(0) invert(1);
 }
 
 .start-hero-copy {
-    position: relative;
-    z-index: 2;
-    max-width: 500px;
-    margin: 92px 0 0;
-}
-
-.start-kicker,
-.start-choice-eyebrow {
-    display: inline-flex;
-    color: #168a6e;
-    font-size: 0.78rem;
-    font-weight: 850;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-}
-
-.start-kicker {
-    padding: 9px 13px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.7);
+    max-width: 360px;
+    margin-top: 82px;
 }
 
 .start-hero h1 {
-    margin: 22px 0 20px;
-    max-width: 500px;
-    color: #173d35;
-    font-size: clamp(3rem, 5vw, 4.7rem);
-    line-height: 0.98;
-    letter-spacing: -0.06em;
+    margin: 0 0 18px;
+    color: #ffffff;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    line-height: 1.04;
+    letter-spacing: -0.045em;
 }
 
 .start-hero-copy p {
-    max-width: 430px;
+    max-width: 300px;
     margin: 0;
-    color: #42655c;
-    font-size: 1.08rem;
-    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
-.start-mascot {
-    position: absolute;
-    z-index: 2;
-    right: 32px;
-    bottom: -16px;
-    width: 190px;
-    filter: drop-shadow(0 18px 22px rgba(24, 91, 77, 0.16));
+.start-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.72rem;
 }
 
-.start-decoration {
-    position: absolute;
-    z-index: 1;
-    border-radius: 50%;
-}
-
-.start-decoration--one {
-    right: -120px;
-    bottom: -155px;
-    width: 430px;
-    height: 430px;
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.start-decoration--two {
-    top: 100px;
-    right: -80px;
-    width: 220px;
-    height: 220px;
-    background: rgba(28, 171, 137, 0.08);
+.start-footer a {
+    color: inherit;
+    text-decoration: none;
 }
 
 .start-choice-panel {
-    padding: 72px clamp(48px, 6vw, 84px);
+    min-height: 100vh;
+    padding: 48px clamp(42px, 9vw, 150px);
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background: #ffffff;
+}
+
+.start-choice-copy,
+.start-page-selection {
+    width: min(100%, 470px);
+    margin-inline: auto;
 }
 
 .start-choice-copy {
-    margin-bottom: 34px;
+    margin-bottom: 26px;
 }
 
 .start-choice-copy h2 {
-    margin: 10px 0 10px;
-    color: #13231f;
-    font-size: clamp(2.25rem, 4vw, 3.25rem);
-    line-height: 1.08;
-    letter-spacing: -0.045em;
+    margin: 0 0 9px;
+    color: #17231f;
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
 }
 
 .start-choice-copy p {
     margin: 0;
-    color: #61716c;
-    line-height: 1.6;
+    color: #69756f;
+    font-size: 0.9rem;
 }
 
 .start-page-selection {
     display: grid;
-    gap: 14px;
+    gap: 12px;
 }
 
 .user-type-card {
     width: 100%;
-    min-height: 112px;
-    padding: 20px;
+    min-height: 92px;
+    padding: 17px;
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr) 34px;
+    grid-template-columns: 48px minmax(0, 1fr) 28px;
     align-items: center;
-    gap: 17px;
-    border: 1px solid #d9e2df;
-    border-radius: 16px;
+    gap: 14px;
     color: #18372f;
-    background: #fbfdfc;
+    background: #ffffff;
+    border: 1px solid #b8c2be;
+    border-radius: 2px;
     text-align: left;
     cursor: pointer;
-    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    transition: border-color 0.16s ease, background 0.16s ease;
 }
 
 .user-type-card:hover {
-    transform: translateY(-2px);
-    border-color: #1aa784;
-    background: #f3fbf8;
-    box-shadow: 0 14px 30px rgba(25, 163, 131, 0.12);
+    border-color: #2db69f;
+    background: #f4fbf9;
 }
 
 .user-type-icon {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     display: grid;
     place-items: center;
-    border-radius: 15px;
-    background: #dff3eb;
+    border-radius: 50%;
+    background: #dff5ef;
 }
 
 .user-type-icon img {
-    width: 27px;
-    height: 27px;
+    width: 23px;
+    height: 23px;
     object-fit: contain;
 }
 
@@ -191,144 +140,61 @@
 
 .user-type-content strong {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     color: #173d35;
-    font-size: 1.08rem;
+    font-size: 0.94rem;
 }
 
 .user-type-content p {
     margin: 0;
-    color: #677873;
-    font-size: 0.88rem;
-    line-height: 1.5;
+    color: #69756f;
+    font-size: 0.78rem;
+    line-height: 1.45;
 }
 
 .user-type-arrow {
-    width: 32px;
-    height: 32px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    color: #168a6e;
-    background: #e8f7f2;
-    font-weight: 900;
-    transition: transform 0.18s ease;
+    color: #218b79;
+    font-weight: 800;
+    transition: transform 0.16s ease;
 }
 
 .user-type-card:hover .user-type-arrow {
     transform: translateX(3px);
 }
 
-.start-choice-note {
-    margin: 28px 0 0;
-    padding-top: 22px;
-    border-top: 1px solid #e6ecea;
-    color: #7a8984;
-    font-size: 0.8rem;
-    line-height: 1.55;
-}
-
-@media (max-width: 920px) {
-    .start-page {
-        padding: 24px;
-    }
-
-    .start-layout {
-        grid-template-columns: minmax(320px, 0.78fr) minmax(440px, 1fr);
-        min-height: calc(100vh - 48px);
-    }
-
-    .start-hero {
-        padding: 38px 34px;
-    }
-
-    .start-hero-copy {
-        margin-top: 70px;
-    }
-
-    .start-hero h1 {
-        font-size: 3.25rem;
-    }
-
-    .start-mascot {
-        width: 145px;
-    }
-
-    .start-choice-panel {
-        padding-inline: 42px;
-    }
-}
-
 @media (max-width: 760px) {
-    .start-page {
-        display: block;
-        padding: 0;
-        background: #ffffff;
-    }
-
     .start-layout {
-        min-height: 100vh;
         display: block;
-        border: 0;
-        border-radius: 0;
-        box-shadow: none;
     }
 
     .start-hero {
-        min-height: 360px;
-        padding: 28px 22px;
+        min-height: 250px;
+        padding: 28px 24px 26px;
     }
 
     .start-logo {
-        width: 144px;
-    }
-
-    .start-hero-copy {
-        margin-top: 48px;
-        max-width: 330px;
-    }
-
-    .start-hero h1 {
-        margin-top: 16px;
-        max-width: 330px;
-        font-size: 2.8rem;
-    }
-
-    .start-hero-copy p {
-        max-width: 300px;
-        font-size: 0.95rem;
-    }
-
-    .start-mascot {
-        right: 6px;
         width: 112px;
     }
 
+    .start-hero-copy {
+        margin-top: 40px;
+    }
+
+    .start-hero h1 {
+        margin-bottom: 10px;
+        font-size: 2rem;
+    }
+
+    .start-hero-copy p {
+        font-size: 0.84rem;
+    }
+
+    .start-footer {
+        display: none;
+    }
+
     .start-choice-panel {
-        padding: 44px 22px 34px;
-    }
-
-    .start-choice-copy h2 {
-        font-size: 2.25rem;
-    }
-}
-
-@media (max-width: 400px) {
-    .start-hero {
-        min-height: 385px;
-    }
-
-    .start-mascot {
-        opacity: 0.62;
-    }
-
-    .user-type-card {
-        grid-template-columns: 50px minmax(0, 1fr) 28px;
-        padding: 16px;
-    }
-
-    .user-type-icon {
-        width: 50px;
-        height: 50px;
+        min-height: auto;
+        padding: 46px 24px;
     }
 }

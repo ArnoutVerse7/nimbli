@@ -55,15 +55,17 @@ function KinesistLoginPage({ onNavigate }) {
     }
 
     return (
-        <PageShell>
+        <PageShell
+            sidebarTitle="Welkom bij Nimbli voor kinesisten"
+            sidebarText="Log in en beheer eenvoudig je patiënten, oefeningen en opvolging."
+        >
             <button className="auth-back-link" type="button" onClick={() => onNavigate('start')}>
                 ← Terug naar keuze
             </button>
 
             <div className="hero-copy">
-                <span className="auth-eyebrow">Voor kinesisten</span>
-                <h1>Welkom bij je praktijk</h1>
-                <p>Beheer patiënten, oefeningen en voortgang vanuit één overzicht.</p>
+                <h1>Inloggen</h1>
+                <p>Log in om naar het overzicht van je praktijk te gaan.</p>
             </div>
 
             <form className="login-form" onSubmit={handleSubmit}>
@@ -106,11 +108,6 @@ function KinesistLoginPage({ onNavigate }) {
                 </Button>
             </form>
 
-            <div className="footer-links">
-                <a href="#">Privacy</a>
-                <span className="separator">•</span>
-                <a href="#">Gebruiksvoorwaarden</a>
-            </div>
         </PageShell>
     )
 }

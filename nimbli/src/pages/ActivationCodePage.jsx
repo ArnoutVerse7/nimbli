@@ -51,7 +51,10 @@ export default function ActivationCodePage({ onNavigate }) {
   }
 
   return (
-    <PageShell>
+    <PageShell
+      sidebarTitle="Activatiecode"
+      sidebarText="Gebruik de persoonlijke code die je van je kinesist hebt ontvangen."
+    >
       <div className="page-row">
         <Button
           variant="icon"
@@ -63,9 +66,8 @@ export default function ActivationCodePage({ onNavigate }) {
       </div>
 
       <div className="hero-copy">
-        <span className="auth-eyebrow">Koppel je kindprofiel</span>
-        <h1>Voer je activatiecode in</h1>
-        <p>Je ontvangt deze persoonlijke code van je kinesist.</p>
+        <h1>Voer je activatiecode in.</h1>
+        <p>Daarmee koppelen we het juiste kindprofiel aan je account.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>

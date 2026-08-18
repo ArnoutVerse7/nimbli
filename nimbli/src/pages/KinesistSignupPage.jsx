@@ -68,7 +68,10 @@ export default function KinesistSignupPage({ onNavigate }) {
     }
 
     return (
-        <PageShell>
+        <PageShell
+            sidebarTitle="Registreer je praktijk"
+            sidebarText="Start met Nimbli en beheer je patiënten vanuit één centrale omgeving."
+        >
             <div className="page-row">
                 <Button variant="icon" type="button" onClick={() => onNavigate('kinesistLogin')}>
                     ←
@@ -77,12 +80,11 @@ export default function KinesistSignupPage({ onNavigate }) {
             </div>
 
             <div className="hero-copy">
-                <span className="auth-eyebrow">Nieuwe praktijk</span>
-                <h1>Maak je kinesistaccount aan</h1>
-                <p>Registreer je praktijk en beheer je eerste patiënt in enkele minuten.</p>
+                <h1>Maak een account aan.</h1>
+                <p>Vul je gegevens in om je praktijk te registreren.</p>
             </div>
 
-            <form className="login-form login-form--signup" onSubmit={handleSubmit}>
+            <form className="login-form" onSubmit={handleSubmit}>
                 <TextInput
                     label="Naam"
                     placeholder="Bijv. Anne Peeters"
@@ -100,7 +102,6 @@ export default function KinesistSignupPage({ onNavigate }) {
                 />
 
                 <TextInput
-                    className="field-span-2"
                     label="Locatie"
                     placeholder="Bijv. Stationsstraat 12, Mechelen"
                     value={form.location}

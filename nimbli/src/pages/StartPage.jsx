@@ -1,7 +1,6 @@
 import logo from '../assets/logos/nimbli-logo.png'
 import userIcon from '../assets/logos/user.png'
 import profileIcon from '../assets/logos/profile.png'
-import mascot from '../assets/logos/mascotte.png'
 import '../styles/Start.css'
 
 export default function StartPage({ onNavigate }) {
@@ -12,24 +11,23 @@ export default function StartPage({ onNavigate }) {
                     <img src={logo} alt="Nimbli" className="start-logo" />
 
                     <div className="start-hero-copy">
-                        <span className="start-kicker">Digitale kinderrevalidatie</span>
-                        <h1>Elke oefening wordt een stap vooruit.</h1>
+                        <h1>Welkom bij Nimbli</h1>
                         <p>
-                            Nimbli helpt kinderen thuis oefenen en geeft kinesisten en
-                            ouders zicht op hun vooruitgang.
+                            Een centrale omgeving voor kinesisten, ouders en kinderen.
                         </p>
                     </div>
 
-                    <img src={mascot} alt="" className="start-mascot" aria-hidden="true" />
-                    <div className="start-decoration start-decoration--one" aria-hidden="true" />
-                    <div className="start-decoration start-decoration--two" aria-hidden="true" />
+                    <div className="start-footer">
+                        <a href="#">Privacy</a>
+                        <span>·</span>
+                        <a href="#">Gebruiksvoorwaarden</a>
+                    </div>
                 </section>
 
                 <section className="start-choice-panel">
                     <div className="start-choice-copy">
-                        <span className="start-choice-eyebrow">Welkom bij Nimbli</span>
-                        <h2>Hoe wil je verdergaan?</h2>
-                        <p>Kies jouw omgeving om veilig aan te melden.</p>
+                        <h2>Hoe wil je inloggen?</h2>
+                        <p>Kies de omgeving die bij jou past.</p>
                     </div>
 
                     <div className="start-page-selection">
@@ -65,11 +63,6 @@ export default function StartPage({ onNavigate }) {
                             <span className="user-type-arrow" aria-hidden="true">→</span>
                         </button>
                     </div>
-
-                    <p className="start-choice-note">
-                        Je gegevens worden veilig bewaard en zijn alleen zichtbaar voor
-                        gekoppelde accounts.
-                    </p>
                 </section>
             </div>
         </main>

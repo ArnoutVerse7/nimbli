@@ -81,15 +81,17 @@ function LoginPage({ onNavigate }) {
   }
 
   return (
-    <PageShell>
+    <PageShell
+      sidebarTitle="Welkom terug bij Nimbli"
+      sidebarText="Log in als ouder en volg de oefeningen en vooruitgang van je kind."
+    >
       <button className="auth-back-link" type="button" onClick={() => onNavigate('start')}>
         ← Terug naar keuze
       </button>
 
       <div className="hero-copy">
-        <span className="auth-eyebrow">Voor ouders en kinderen</span>
-        <h1>Welkom terug</h1>
-        <p>Bekijk het oefenprogramma en volg samen de vooruitgang.</p>
+        <h1>Inloggen</h1>
+        <p>Vul je gegevens in om verder te gaan.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
@@ -132,11 +134,6 @@ function LoginPage({ onNavigate }) {
         </Button>
       </form>
 
-      <div className="footer-links">
-        <a href="#">Privacy</a>
-        <span className="separator">•</span>
-        <a href="#">Gebruiksvoorwaarden</a>
-      </div>
     </PageShell>
   )
 }

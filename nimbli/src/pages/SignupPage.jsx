@@ -83,7 +83,10 @@ export default function SignupPage({ onNavigate }) {
   }
 
   return (
-    <PageShell>
+    <PageShell
+      sidebarTitle="Maak een account aan"
+      sidebarText="Registreer als ouder en krijg toegang tot het oefentraject van je kind."
+    >
       <div className="page-row">
         <Button variant="icon" type="button" onClick={() => onNavigate('login')}>
           ←
@@ -92,9 +95,8 @@ export default function SignupPage({ onNavigate }) {
       </div>
 
       <div className="hero-copy">
-        <span className="auth-eyebrow">Ouderaccount</span>
-        <h1>Maak je account aan</h1>
-        <p>Je activatiecode is herkend. Vul je gegevens aan om verder te gaan.</p>
+        <h1>Maak een account aan.</h1>
+        <p>Je code is herkend. Vul je gegevens aan om verder te gaan.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
