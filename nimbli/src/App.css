@@ -60,6 +60,16 @@ button:disabled {
   margin-bottom: 32px;
 }
 
+.auth-sidebar-label {
+  display: block;
+  margin: 0 14px 10px;
+  color: #98a29e;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .auth-sidebar-nav {
   display: grid;
   gap: 8px;
@@ -458,6 +468,10 @@ button:disabled {
   .auth-sidebar-logo {
     width: 90px;
     margin-bottom: 18px;
+  }
+
+  .auth-sidebar-label {
+    margin-left: 0;
   }
 
   .auth-sidebar-nav {

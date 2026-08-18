@@ -13,6 +13,8 @@ export default function PageShell({
         <aside className="auth-sidebar">
           <img src={logo} alt="Nimbli" className="auth-sidebar-logo" />
 
+          <span className="auth-sidebar-label">Aanmelden als</span>
+
           <nav className="auth-sidebar-nav" aria-label="Kies je omgeving">
             <button
               type="button"
@@ -29,7 +31,7 @@ export default function PageShell({
               onClick={() => onNavigate('login')}
             >
               <img src={profileIcon} alt="" />
-              <span>Ouder of kind</span>
+              <span>Ouder &amp; kind</span>
             </button>
           </nav>
 
