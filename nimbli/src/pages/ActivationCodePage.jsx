@@ -51,10 +51,7 @@ export default function ActivationCodePage({ onNavigate }) {
   }
 
   return (
-    <PageShell
-      sidebarTitle="Activatiecode"
-      sidebarText="Gebruik de persoonlijke code die je van je kinesist hebt ontvangen."
-    >
+    <PageShell activeRole="parent" onNavigate={onNavigate}>
       <div className="page-row">
         <Button
           variant="icon"

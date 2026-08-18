@@ -83,10 +83,7 @@ export default function SignupPage({ onNavigate }) {
   }
 
   return (
-    <PageShell
-      sidebarTitle="Maak een account aan"
-      sidebarText="Registreer als ouder en krijg toegang tot het oefentraject van je kind."
-    >
+    <PageShell activeRole="parent" onNavigate={onNavigate}>
       <div className="page-row">
         <Button variant="icon" type="button" onClick={() => onNavigate('login')}>
           ←

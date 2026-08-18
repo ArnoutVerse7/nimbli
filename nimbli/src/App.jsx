@@ -24,7 +24,6 @@ import NewExercisePage from './pages/NewExercisePage'
 import KinesistSettingsPage from './pages/KinesistSettingsPage'
 import PremiumTeamSignupPage from './pages/PremiumTeamSignupPage'
 import PremiumCheckoutPage from './pages/PremiumCheckoutPage'
-import StartPage from './pages/StartPage'
 import KinesistLoginPage from './pages/KinesistLoginPage'
 import KinesistSignupPage from './pages/KinesistSignupPage'
 
@@ -34,7 +33,6 @@ const pageComponents = {
   signup: SignupPage,
   kinesistLogin: KinesistLoginPage,
   kinesistSignup: KinesistSignupPage,
-  start: StartPage,
   profileSelection: ProfileSelectionPage,
   parentDashboard: ParentDashboardPage,
   childDashboard: ChildDashboardPage,
@@ -52,7 +50,7 @@ const pageComponents = {
 }
 
 function App() {
-  const [page, setPage] = useState('start')
+  const [page, setPage] = useState('kinesistLogin')
   const [isRestoringSession, setIsRestoringSession] = useState(true)
 
   useEffect(() => {

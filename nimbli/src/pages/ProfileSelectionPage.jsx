@@ -7,7 +7,7 @@ export default function ProfileSelectionPage({ onNavigate }) {
   const [selected, setSelected] = useState('Ouder')
 
   return (
-    <PageShell>
+    <PageShell activeRole="parent" onNavigate={onNavigate}>
       <div className="status-bar" />
       <div className="hero-copy">
         <h1>Kies jouw profiel.</h1>

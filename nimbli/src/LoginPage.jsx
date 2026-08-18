@@ -81,14 +81,7 @@ function LoginPage({ onNavigate }) {
   }
 
   return (
-    <PageShell
-      sidebarTitle="Welkom terug bij Nimbli"
-      sidebarText="Log in als ouder en volg de oefeningen en vooruitgang van je kind."
-    >
-      <button className="auth-back-link" type="button" onClick={() => onNavigate('start')}>
-        ← Terug naar keuze
-      </button>
-
+    <PageShell activeRole="parent" onNavigate={onNavigate}>
       <div className="hero-copy">
         <h1>Inloggen</h1>
         <p>Vul je gegevens in om verder te gaan.</p>

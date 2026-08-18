@@ -68,10 +68,7 @@ export default function KinesistSignupPage({ onNavigate }) {
     }
 
     return (
-        <PageShell
-            sidebarTitle="Registreer je praktijk"
-            sidebarText="Start met Nimbli en beheer je patiënten vanuit één centrale omgeving."
-        >
+        <PageShell activeRole="kinesist" onNavigate={onNavigate}>
             <div className="page-row">
                 <Button variant="icon" type="button" onClick={() => onNavigate('kinesistLogin')}>
                     ←
