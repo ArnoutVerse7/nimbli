@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
-import starIcon from '../assets/logos/star.png'
 import profileIcon from '../assets/logos/profile.png'
-import EnvelopeIcon from '../assets/logos/envelope.png'
-import phoneIcon from '../assets/logos/telephone.png'
 import '../styles/KinesistFlow.css'
 
 export default function KinesistPatientDetailPage({ onNavigate }) {
-    const [patient, setPatient] = useState(null)
+    const [patient] = useState(() => {
+        const storedPatient = localStorage.getItem('selectedPatient')
+
+        if (!storedPatient) return null
+
+        try {
+            return JSON.parse(storedPatient)
+        } catch {
+            return null
+        }
+    })
     const [assignedExercises, setAssignedExercises] = useState([])
     const [logEntries, setLogEntries] = useState([])
     const [activeTab, setActiveTab] = useState('overview')
@@ -18,45 +25,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     const [newLogTitle, setNewLogTitle] = useState('')
     const [newLogText, setNewLogText] = useState('')
 
-    useEffect(() => {
-        const savedPatient = JSON.parse(localStorage.getItem('selectedPatient'))
-        setPatient(savedPatient)
-
-        if (savedPatient?.id) {
-            loadAssignedExercises(savedPatient.id)
-            loadLogEntries(savedPatient.id)
-        }
-    }, [])
-
-    const loadAssignedExercises = async (patientId) => {
-        const { data, error } = await supabase
-            .from('patient_exercises')
-            .select(`
-        id,
-        completion_percentage,
-        completed,
-        assigned_at,
-        exercises (
-          id,
-          title,
-          category,
-          level,
-          duration,
-          reps,
-          video_url
-        )
-      `)
-            .eq('patient_id', patientId)
-
-        if (error) {
-            console.error(error)
-            return
-        }
-
-        setAssignedExercises(data || [])
-    }
-
-    const loadLogEntries = async (patientId) => {
+    const loadLogEntries = useCallback(async (patientId) => {
         const { data, error } = await supabase
             .from('logbook_entries')
             .select('*')
@@ -69,16 +38,81 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         }
 
         setLogEntries(data || [])
-    }
+    }, [])
+
+    useEffect(() => {
+        let ignore = false
+
+        async function loadPatientData() {
+            if (!patient?.id) return
+
+            const [assignedResult, logResult] = await Promise.all([
+                supabase
+                    .from('patient_exercises')
+                    .select(`
+            id,
+            completion_percentage,
+            completed,
+            accuracy_percentage,
+            xp_earned,
+            assigned_at,
+            completed_at,
+            exercises (
+              id,
+              title,
+              category,
+              level,
+              duration,
+              reps,
+              video_url
+            )
+          `)
+                    .eq('patient_id', patient.id),
+                supabase
+                    .from('logbook_entries')
+                    .select('*')
+                    .eq('patient_id', patient.id)
+                    .order('created_at', { ascending: false }),
+            ])
+
+            if (ignore) return
+
+            if (assignedResult.error) {
+                console.error(assignedResult.error)
+            } else {
+                setAssignedExercises(assignedResult.data || [])
+            }
+
+            if (logResult.error) {
+                console.error(logResult.error)
+            } else {
+                setLogEntries(logResult.data || [])
+            }
+        }
+
+        loadPatientData()
+
+        return () => {
+            ignore = true
+        }
+    }, [patient])
 
     const saveLogEntry = async () => {
         if (!newLogText.trim()) return
+
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+
+        if (userError || !userData.user) {
+            alert('Je sessie is verlopen. Log opnieuw in.')
+            return
+        }
 
         const { error } = await supabase
             .from('logbook_entries')
             .insert([
                 {
                     patient_id: patient.id,
+                    author_id: userData.user.id,
                     title: newLogTitle || 'Nieuwe notitie',
                     content: newLogText,
                 },
@@ -96,11 +130,53 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         loadLogEntries(patient.id)
     }
 
-    const currentPatient = patient || {
-        first_name: 'Liam',
-        last_name: 'Huismans',
-        age: '7',
-        goal: 'Motorische ontwikkeling ondersteunen',
+    const completedExercises = assignedExercises.filter((item) => item.completed)
+    const measuredExercises = completedExercises.filter(
+        (item) => Number.isFinite(item.accuracy_percentage)
+    )
+    const averageAccuracy = measuredExercises.length
+        ? Math.round(
+            measuredExercises.reduce(
+                (total, item) => total + item.accuracy_percentage,
+                0
+            ) / measuredExercises.length
+        )
+        : 0
+    const categoryProgress = Object.values(
+        assignedExercises.reduce((categories, item) => {
+            const category = item.exercises?.category || 'Overig'
+            const current = categories[category] || { category, total: 0, count: 0 }
+
+            current.total += item.completion_percentage || 0
+            current.count += 1
+            categories[category] = current
+
+            return categories
+        }, {})
+    ).map((item) => ({
+        category: item.category,
+        progress: Math.round(item.total / item.count),
+    }))
+    const recentResults = [...completedExercises]
+        .sort((a, b) => new Date(b.completed_at || 0) - new Date(a.completed_at || 0))
+        .slice(0, 3)
+
+    if (!patient) {
+        return (
+            <main className="kine-page">
+                <section className="kine-main">
+                    <div className="patient-detail-content">
+                        <p className="empty-text">Geen patiënt geselecteerd.</p>
+                        <button
+                            className="primary-btn"
+                            onClick={() => onNavigate('kinesistDashboard')}
+                        >
+                            Terug naar het dashboard
+                        </button>
+                    </div>
+                </section>
+            </main>
+        )
     }
 
     return (
@@ -146,19 +222,22 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         <div className="patient-main-info">
                             <div className="patient-title-row">
                                 <h2>
-                                    {currentPatient.first_name} {currentPatient.last_name}
+                                    {patient.first_name} {patient.last_name}
                                 </h2>
-                                <span>{currentPatient.age} jaar</span>
+                                <span>{patient.age} jaar</span>
                             </div>
 
-                            <p>Startdatum: 2026-02-15</p>
-                            <strong>{currentPatient.goal}</strong>
+                            <p>
+                                Startdatum:{' '}
+                                {new Date(patient.created_at).toLocaleDateString('nl-BE')}
+                            </p>
+                            <strong>{patient.goal}</strong>
                         </div>
 
                         <button
                             className="primary-btn"
                             onClick={() => {
-                                localStorage.setItem('selectedPatient', JSON.stringify(currentPatient))
+                                localStorage.setItem('selectedPatient', JSON.stringify(patient))
                                 onNavigate('kinesistExercises')
                             }}
                         >
@@ -167,38 +246,28 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
 
                         <div className="patient-contact-info">
                             <div>
-                                <strong>Sarah Jansen</strong>
+                                <strong>
+                                    {patient.parent_id ? 'Ouder gekoppeld' : 'Nog geen ouder gekoppeld'}
+                                </strong>
                                 <span>Ouder/verzorger</span>
-                            </div>
-
-                            <div className="patient-contact-details">
-                                <p>
-                                    <img src={EnvelopeIcon} alt="Mail" />
-                                    sarah.jansen@email.com
-                                </p>
-
-                                <p>
-                                    <img src={phoneIcon} alt="Phone" />
-                                    +31 6 1234 5678
-                                </p>
                             </div>
                         </div>
                     </section>
 
                     <section className="patient-detail-stats">
                         <div className="kine-stat-card">
-                            <strong>89%</strong>
+                            <strong>{averageAccuracy}%</strong>
                             <span>Gemiddelde juistheid</span>
                         </div>
 
                         <div className="kine-stat-card">
-                            <strong>12</strong>
+                            <strong>{completedExercises.length}</strong>
                             <span>Sessies voltooid</span>
                         </div>
 
                         <div className="kine-stat-card">
-                            <strong>20</strong>
-                            <span>Dagen streak</span>
+                            <strong>{assignedExercises.length}</strong>
+                            <span>Oefeningen toegewezen</span>
                         </div>
                     </section>
 
@@ -238,52 +307,38 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                 <h3>Voortgang per categorie</h3>
 
                                 <div className="category-progress-list">
-                                    <div className="category-progress-item">
-                                        <div>
-                                            <strong>Balans</strong>
-                                            <span>78%</span>
-                                        </div>
-                                        <div className="category-progress-bar">
-                                            <div style={{ width: '78%' }}></div>
-                                        </div>
-                                    </div>
-
-                                    <div className="category-progress-item">
-                                        <div>
-                                            <strong>Mobiliteit</strong>
-                                            <span>92%</span>
-                                        </div>
-                                        <div className="category-progress-bar">
-                                            <div style={{ width: '92%' }}></div>
-                                        </div>
-                                    </div>
-
-                                    <div className="category-progress-item">
-                                        <div>
-                                            <strong>Kracht</strong>
-                                            <span>65%</span>
-                                        </div>
-                                        <div className="category-progress-bar">
-                                            <div style={{ width: '65%' }}></div>
-                                        </div>
-                                    </div>
+                                    {categoryProgress.length === 0 ? (
+                                        <p className="empty-text">Nog geen voortgang beschikbaar.</p>
+                                    ) : (
+                                        categoryProgress.map((item) => (
+                                            <div className="category-progress-item" key={item.category}>
+                                                <div>
+                                                    <strong>{item.category}</strong>
+                                                    <span>{item.progress}%</span>
+                                                </div>
+                                                <div className="category-progress-bar">
+                                                    <div style={{ width: `${item.progress}%` }}></div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 
                             <div className="patient-detail-card">
                                 <h3>Laatste resultaten</h3>
 
-                                <div className="detail-result-row">
-                                    <img src={checkIcon} alt="" />
-                                    <span>Jumping Jacks voltooid</span>
-                                    <strong>89%</strong>
-                                </div>
-
-                                <div className="detail-result-row">
-                                    <img src={starIcon} alt="" />
-                                    <span>Nieuwe badge behaald</span>
-                                    <strong>+50 XP</strong>
-                                </div>
+                                {recentResults.length === 0 ? (
+                                    <p className="empty-text">Nog geen resultaten beschikbaar.</p>
+                                ) : (
+                                    recentResults.map((item) => (
+                                        <div className="detail-result-row" key={item.id}>
+                                            <img src={checkIcon} alt="" />
+                                            <span>{item.exercises?.title || 'Oefening'} voltooid</span>
+                                            <strong>{item.accuracy_percentage || 0}%</strong>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </section>
                     )}
@@ -292,54 +347,32 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         <section className="patient-detail-card">
                             <h3>Sessie geschiedenis</h3>
 
-                            <div className="session-history-list">
-                                <article className="session-history-card">
-                                    <div className="session-check">✓</div>
+                            {recentResults.length === 0 ? (
+                                <p className="empty-text">Nog geen voltooide sessies.</p>
+                            ) : (
+                                <div className="session-history-list">
+                                    {recentResults.map((item) => (
+                                        <article className="session-history-card" key={item.id}>
+                                            <div className="session-check">✓</div>
 
-                                    <div className="session-history-content">
-                                        <div className="session-history-top">
-                                            <strong>Woensdag 17 december</strong>
-                                            <span>+8%</span>
-                                        </div>
+                                            <div className="session-history-content">
+                                                <div className="session-history-top">
+                                                    <strong>
+                                                        {item.completed_at
+                                                            ? new Date(item.completed_at).toLocaleDateString('nl-BE')
+                                                            : 'Datum onbekend'}
+                                                    </strong>
+                                                    <span>{item.accuracy_percentage || 0}% juist</span>
+                                                </div>
 
-                                        <div className="session-meta">
-                                            <p>09:00</p>
-                                            <p>45 min</p>
-                                        </div>
-
-                                        <p className="session-label">Oefeningen:</p>
-
-                                        <div className="session-tags">
-                                            <span>Balans oefening</span>
-                                            <span>Looptraining</span>
-                                            <span>Coördinatie spel</span>
-                                        </div>
-                                    </div>
-                                </article>
-
-                                <article className="session-history-card">
-                                    <div className="session-check">✓</div>
-
-                                    <div className="session-history-content">
-                                        <div className="session-history-top">
-                                            <strong>Maandag 15 december</strong>
-                                            <span>+5%</span>
-                                        </div>
-
-                                        <div className="session-meta">
-                                            <p>14:30</p>
-                                            <p>30 min</p>
-                                        </div>
-
-                                        <p className="session-label">Oefeningen:</p>
-
-                                        <div className="session-tags">
-                                            <span>Stretch oefeningen</span>
-                                            <span>Kracht training</span>
-                                        </div>
-                                    </div>
-                                </article>
-                            </div>
+                                                <div className="session-tags">
+                                                    <span>{item.exercises?.title || 'Oefening'}</span>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
                         </section>
                     )}
 
@@ -461,7 +494,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                             <p>{entry.content}</p>
 
                                             <div className="logbook-author">
-                                                Door Dr. Jansen
+                                                Door kinesist
                                             </div>
                                         </div>
                                     ))

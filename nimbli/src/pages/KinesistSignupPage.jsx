@@ -7,6 +7,8 @@ import PageShell from '../components/PageShell'
 
 export default function KinesistSignupPage({ onNavigate }) {
     const [accepted, setAccepted] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const [form, setForm] = useState({
         name: '',
@@ -18,20 +20,47 @@ export default function KinesistSignupPage({ onNavigate }) {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        setErrorMessage('')
 
-        const { error } = await supabase
-            .from('kinesists')
-            .insert([
-                {
-                    name: form.name,
-                    email: form.email,
+        if (!form.name.trim() || !form.practiceName.trim() || !form.email.trim() || !form.password) {
+            setErrorMessage('Vul alle verplichte velden in.')
+            return
+        }
+
+        if (form.password.length < 8) {
+            setErrorMessage('Je wachtwoord moet minstens 8 tekens bevatten.')
+            return
+        }
+
+        setIsLoading(true)
+
+        const { data, error } = await supabase.auth.signUp({
+            email: form.email.trim().toLowerCase(),
+            password: form.password,
+            options: {
+                data: {
+                    full_name: form.name.trim(),
                     role: 'kinesist',
+                    practice_name: form.practiceName.trim(),
+                    location: form.location.trim(),
                 },
-            ])
+            },
+        })
+
+        setIsLoading(false)
 
         if (error) {
             console.error(error)
-            alert('Fout bij account aanmaken')
+            setErrorMessage(error.message || 'Fout bij account aanmaken.')
+            return
+        }
+
+        if (!data.session) {
+            localStorage.setItem(
+                'authNotice',
+                'Account aangemaakt. Bevestig indien nodig je e-mailadres en log daarna in.'
+            )
+            onNavigate('kinesistLogin')
             return
         }
 
@@ -98,8 +127,12 @@ export default function KinesistSignupPage({ onNavigate }) {
                     onChange={(event) => setAccepted(event.target.checked)}
                 />
 
-                <Button type="submit" disabled={!accepted}>
-                    Account aanmaken
+                {errorMessage && (
+                    <p className="form-error-message">{errorMessage}</p>
+                )}
+
+                <Button type="submit" disabled={!accepted || isLoading}>
+                    {isLoading ? 'Account aanmaken...' : 'Account aanmaken'}
                 </Button>
             </form>
         </PageShell>

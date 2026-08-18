@@ -23,6 +23,26 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
       }
 
       setExercise(data)
+
+      const patientId = localStorage.getItem('patientId')
+
+      if (patientId) {
+        const { error: progressError } = await supabase
+          .from('patient_exercises')
+          .update({
+            completed: true,
+            completion_percentage: 100,
+            accuracy: 95,
+            xp_earned: 50,
+            completed_at: new Date().toISOString(),
+          })
+          .eq('patient_id', patientId)
+          .eq('exercise_id', exerciseId)
+
+        if (progressError) {
+          console.error(progressError)
+        }
+      }
     }
 
     if (exerciseId) {

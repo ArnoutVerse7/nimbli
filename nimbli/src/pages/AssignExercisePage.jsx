@@ -56,6 +56,14 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
 
         setIsSaving(true)
 
+        const { data: userData, error: userError } = await supabase.auth.getUser()
+
+        if (userError || !userData.user) {
+            alert('Je sessie is verlopen. Log opnieuw in.')
+            setIsSaving(false)
+            return
+        }
+
         const { data: existingAssignment, error: existingError } = await supabase
             .from('patient_exercises')
             .select('*')
@@ -81,6 +89,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                 {
                     patient_id: selectedPatientId,
                     exercise_id: exercise.id,
+                    assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
                 },

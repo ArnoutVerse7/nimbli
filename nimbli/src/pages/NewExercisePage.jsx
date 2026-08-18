@@ -51,6 +51,12 @@ export default function NewExercisePage({ onNavigate }) {
         }
 
         try {
+            const { data: userData, error: userError } = await supabase.auth.getUser()
+
+            if (userError || !userData.user) {
+                throw new Error('Je moet ingelogd zijn als kinesist.')
+            }
+
             const { data: existingExercise, error: existingError } = await supabase
                 .from('exercises')
                 .select('*')
@@ -88,6 +94,7 @@ export default function NewExercisePage({ onNavigate }) {
                         reps: form.reps || '10 herhalingen',
                         cover_image: uploadedCoverUrl,
                         video_url: uploadedVideoUrl,
+                        created_by: userData.user.id,
                     },
                 ])
 

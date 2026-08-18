@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import '../styles/KinesistFlow.css'
@@ -12,32 +11,27 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
     })
 
     const [isSaving, setIsSaving] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
-    const saveTeamMember = async () => {
-        setIsSaving(true)
+    const saveTeamMember = () => {
+        setErrorMessage('')
 
-        const { data, error } = await supabase
-            .from('kinesists')
-            .upsert(
-                {
-                    name: teamMember.name || 'Nieuwe kinesist',
-                    email: teamMember.email || 'kinesist@email.com',
-                    role: teamMember.role || 'kinesist',
-                },
-                { onConflict: 'email' }
-            )
-            .select()
-            .single()
-
-        if (error) {
-            console.error(error)
-            alert('Fout bij opslaan van teamlid')
-            setIsSaving(false)
+        if (!teamMember.name.trim() || !teamMember.email.trim()) {
+            setErrorMessage('Vul de naam en het e-mailadres van het teamlid in.')
             return
         }
 
+        setIsSaving(true)
+        sessionStorage.setItem(
+            'pendingTeamMember',
+            JSON.stringify({
+                name: teamMember.name.trim(),
+                email: teamMember.email.trim().toLowerCase(),
+                role: teamMember.role.trim() || 'kinesist',
+            })
+        )
         setIsSaving(false)
-        onNavigate(`premiumCheckout-${data.id}`)
+        onNavigate('premiumCheckout-team')
     }
 
     return (
@@ -79,6 +73,10 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
                             <div className="active"></div>
                             <div></div>
                         </div>
+
+                        {errorMessage && (
+                            <p className="form-error-message">{errorMessage}</p>
+                        )}
 
                         <h2>Teamlid toevoegen</h2>
                         <p>Voeg een extra kinesist toe aan je praktijkaccount.</p>

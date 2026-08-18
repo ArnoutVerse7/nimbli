@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import logo from '../assets/logos/nimbli-logo.png'
 import exitIcon from '../assets/logos/exit.png'
 import '../styles/KinesistFlow.css'
+import { getCurrentUserAndProfile } from '../lib/auth'
 
 export default function KinesistSettingsPage({ onNavigate }) {
     const [kinesist, setKinesist] = useState(null)
@@ -20,11 +21,8 @@ export default function KinesistSettingsPage({ onNavigate }) {
 
     useEffect(() => {
         async function loadSettings() {
-            const { data: kinesistData, error: kinesistError } = await supabase
-                .from('kinesists')
-                .select('*')
-                .eq('email', 'testkinesist@nimbli.com')
-                .single()
+            const { profile: kinesistData, error: kinesistError } =
+                await getCurrentUserAndProfile('kinesist')
 
             if (kinesistError) {
                 console.error(kinesistError)
@@ -34,10 +32,10 @@ export default function KinesistSettingsPage({ onNavigate }) {
             setKinesist(kinesistData)
 
             setForm({
-                name: kinesistData.name || '',
+                name: kinesistData.full_name || '',
                 email: kinesistData.email || '',
-                practiceName: kinesistData.practice_name || 'Testpraktijk',
-                location: kinesistData.location || 'Teststraat 12, Mechelen',
+                practiceName: kinesistData.practice_name || '',
+                location: kinesistData.location || '',
             })
 
             const { data: subscriptionData, error: subscriptionError } = await supabase
@@ -58,13 +56,15 @@ export default function KinesistSettingsPage({ onNavigate }) {
         if (!kinesist?.id) return
 
         setIsSaving(true)
+        setErrorMessage('')
+        setSuccessMessage('')
 
         const { data, error } = await supabase
-            .from('kinesists')
+            .from('profiles')
             .update({
-                name: form.name,
-                email: form.email,
-                role: 'kinesist',
+                full_name: form.name.trim(),
+                practice_name: form.practiceName.trim(),
+                location: form.location.trim(),
             })
             .eq('id', kinesist.id)
             .select()
@@ -78,8 +78,20 @@ export default function KinesistSettingsPage({ onNavigate }) {
             return
         }
 
+        if (form.email.trim().toLowerCase() !== kinesist.email?.toLowerCase()) {
+            const { error: emailError } = await supabase.auth.updateUser({
+                email: form.email.trim().toLowerCase(),
+            })
+
+            if (emailError) {
+                setErrorMessage('Profiel opgeslagen, maar het e-mailadres kon niet worden aangepast.')
+                setKinesist(data)
+                return
+            }
+        }
+
         setKinesist(data)
-        setSuccessMessage('Profiel opgeslagen')
+        setSuccessMessage('Profiel opgeslagen.')
     }
 
     const currentPlan = subscription?.plan || 'free'

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useState, useEffect, useRef } from 'react'
 import { PoseLandmarker, FilesetResolver } from '@mediapipe/tasks-vision'
 import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
@@ -36,50 +36,7 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
     if (exerciseId) loadExercise()
   }, [exerciseId])
 
-  useEffect(() => {
-    async function setupPoseDetection() {
-      try {
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-        )
-
-        poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
-            delegate: 'GPU',
-          },
-          runningMode: 'VIDEO',
-          numPoses: 1,
-        })
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        })
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          videoRef.current.onloadeddata = detectPose
-        }
-      } catch (error) {
-        console.error(error)
-        setCameraError('Camera of pose detection kon niet gestart worden.')
-      }
-    }
-
-    setupPoseDetection()
-
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current)
-
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop())
-      }
-    }
-  }, [])
-
-  const drawPose = (landmarks) => {
+  const drawPose = useCallback((landmarks) => {
     const canvas = canvasRef.current
     const video = videoRef.current
 
@@ -158,22 +115,65 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
       ctx.fill()
       ctx.stroke()
     })
-  }
+  }, [])
 
-  const detectPose = () => {
+  const detectPose = useCallback(function detectCurrentPose() {
     const video = videoRef.current
     const poseLandmarker = poseLandmarkerRef.current
 
     if (!video || !poseLandmarker || video.readyState < 2) {
-      animationRef.current = requestAnimationFrame(detectPose)
+      animationRef.current = requestAnimationFrame(detectCurrentPose)
       return
     }
 
     const results = poseLandmarker.detectForVideo(video, performance.now())
     drawPose(results.landmarks)
 
-    animationRef.current = requestAnimationFrame(detectPose)
-  }
+    animationRef.current = requestAnimationFrame(detectCurrentPose)
+  }, [drawPose])
+
+  useEffect(() => {
+    let cameraStream = null
+
+    async function setupPoseDetection() {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        )
+
+        poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
+            delegate: 'GPU',
+          },
+          runningMode: 'VIDEO',
+          numPoses: 1,
+        })
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = cameraStream
+          videoRef.current.onloadeddata = detectPose
+        }
+      } catch (error) {
+        console.error(error)
+        setCameraError('Camera of pose detection kon niet gestart worden.')
+      }
+    }
+
+    setupPoseDetection()
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+
+      cameraStream?.getTracks().forEach((track) => track.stop())
+    }
+  }, [detectPose])
 
   useEffect(() => {
     if (!isRunning || !exercise || poseStatus !== 'Volledig lichaam zichtbaar') return
@@ -190,9 +190,6 @@ export default function ExerciseExecutionPage({ exerciseId, onNavigate }) {
 
     return () => clearInterval(timer)
   }, [isRunning, exercise, exerciseId, onNavigate, poseStatus])
-
-  const totalDuration = parseInt(exercise?.duration) || 120
-  const progress = ((totalDuration - timeLeft) / totalDuration) * 100
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)

@@ -10,7 +10,7 @@ import streakIcon from '../assets/logos/streak.png'
 import '../styles/ParentDashboard.css'
 
 export default function ParentDashboardPage({ onNavigate }) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const activeTab = 'overview'
   const [patient, setPatient] = useState(null)
   const [assignedExercises, setAssignedExercises] = useState([])
 

@@ -5,6 +5,7 @@ import profileIcon from '../assets/logos/profile.png'
 import exitIcon from '../assets/logos/exit.png'
 import mascotte2 from '../assets/logos/mascotte2.png'
 import user from '../assets/logos/user.png'
+import { getCurrentUserAndProfile } from '../lib/auth'
 
 import '../styles/KinesistFlow.css'
 
@@ -20,27 +21,28 @@ export default function KinesistDashboardPage({ onNavigate }) {
     )
     useEffect(() => {
         async function loadData() {
+            const { profile, error: profileError } = await getCurrentUserAndProfile('kinesist')
+
+            if (profileError || !profile) {
+                console.error(profileError)
+                onNavigate('kinesistLogin')
+                return
+            }
+
+            setKinesist(profile)
+
             const { data: patientsData, error: patientsError } = await supabase
                 .from('patients')
                 .select('*')
+                .order('created_at', { ascending: false })
 
             if (!patientsError) {
                 setPatients(patientsData || [])
             }
-
-            const { data: kinesistData, error: kinesistError } = await supabase
-                .from('kinesists')
-                .select('*')
-                .eq('email', 'testkinesist@nimbli.com')
-                .single()
-
-            if (!kinesistError) {
-                setKinesist(kinesistData)
-            }
         }
 
         loadData()
-    }, [])
+    }, [onNavigate])
 
     return (
         <main className="kine-page">
@@ -61,16 +63,16 @@ export default function KinesistDashboardPage({ onNavigate }) {
 
                 <div className="kine-content">
                     <section className="kine-welcome">
-                        <h2>Goedemiddag {kinesist?.name || 'Kinesist'}!</h2>
+                        <h2>Goedemiddag {kinesist?.full_name || 'Kinesist'}!</h2>
                         <div className="kine-practice-card">
                             <div className="practice-avatar">
                                 <img src={user} alt="" />
                             </div>
 
                             <div className="practice-info">
-                                <h3>{kinesist?.name || 'Kinesist'}</h3>
-                                <p>Kinderkinesitherapeut</p>
-                                <span>Teststraat 12, Mechelen</span>
+                                <h3>{kinesist?.full_name || 'Kinesist'}</h3>
+                                <p>{kinesist?.practice_name || 'Kinderkinesitherapeut'}</p>
+                                <span>{kinesist?.location || 'Locatie nog niet ingesteld'}</span>
                             </div>
                         </div>
 

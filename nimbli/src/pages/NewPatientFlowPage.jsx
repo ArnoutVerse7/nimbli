@@ -13,9 +13,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
     const [isSaving, setIsSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
 
-    const [activationCode] = useState(
-        Math.random().toString(36).substring(2, 8).toUpperCase()
-    )
+    const [activationCode, setActivationCode] = useState('')
 
     const [patientForm, setPatientForm] = useState({
         firstName: '',
@@ -86,28 +84,37 @@ export default function NewPatientFlowPage({ onNavigate }) {
     const savePatient = async () => {
         setIsSaving(true)
         setErrorMessage('')
+        let createdPatientId = null
 
         try {
-            const { data: patientData, error: patientError } = await supabase
-                .from('patients')
-                .insert([
-                    {
-                        first_name: patientForm.firstName.trim(),
-                        last_name: patientForm.lastName.trim(),
-                        age: parseInt(patientForm.age || '7'),
-                        goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
-                        activation_code: activationCode,
-                    },
-                ])
-                .select()
-                .single()
+            const { data: userData, error: userError } = await supabase.auth.getUser()
+
+            if (userError || !userData.user) {
+                throw new Error('Je sessie is verlopen. Log opnieuw in.')
+            }
+
+            const { data, error: patientError } = await supabase.rpc('create_patient', {
+                p_first_name: patientForm.firstName.trim(),
+                p_last_name: patientForm.lastName.trim(),
+                p_age: parseInt(patientForm.age || '7', 10),
+                p_goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
+            })
 
             if (patientError) throw patientError
 
+            const patientData = Array.isArray(data) ? data[0] : data
+
+            if (!patientData?.patient_id || !patientData?.activation_code) {
+                throw new Error('De patiënt kon niet worden aangemaakt.')
+            }
+
+            createdPatientId = patientData.patient_id
+
             if (selectedExercises.length > 0) {
                 const exerciseRows = selectedExercises.map((exercise) => ({
-                    patient_id: patientData.id,
+                    patient_id: patientData.patient_id,
                     exercise_id: exercise.id,
+                    assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
                 }))
@@ -119,9 +126,15 @@ export default function NewPatientFlowPage({ onNavigate }) {
                 if (assignError) throw assignError
             }
 
-            onNavigate('kinesistDashboard')
+            setActivationCode(patientData.activation_code)
+            setStep(4)
         } catch (error) {
             console.error('SAVE PATIENT ERROR:', error)
+
+            if (createdPatientId) {
+                await supabase.from('patients').delete().eq('id', createdPatientId)
+            }
+
             setErrorMessage(error.message || 'Er ging iets mis bij het opslaan.')
         } finally {
             setIsSaving(false)
@@ -350,10 +363,18 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                             Terug
                                         </button>
 
-                                        <button className="primary-btn" onClick={() => setStep(4)}>
-                                            Volgende
+                                        <button
+                                            className="primary-btn"
+                                            onClick={savePatient}
+                                            disabled={isSaving}
+                                        >
+                                            {isSaving ? 'Patiënt opslaan...' : 'Patiënt bevestigen'}
                                         </button>
                                     </div>
+
+                                    {errorMessage && (
+                                        <p className="form-error-message">{errorMessage}</p>
+                                    )}
                                 </div>
                             </section>
                         )}
@@ -380,10 +401,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                                 <button
                                     className="primary-btn"
-                                    disabled={isSaving}
-                                    onClick={savePatient}
+                                    onClick={() => onNavigate('kinesistDashboard')}
                                 >
-                                    {isSaving ? 'Opslaan...' : 'Terugkeren naar het dashboard'}
+                                    Terugkeren naar het dashboard
                                 </button>
                             </section>
                         )}

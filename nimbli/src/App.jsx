@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './App.css'
+import { supabase } from './lib/supabase'
+import { selectFirstPatientForParent, signOutAndClearLocalData } from './lib/auth'
 import LoginPage from './LoginPage'
 import ActivationCodePage from './pages/ActivationCodePage'
 import SignupPage from './pages/SignupPage'
@@ -51,6 +53,76 @@ const pageComponents = {
 
 function App() {
   const [page, setPage] = useState('start')
+  const [isRestoringSession, setIsRestoringSession] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function restoreSession() {
+      const { data } = await supabase.auth.getSession()
+      const user = data.session?.user
+
+      if (!user) {
+        if (isMounted) setIsRestoringSession(false)
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!isMounted) return
+
+      if (profile?.role === 'kinesist') {
+        setPage('kinesistDashboard')
+      } else if (profile?.role === 'parent') {
+        const { patient } = await selectFirstPatientForParent(user.id)
+        setPage(patient ? 'profileSelection' : 'activation')
+      }
+
+      setIsRestoringSession(false)
+    }
+
+    restoreSession()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const handleNavigate = useCallback(async (nextPage) => {
+    const protectedPages = [
+      'profileSelection',
+      'parentDashboard',
+      'childDashboard',
+      'progress',
+      'childMissions',
+      'childProfile',
+      'kinesistDashboard',
+      'newPatientFlow',
+      'kinesistPatientDetail',
+      'kinesistExercises',
+      'newExercise',
+      'kinesistSettings',
+      'premiumTeamSignup',
+      'premiumCheckout',
+    ]
+
+    const isProtectedRoute =
+      protectedPages.includes(page) ||
+      page.startsWith('exercise') ||
+      page.startsWith('assignExercise-') ||
+      page.startsWith('kinesistExerciseDetail-') ||
+      page.startsWith('premiumCheckout-')
+
+    if ((nextPage === 'login' || nextPage === 'kinesistLogin') && isProtectedRoute) {
+      await signOutAndClearLocalData()
+    }
+
+    setPage(nextPage)
+  }, [page])
 
   const parsePageRoute = (pageRoute) => {
     if (pageRoute.startsWith('exerciseDetails-')) {
@@ -83,18 +155,17 @@ function App() {
       return { component: PremiumCheckoutPage, props: { memberId } }
     }
 
-    if (pageRoute.startsWith('premiumCheckout-')) {
-      const memberId = pageRoute.replace('premiumCheckout-', '')
-      return { component: PremiumCheckoutPage, props: { memberId } }
-    }
-
     const Component = pageComponents[pageRoute] || LoginPage
     return { component: Component, props: {} }
   }
 
+  if (isRestoringSession) {
+    return <div className="app-loading">Nimbli laden...</div>
+  }
+
   const { component: CurrentPage, props: currentProps } = parsePageRoute(page)
 
-  return <CurrentPage onNavigate={setPage} {...currentProps} />
+  return <CurrentPage onNavigate={handleNavigate} {...currentProps} />
 }
 
 export default App

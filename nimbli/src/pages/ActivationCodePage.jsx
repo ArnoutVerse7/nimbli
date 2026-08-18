@@ -22,21 +22,25 @@ export default function ActivationCodePage({ onNavigate }) {
     setErrorMessage('')
 
     try {
-      const { data: patient, error } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('activation_code', activationCode)
-        .single()
+      const { data: userData } = await supabase.auth.getUser()
 
-      if (error || !patient) {
-        setErrorMessage('Activatiecode niet gevonden.')
-        setIsLoading(false)
+      if (userData.user) {
+        const { data: patientId, error } = await supabase.rpc('claim_patient', {
+          p_activation_code: activationCode,
+        })
+
+        if (error) {
+          setErrorMessage('Activatiecode is ongeldig of verlopen.')
+          return
+        }
+
+        localStorage.setItem('patientId', patientId)
+        localStorage.removeItem('pendingActivationCode')
+        onNavigate('profileSelection')
         return
       }
 
-      localStorage.setItem('patientId', patient.id)
-      localStorage.setItem('activationCode', activationCode)
-
+      localStorage.setItem('pendingActivationCode', activationCode)
       onNavigate('signup')
     } catch (error) {
       console.error(error)
