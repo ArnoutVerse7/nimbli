@@ -1,12 +1,11 @@
 import '../styles/ChildFlow.css'
+import ChildSidebar from '../components/ChildSidebar'
 
-import logo from '../assets/logos/nimbli-logo.png'
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
 import checkIcon from '../assets/logos/check.png'
 import lockIcon from '../assets/logos/lock.png'
-import exitIcon from '../assets/logos/exit.png'
 
 export default function ChildMissionsPage({ onNavigate }) {
     const missions = [
@@ -18,24 +17,7 @@ export default function ChildMissionsPage({ onNavigate }) {
     return (
         <main className="child-road-page">
             <section className="child-dashboard-shell">
-                <aside className="child-sidebar">
-                    <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childDashboard')}>
-                        Dashboard
-                    </button>
-
-                    <button className="sidebar-link active" onClick={() => onNavigate('childMissions')}>
-                        Dagelijkse missies
-                    </button>
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childProfile')}>
-                        Profiel
-                    </button>
-                    <button className="sidebar-link" onClick={() => onNavigate('login')}>
-                        <img src={exitIcon} alt="Uitloggen" />
-                    </button>
-                </aside>
+                <ChildSidebar active="missions" onNavigate={onNavigate} />
 
                 <section className="child-main-area">
                     <header className="child-road-header">
