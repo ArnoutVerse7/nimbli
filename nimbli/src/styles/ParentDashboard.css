@@ -1,17 +1,17 @@
 .parent-page {
-  --parent-green: #2bb49d;
-  --parent-green-dark: #178f7a;
-  --parent-green-soft: #edf9f6;
-  --parent-purple: #7863df;
-  --parent-sand: #fff9ef;
-  --parent-ink: #202a27;
-  --parent-muted: #74807c;
-  --parent-border: #dde7e3;
+  --parent-green: var(--nimbli-main-green);
+  --parent-green-dark: var(--nimbli-main-dark-green);
+  --parent-green-soft: var(--nimbli-offwhite);
+  --parent-purple: var(--nimbli-purple);
+  --parent-sand: var(--nimbli-offwhite);
+  --parent-ink: var(--nimbli-black);
+  --parent-muted: var(--nimbli-text-muted);
+  --parent-border: var(--nimbli-gray);
   min-height: 100vh;
   display: grid;
   grid-template-columns: 210px minmax(0, 1fr);
   color: var(--parent-ink);
-  background: #fbfdfc;
+  background: var(--nimbli-page-background);
 }
 
 .parent-sidebar {
@@ -22,7 +22,7 @@
   padding: 28px 20px 22px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--nimbli-white);
   border-right: 1px solid var(--parent-border);
 }
 
@@ -55,7 +55,7 @@
   gap: 11px;
   border: 0;
   border-radius: 8px;
-  color: #6d7a76;
+  color: var(--nimbli-text-muted);
   background: transparent;
   font-size: 13px;
   font-weight: 750;
@@ -70,7 +70,7 @@
 }
 
 .parent-sidebar-link.active {
-  color: #fff;
+  color: var(--nimbli-white);
   background: var(--parent-green);
   box-shadow: 0 5px 12px rgba(43, 180, 157, .18);
 }
@@ -98,7 +98,7 @@
 .parent-main {
   min-width: 0;
   min-height: 100vh;
-  background: #fbfdfc;
+  background: var(--nimbli-page-background);
 }
 
 .parent-topbar {
@@ -107,7 +107,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: var(--nimbli-white);
   border-bottom: 1px solid var(--parent-border);
 }
 
@@ -137,7 +137,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--nimbli-white);
   background: var(--parent-green);
   font-size: 12px;
   font-weight: 850;
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #fff;
+  background: var(--nimbli-white);
   border-bottom: 1px solid var(--parent-border);
 }
 
@@ -239,15 +239,15 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--nimbli-white);
   background: #d6dcda;
   font-size: 10px;
   font-weight: 850;
 }
 
-.parent-week-dot.done { background: #66c77d; }
-.parent-week-dot.today { background: #f4b83e; }
-.parent-week-dot.past { background: #e77168; }
+.parent-week-dot.done { background: var(--nimbli-light-green); }
+.parent-week-dot.today { background: var(--nimbli-yellow); }
+.parent-week-dot.past { background: var(--nimbli-red); }
 
 .parent-summary-grid {
   display: grid;
@@ -261,7 +261,7 @@
   gap: 5px;
   border: 1px solid var(--parent-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--nimbli-white);
 }
 
 .parent-summary-item span {
@@ -281,7 +281,7 @@
 .parent-support-card {
   border: 1px solid var(--parent-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--nimbli-white);
 }
 
 .parent-card,
@@ -510,7 +510,7 @@
   height: 28px;
   padding: 7px;
   border-radius: 50%;
-  background: #75cc88;
+  background: var(--nimbli-light-green);
 }
 
 .parent-recent-item b {
@@ -561,7 +561,7 @@
 .parent-calendar-days button strong { font-size: 13px; }
 
 .parent-calendar-days button.active {
-  color: #fff;
+  color: var(--nimbli-white);
   background: var(--parent-green);
   box-shadow: 0 5px 12px rgba(43, 180, 157, .18);
 }
@@ -575,7 +575,7 @@
 }
 
 .parent-agenda-list > .parent-exercise-row {
-  background: #fff;
+  background: var(--nimbli-white);
   border-color: var(--parent-border);
 }
 
@@ -695,14 +695,14 @@
 
 .parent-primary-button {
   border: 1px solid var(--parent-green);
-  color: #fff;
+  color: var(--nimbli-white);
   background: var(--parent-green);
 }
 
 .parent-secondary-button {
   border: 1px solid var(--parent-green);
   color: var(--parent-green-dark);
-  background: #fff;
+  background: var(--nimbli-white);
 }
 
 .parent-settings-message {
@@ -740,11 +740,11 @@
   height: 15px;
   display: block;
   border-radius: 50%;
-  background: #fff;
+  background: var(--nimbli-white);
   transition: transform .16s ease;
 }
 
-.parent-toggle-row button.active { background: #64c97c; }
+.parent-toggle-row button.active { background: var(--nimbli-light-green); }
 .parent-toggle-row button.active span { transform: translateX(15px); }
 
 .parent-support-card {

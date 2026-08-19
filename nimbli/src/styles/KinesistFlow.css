@@ -1,8 +1,6 @@
 .kine-page {
     min-height: 100vh;
-    background: var(--bg-light, #f4f9f6);
     display: grid;
-    grid-template-columns: 240px 1fr;
 }
 
 .kine-main {
@@ -11,70 +9,31 @@
     flex-direction: column;
 }
 
-.kine-content,
-.new-patient-content,
-.patient-detail-content {
-    padding: 36px;
-    min-height: calc(100vh - 74px);
-}
-
 /* ===== KINESIST DASHBOARD ===== */
-
-.kine-welcome h2 {
-    margin: 0 0 22px;
-    color: #1d232a;
-}
 
 .kine-stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.kine-stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .kine-stat-card strong {
     display: block;
-    font-size: 34px;
-    color: #7bb7e8;
-    margin-bottom: 6px;
 }
 
 .kine-stat-card span {
-    color: #67707b;
-    font-size: 13px;
     font-weight: 700;
 }
 
 .kine-practice-card {
     display: flex;
     align-items: center;
-    gap: 20px;
     background: white;
-    border-radius: 20px;
-    padding: 24px;
-    margin: 24px 0;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-    max-width: 390px;
 }
 
 .practice-avatar {
-    width: 80px;
-    height: 80px;
-    background: #eef7f5;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.practice-avatar img {
-    width: 56px;
 }
 
 .practice-info h3 {
@@ -92,18 +51,13 @@
     font-size: 14px;
 }
 
-.kine-patients-section {
-    margin-top: 34px;
-    max-width: 980px;
-}
-
 .section-header {
     margin-bottom: 18px;
 }
 
 .section-header h3 {
     margin: 0;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .add-patient-btn {
@@ -125,7 +79,6 @@
 }
 
 .empty-patients {
-    min-height: 340px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -133,30 +86,24 @@
 }
 
 .empty-patients img {
-    width: 150px;
     height: auto;
     margin-bottom: 14px;
 }
 
 .empty-patients h3 {
     margin: 0 0 18px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== PATIENT LIST ===== */
 
 .patient-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
 }
 
 .patient-list-card {
     width: 100%;
-    background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
     cursor: pointer;
     text-align: left;
     box-shadow: none;
@@ -164,17 +111,12 @@
 }
 
 .patient-list-card:hover {
-    border-color: #19a383;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
     transform: translateY(-1px);
 }
 
 .patient-list-top {
     display: grid;
-    grid-template-columns: 48px 1fr auto;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
 }
 
 .patient-list-avatar {
@@ -196,18 +138,18 @@
 
 .patient-list-card strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 4px;
     font-size: 15px;
 }
 
 .patient-list-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
 .patient-improvement {
-    color: #7bc77e;
+    color: var(--nimbli-light-green);
     font-weight: 900;
     margin: 0;
     font-size: 13px;
@@ -215,7 +157,7 @@
 
 .patient-goal {
     margin: 0 0 12px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
     font-weight: 700;
 }
@@ -230,12 +172,12 @@
 .session-dot {
     width: 11px;
     height: 11px;
-    background: #20c25e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
 }
 
 .session-dot.empty {
-    background: #b8c2be;
+    background: var(--nimbli-gray);
 }
 
 .patient-progress-row {
@@ -255,21 +197,20 @@
 .patient-progress-bar div {
     height: 100%;
     width: 60%;
-    background: #f7c948;
+    background: var(--nimbli-yellow);
     border-radius: 999px;
 }
 
 .patient-progress-row span {
     font-size: 13px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== BUTTONS ===== */
 
 .primary-btn {
     border: none;
-    background: #19a383;
     color: white;
     border-radius: 10px;
     padding: 12px 24px;
@@ -277,14 +218,9 @@
     cursor: pointer;
 }
 
-.primary-btn:hover {
-    background: #178f75;
-}
-
 .secondary-btn {
-    border: 2px solid #19a383;
+    border: 2px solid var(--nimbli-main-green);
     background: white;
-    color: #19a383;
     border-radius: 10px;
     padding: 10px 24px;
     font-weight: 900;
@@ -295,67 +231,48 @@
 
 .new-patient-card {
     width: 100%;
-    max-width: 960px;
-    background: white;
-    border-radius: 20px;
-    padding: 34px;
-    box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .step-label {
     margin: 0 0 10px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
-    font-size: 13px;
 }
 
 .step-progress {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    max-width: 420px;
-    margin-bottom: 32px;
 }
 
 .step-progress div {
-    height: 7px;
-    background: #e5e9ed;
+    background: var(--nimbli-border);
     border-radius: 999px;
-}
-
-.step-progress div.active {
-    background: #7bb7e8;
 }
 
 .patient-step h2 {
     margin: 0 0 22px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .patient-step>p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin-top: -12px;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    max-width: 620px;
 }
 
 .form-grid label {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    color: #67707b;
-    font-size: 13px;
     font-weight: 800;
 }
 
 .form-grid input {
     border: none;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 10px;
     padding: 14px 16px;
     font-weight: 700;
@@ -364,34 +281,23 @@
 .tag-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 22px 0 28px;
     max-width: 700px;
 }
 
 .tag-list span {
-    background: #f3f5f6;
     border-radius: 999px;
-    padding: 10px 14px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 700;
-    font-size: 13px;
 }
 
 .exercise-select-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
 }
 
 .exercise-select-card,
 .selected-exercise {
-    border: 1px solid #e5e9ed;
-    border-radius: 14px;
-    padding: 16px;
+    border: 1px solid var(--nimbli-border);
     display: grid;
-    grid-template-columns: 58px 1fr;
-    gap: 14px;
     align-items: center;
 }
 
@@ -406,25 +312,17 @@
 
 .exercise-select-card.selected {
     border: 2px solid var(--primary-color);
-    background: rgba(37, 174, 140, 0.08);
-}
-
-.exercise-thumb {
-    width: 58px;
-    height: 58px;
-    border-radius: 10px;
-    background: #1d232a;
 }
 
 .exercise-select-card strong,
 .selected-exercise strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 6px;
 }
 
 .exercise-select-card span {
-    color: #19a383;
+    color: var(--nimbli-main-green);
     font-size: 13px;
     font-weight: 800;
 }
@@ -432,27 +330,23 @@
 .exercise-select-card p,
 .selected-exercise p {
     margin: 4px 0 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
 .button-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 28px;
 }
 
 .review-layout {
     display: grid;
     grid-template-columns: 0.9fr 1.1fr;
-    gap: 42px;
 }
 
 .patient-preview-card {
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 16px;
-    padding: 24px;
     text-align: center;
     margin-bottom: 18px;
 }
@@ -460,8 +354,8 @@
 .patient-image-placeholder {
     width: 150px;
     height: 150px;
-    background: #ddd;
-    border: 3px solid #1d232a;
+    background: var(--nimbli-gray);
+    border: 3px solid var(--nimbli-black);
     margin: 0 auto 16px;
 }
 
@@ -470,20 +364,19 @@
 }
 
 .patient-preview-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .info-box,
 .next-steps-box {
-    background: #fff8ed;
+    background: var(--nimbli-page-background);
     border-radius: 16px;
-    padding: 18px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .info-box strong,
 .next-steps-box strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .selected-exercises {
@@ -500,7 +393,7 @@
 .success-icon {
     width: 58px;
     height: 58px;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
     padding: 14px;
     object-fit: contain;
@@ -509,14 +402,9 @@
 
 .activation-code {
     width: fit-content;
-    background: #7bb7e8;
     color: white;
-    font-size: 32px;
     letter-spacing: 8px;
     font-weight: 900;
-    border-radius: 12px;
-    padding: 18px 28px;
-    margin: 18px 0;
 }
 
 .share-options {
@@ -526,12 +414,12 @@
 }
 
 .share-options button {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     background: white;
     border-radius: 12px;
     padding: 14px 18px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .next-steps-box {
@@ -544,9 +432,6 @@
 }
 
 .exercise-thumb {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -562,26 +447,19 @@
 .patient-back-btn {
     border: none;
     background: transparent;
-    color: #1d232a;
     font-weight: 800;
     cursor: pointer;
-    margin-bottom: 18px;
     padding: 0;
-    font-size: 15px;
 }
 
 .patient-detail-hero {
-    background: white;
     border-radius: 20px;
-    padding: 24px 28px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .patient-detail-hero.extended {
     display: grid;
-    grid-template-columns: 80px 1fr auto;
     align-items: start;
-    gap: 22px;
 }
 
 .patient-photo-placeholder {
@@ -594,8 +472,6 @@
 }
 
 .patient-photo-placeholder img {
-    width: 80px;
-    height: 80px;
     object-fit: contain;
 }
 
@@ -613,24 +489,22 @@
 .patient-title-row h2,
 .patient-main-info h2 {
     margin: 0;
-    font-size: 28px;
     line-height: 1.1;
 }
 
 .patient-title-row span,
 .patient-main-info p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 6px 0;
 }
 
 .patient-main-info strong {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .patient-contact-info {
     grid-column: 1 / -1;
-    border-top: 1px solid #e5e9ed;
-    padding-top: 18px;
+    border-top: 1px solid var(--nimbli-border);
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: start;
@@ -638,13 +512,13 @@
 
 .patient-contact-info strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 4px;
 }
 
 .patient-contact-info span,
 .patient-contact-info p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 4px 0;
 }
 
@@ -653,7 +527,7 @@
     align-items: center;
     gap: 10px;
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .patient-contact-info p img {
@@ -669,41 +543,25 @@
 .patient-detail-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin: 24px 0;
 }
 
 .patient-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
 }
 
 .patient-tabs button {
     border: none;
-    background: white;
-    padding: 12px 22px;
-    border-radius: 999px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     cursor: pointer;
 }
 
-.patient-tabs button.active {
-    background: #19a383;
-    color: white;
-}
-
 .patient-detail-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 24px;
 }
 
 .patient-detail-card {
-    background: white;
     border-radius: 18px;
-    padding: 24px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
@@ -712,9 +570,7 @@
 }
 
 .category-progress-list {
-    display: flex;
     flex-direction: column;
-    gap: 24px;
 }
 
 .category-progress-item>div:first-child {
@@ -725,16 +581,15 @@
 }
 
 .category-progress-item strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .category-progress-item span {
-    color: #19a383;
+    color: var(--nimbli-main-green);
     font-weight: 900;
 }
 
 .category-progress-bar {
-    height: 12px;
     background: #e8ecef;
     border-radius: 999px;
     overflow: hidden;
@@ -742,14 +597,13 @@
 
 .category-progress-bar div {
     height: 100%;
-    background: #19a383;
+    background: var(--nimbli-main-green);
     border-radius: 999px;
 }
 
 .detail-result-row {
-    background: #f8fafb;
+    background: var(--nimbli-page-background);
     border-radius: 14px;
-    padding: 14px;
     display: grid;
     grid-template-columns: 32px 1fr auto;
     gap: 12px;
@@ -762,11 +616,11 @@
     height: 28px;
     padding: 7px;
     border-radius: 50%;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
 }
 
 .detail-result-row strong {
-    color: #19a383;
+    color: var(--nimbli-main-green);
 }
 
 .session-history-list {
@@ -776,8 +630,8 @@
 }
 
 .session-history-card {
-    background: #f8fafb;
-    border: 1px solid #e5e9ed;
+    background: var(--nimbli-page-background);
+    border: 1px solid var(--nimbli-border);
     border-radius: 16px;
     padding: 18px;
     display: grid;
@@ -790,7 +644,7 @@
     height: 36px;
     border-radius: 50%;
     background: #d8f8e5;
-    color: #20c25e;
+    color: var(--nimbli-light-green);
     display: grid;
     place-items: center;
     font-weight: 900;
@@ -809,12 +663,12 @@
 }
 
 .session-history-top strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .session-history-top span {
     background: #d8f8e5;
-    color: #20c25e;
+    color: var(--nimbli-light-green);
     border-radius: 999px;
     padding: 5px 10px;
     font-weight: 900;
@@ -824,7 +678,7 @@
 .session-meta {
     display: flex;
     gap: 24px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin-bottom: 14px;
 }
 
@@ -834,7 +688,7 @@
 
 .session-label {
     margin: 0 0 8px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     font-size: 13px;
 }
@@ -863,10 +717,7 @@
 }
 
 .exercise-program-card {
-    background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
 }
 
 .exercise-program-top {
@@ -887,8 +738,7 @@
 }
 
 .exercise-header strong {
-    font-size: 18px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-menu {
@@ -896,7 +746,7 @@
     background: none;
     cursor: pointer;
     font-size: 20px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .exercise-badges {
@@ -919,7 +769,7 @@
 
 .badge-category {
     background: #eef7f5;
-    color: #19a383;
+    color: var(--nimbli-main-green);
 }
 
 .exercise-details {
@@ -938,7 +788,7 @@
 .exercise-details p {
     margin: 0;
     font-weight: 700;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-progress {
@@ -958,14 +808,14 @@
 
 .exercise-progress-bar div {
     height: 100%;
-    background: #f7c948;
+    background: var(--nimbli-yellow);
     border-radius: 999px;
 }
 
 .exercise-progress span {
     font-size: 13px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .last-completed {
@@ -985,8 +835,8 @@
 }
 
 .logbook-form {
-    background: #f8fafb;
-    border: 1px solid #e5e9ed;
+    background: var(--nimbli-page-background);
+    border: 1px solid var(--nimbli-border);
     border-radius: 16px;
     padding: 18px;
     margin-bottom: 18px;
@@ -997,7 +847,7 @@
 
 .logbook-form input,
 .logbook-form textarea {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     border-radius: 10px;
     padding: 12px 14px;
     font: inherit;
@@ -1016,7 +866,7 @@
 
 .logbook-entry {
     background: white;
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     border-radius: 14px;
     padding: 18px;
 }
@@ -1032,17 +882,17 @@
 .logbook-entry strong {
     display: block;
     margin-bottom: 8px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .logbook-entry p {
     margin: 0 0 14px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     line-height: 1.6;
 }
 
 .logbook-author {
-    border-top: 1px solid #e5e9ed;
+    border-top: 1px solid var(--nimbli-border);
     padding-top: 12px;
     color: #8a94a6;
     font-size: 13px;
@@ -1054,7 +904,7 @@
     margin-top: 24px;
     border-radius: 18px;
     overflow: hidden;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
 }
 
 .cover-preview-wrapper img {
@@ -1070,7 +920,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 22px;
 }
 
 .exercise-library-header h2 {
@@ -1079,13 +928,11 @@
 
 .exercise-library-header p {
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .exercise-library-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
 }
 
 .exercise-cover-thumb img {
@@ -1097,39 +944,25 @@
 
 .exercise-library-tabs button {
     border: none;
-    background: white;
-    padding: 10px 18px;
-    border-radius: 999px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     cursor: pointer;
 }
 
-.exercise-library-tabs button.active {
-    background: #19a383;
-    color: white;
-}
-
 .exercise-library-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
 }
 
 .exercise-library-card {
     background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 18px;
+    border: 1px solid var(--nimbli-border);
     display: grid;
-    grid-template-columns: 72px 1fr;
-    gap: 16px;
     text-align: left;
     cursor: pointer;
 }
 
 .exercise-library-card:hover {
-    border-color: #19a383;
+    border-color: var(--nimbli-main-green);
 }
 
 .video-thumb {
@@ -1141,31 +974,24 @@
 
 .exercise-card-badges {
     display: flex;
-    gap: 8px;
-    margin: 10px 0;
 }
 
 .exercise-card-badges span {
     background: #eef7f5;
-    color: #19a383;
-    padding: 5px 10px;
+    color: var(--nimbli-main-green);
     border-radius: 999px;
-    font-size: 12px;
     font-weight: 800;
 }
 
 .exercise-library-card p {
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== EXERCISE DETAIL ===== */
 
 .exercise-detail-layout {
     display: grid;
-    grid-template-columns: 1.4fr 0.8fr;
-    gap: 24px;
-    margin-bottom: 24px;
 }
 
 .exercise-detail-video,
@@ -1173,7 +999,6 @@
     width: 100%;
     background: white;
     border-radius: 18px;
-    padding: 24px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
@@ -1192,9 +1017,6 @@
 
 .video-placeholder {
     position: relative;
-    height: 320px;
-    background: #1d232a;
-    border-radius: 16px;
     display: grid;
     place-items: center;
     color: white;
@@ -1216,7 +1038,7 @@
     z-index: 1;
     display: grid;
     justify-items: center;
-    color: #fff;
+    color: var(--nimbli-white);
     text-shadow: 0 2px 10px rgba(0, 0, 0, .45);
 }
 
@@ -1226,8 +1048,8 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    color: #19a383;
-    background: #fff;
+    color: var(--nimbli-main-green);
+    background: var(--nimbli-white);
     font-size: 20px;
     text-shadow: none;
 }
@@ -1238,21 +1060,13 @@
     border-radius: 50%;
     border: none;
     background: white;
-    color: #19a383;
+    color: var(--nimbli-main-green);
     font-size: 24px;
     margin-bottom: 12px;
 }
 
 .exercise-info-list {
     display: grid;
-    gap: 16px;
-    margin: 24px 0;
-}
-
-.exercise-info-list div {
-    background: #f8fafb;
-    border-radius: 12px;
-    padding: 14px;
 }
 
 .exercise-info-list small {
@@ -1262,12 +1076,12 @@
 }
 
 .exercise-info-list strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-description-card p,
 .exercise-description-card li {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     line-height: 1.6;
 }
 
@@ -1281,10 +1095,10 @@
 
 .video-preview-wrapper {
     position: relative;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
 }
 
 .video-preview-wrapper::before {
@@ -1292,9 +1106,9 @@
     padding: 12px 14px;
     font-size: 13px;
     font-weight: 900;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     background: white;
-    border-bottom: 1px solid #e5e9ed;
+    border-bottom: 1px solid var(--nimbli-border);
 }
 
 .video-preview-wrapper video {
@@ -1306,41 +1120,13 @@
 
 .delete-video-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    border: none;
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-weight: 900;
-}
-
-.delete-video-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    border: none;
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-weight: 900;
-}
-
-.delete-video-btn {
-    position: absolute;
     top: 14px;
     right: 14px;
     width: 42px;
     height: 42px;
     border: none;
     border-radius: 50%;
-    background: #ff4d4f;
+    background: var(--nimbli-red);
     color: white;
     font-size: 22px;
     font-weight: 900;
@@ -1358,7 +1144,7 @@
 
 .delete-video-btn:hover {
     transform: scale(1.08);
-    background: #e53935;
+    background: var(--nimbli-red);
 }
 
 .exercise-save-btn {
@@ -1368,21 +1154,17 @@
 /* ===== ASSIGN EXERCISE ===== */
 .assign-layout {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
     gap: 24px;
 }
 
 .assign-patient-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .assign-patient-card {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     background: white;
-    border-radius: 14px;
-    padding: 14px;
     display: grid;
     grid-template-columns: 48px 1fr;
     gap: 14px;
@@ -1391,8 +1173,7 @@
 }
 
 .assign-patient-card.selected {
-    border: 2px solid #19a383;
-    background: rgba(25, 163, 131, 0.07);
+    border: 2px solid var(--nimbli-main-green);
 }
 
 .assign-patient-card strong {
@@ -1401,7 +1182,7 @@
 }
 
 .assign-patient-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
@@ -1413,7 +1194,6 @@
 .assign-success-card {
     background: white;
     border-radius: 20px;
-    padding: 48px;
     text-align: center;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
@@ -1421,18 +1201,17 @@
 .assign-success-card img {
     width: 64px;
     height: 64px;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
     padding: 16px;
 }
 
 .empty-text {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .settings-layout {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
     gap: 24px;
 }
 
@@ -1445,9 +1224,7 @@
 }
 
 .plan-card {
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
     margin-bottom: 16px;
 }
 
@@ -1459,23 +1236,21 @@
 
 .plan-card strong {
     display: block;
-    font-size: 26px;
     margin: 6px 0;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .plan-card p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 0 0 14px;
 }
 
 .plan-card.premium {
-    border: 2px solid #19a383;
-    background: rgba(25, 163, 131, 0.06);
+    border: 2px solid var(--nimbli-main-green);
 }
 
 .plan-card ul {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     padding-left: 20px;
     margin-bottom: 18px;
 }
@@ -1490,9 +1265,6 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1000px) {
-    .kine-page {
-        grid-template-columns: 1fr;
-    }
 
     .kine-page .child-sidebar {
         display: none;
@@ -1518,23 +1290,23 @@
 /* ===== FIGMA-ALIGNED KINESIST PORTAL ===== */
 
 .kine-page {
-    --kine-green: #2bb49d;
-    --kine-green-dark: #178f7a;
-    --kine-green-soft: #edf9f6;
-    --kine-blue: #69b7e8;
-    --kine-blue-soft: #f1f8fd;
-    --kine-sand: #fff9ef;
-    --kine-ink: #202a27;
-    --kine-muted: #73807b;
-    --kine-border: #dde7e3;
+    --kine-green: var(--nimbli-main-green);
+    --kine-green-dark: var(--nimbli-main-dark-green);
+    --kine-green-soft: var(--nimbli-offwhite);
+    --kine-blue: var(--nimbli-blue);
+    --kine-blue-soft: color-mix(in srgb, var(--nimbli-blue) 16%, var(--nimbli-white));
+    --kine-sand: var(--nimbli-offwhite);
+    --kine-ink: var(--nimbli-black);
+    --kine-muted: var(--nimbli-text-muted);
+    --kine-border: var(--nimbli-gray);
     grid-template-columns: 210px minmax(0, 1fr);
-    background: #fbfdfc;
+    background: var(--nimbli-page-background);
     color: var(--kine-ink);
 }
 
 .kine-main {
     min-width: 0;
-    background: #fbfdfc;
+    background: var(--nimbli-page-background);
 }
 
 .kine-sidebar {
@@ -1576,7 +1348,7 @@
     align-items: center;
     gap: 11px;
     border-radius: 8px;
-    color: #6d7a76;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
     font-weight: 750;
     transition: background .16s ease, color .16s ease, transform .16s ease;
@@ -1588,7 +1360,7 @@
 }
 
 .kine-sidebar .sidebar-link.active {
-    color: #fff;
+    color: var(--nimbli-white);
     background: var(--kine-green);
     box-shadow: 0 5px 12px rgba(43, 180, 157, .18);
 }
@@ -1768,7 +1540,7 @@
     padding: 11px 14px;
     border: 1px solid var(--kine-border);
     border-radius: 8px;
-    background: #fff;
+    background: var(--nimbli-white);
     color: var(--kine-ink);
     font-size: 12px;
     font-weight: 550;
@@ -1794,7 +1566,7 @@ input.kine-search:focus {
     padding: 16px;
     border-color: var(--kine-border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--nimbli-white);
 }
 
 .patient-list-card:hover {
@@ -1824,7 +1596,7 @@ input.kine-search:focus {
     min-height: 250px;
     border: 1px dashed #cedbd6;
     border-radius: 12px;
-    background: #fff;
+    background: var(--nimbli-white);
 }
 
 .empty-patients img {
@@ -1871,7 +1643,7 @@ input.kine-search:focus {
     padding: 28px 32px 32px;
     border: 1px solid var(--kine-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--nimbli-white);
     box-shadow: none;
 }
 
@@ -1923,7 +1695,7 @@ input.kine-search:focus {
     padding: 10px 12px;
     border: 1px solid var(--kine-border);
     border-radius: 7px;
-    background: #fff;
+    background: var(--nimbli-white);
     color: var(--kine-ink);
     outline: none;
 }
@@ -1943,7 +1715,7 @@ input.kine-search:focus {
 .tag-list span {
     padding: 7px 10px;
     border: 1px solid var(--kine-border);
-    background: #fafcfb;
+    background: var(--nimbli-page-background);
     font-size: 10px;
 }
 
@@ -2113,7 +1885,7 @@ input.kine-search:focus {
 
 .patient-detail-card {
     padding: 20px;
-    background: #fff;
+    background: var(--nimbli-white);
 }
 
 .patient-detail-card h3 {
@@ -2125,7 +1897,7 @@ input.kine-search:focus {
     margin: 0 0 14px;
     padding: 8px 6px 0;
     border-radius: 8px;
-    background: #fbfdfc;
+    background: var(--nimbli-page-background);
 }
 
 .progress-chart svg {
@@ -2149,7 +1921,7 @@ input.kine-search:focus {
 }
 
 .progress-chart circle {
-    fill: #fff;
+    fill: var(--nimbli-white);
     stroke: var(--kine-green);
     stroke-width: 3;
 }
@@ -2198,7 +1970,7 @@ input.kine-search:focus {
     padding: 15px;
     border-color: #eee4d4;
     border-radius: 9px;
-    background: var(--kine-sand);
+    background: var(--nimbli-page-background);
 }
 
 .exercise-header strong {
@@ -2302,7 +2074,7 @@ input.kine-search:focus {
 .video-placeholder {
     height: 280px;
     border-radius: 8px;
-    background: #25312e;
+    background: var(--nimbli-black);
 }
 
 .exercise-info-list {
@@ -2314,7 +2086,7 @@ input.kine-search:focus {
     padding: 11px;
     border: 1px solid var(--kine-border);
     border-radius: 7px;
-    background: #fbfdfc;
+    background: var(--nimbli-page-background);
     font-size: 11px;
 }
 
@@ -2547,13 +2319,13 @@ input.kine-search:focus {
 
 .activation-feedback {
     margin: 0;
-    color: #178f7a;
+    color: var(--nimbli-main-dark-green);
     font-size: 10px;
     font-weight: 700;
 }
 
 .activation-feedback.error {
-    color: #b42318;
+    color: var(--nimbli-dark-red);
 }
 
 @media (max-width: 720px) {
