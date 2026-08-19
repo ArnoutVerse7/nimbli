@@ -32,8 +32,9 @@ De volledige database- en securityconfiguratie staat in `supabase/migrations`:
 
 1. Voer `001_initial_schema.sql` uit in de Supabase SQL Editor.
 2. Voer daarna `002_storage_policies.sql` uit.
-3. Stel bij Authentication > URL Configuration de Site URL in op `http://localhost:5173` en voeg `http://localhost:5173/**` toe als Redirect URL.
-4. Schakel Email Authentication in en gebruik minimaal acht tekens voor wachtwoorden.
+3. Voer ten slotte `003_assignment_schedule.sql` uit.
+4. Stel bij Authentication > URL Configuration de Site URL in op `http://localhost:5173` en voeg `http://localhost:5173/**` toe als Redirect URL.
+5. Schakel Email Authentication in en gebruik minimaal acht tekens voor wachtwoorden.
 
 Commit nooit `.env.local`, databasewachtwoorden of een Supabase secret/service-role key.
 

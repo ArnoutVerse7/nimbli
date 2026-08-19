@@ -1205,7 +1205,7 @@
     width: 100%;
 }
 
-.assign-duration-field {
+.exercise-schedule-panel {
     margin-top: 18px;
     display: grid;
     gap: 7px;
@@ -1214,7 +1214,18 @@
     font-weight: 800;
 }
 
-.assign-duration-field select {
+.exercise-schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.exercise-schedule-grid label {
+    display: grid;
+    gap: 6px;
+}
+
+.exercise-schedule-grid input {
     width: 100%;
     min-height: 42px;
     padding: 9px 11px;
@@ -1225,11 +1236,16 @@
     font: inherit;
 }
 
-.assign-duration-field small {
+.exercise-schedule-panel small,
+.exercise-schedule-summary {
     color: var(--kine-muted);
     font-size: 10px;
     font-weight: 600;
     line-height: 1.45;
+}
+
+.exercise-schedule-summary {
+    margin: -4px 0 12px;
 }
 
 .assign-success-card {
@@ -2285,6 +2301,7 @@ input.kine-search:focus {
     .patient-list,
     .exercise-select-grid,
     .exercise-library-grid,
+    .exercise-schedule-grid,
     .form-grid,
     .review-layout,
     .patient-detail-stats,

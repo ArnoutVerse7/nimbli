@@ -3,7 +3,12 @@ import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profile from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
 import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+    getDefaultExerciseSchedule,
+    isValidExerciseSchedule,
+} from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
 export default function NewPatientFlowPage({ onNavigate }) {
@@ -12,6 +17,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
     const [selectedExercises, setSelectedExercises] = useState([])
     const [isSaving, setIsSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [schedule, setSchedule] = useState(getDefaultExerciseSchedule)
 
     const [activationCode, setActivationCode] = useState('')
 
@@ -81,7 +87,23 @@ export default function NewPatientFlowPage({ onNavigate }) {
         setStep(2)
     }
 
+    const goToReview = () => {
+        setErrorMessage('')
+
+        if (selectedExercises.length > 0 && !isValidExerciseSchedule(schedule)) {
+            setErrorMessage('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
+        setStep(3)
+    }
+
     const savePatient = async () => {
+        if (selectedExercises.length > 0 && !isValidExerciseSchedule(schedule)) {
+            setErrorMessage('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
         setIsSaving(true)
         setErrorMessage('')
         let createdPatientId = null
@@ -117,6 +139,8 @@ export default function NewPatientFlowPage({ onNavigate }) {
                     assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
+                    start_date: schedule.startDate,
+                    end_date: schedule.endDate,
                 }))
 
                 const { error: assignError } = await supabase
@@ -135,7 +159,12 @@ export default function NewPatientFlowPage({ onNavigate }) {
                 await supabase.from('patients').delete().eq('id', createdPatientId)
             }
 
-            setErrorMessage(error.message || 'Er ging iets mis bij het opslaan.')
+            const scheduleMigrationMissing = error?.message?.includes('start_date')
+                || error?.message?.includes('end_date')
+
+            setErrorMessage(scheduleMigrationMissing
+                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
+                : error.message || 'Er ging iets mis bij het opslaan.')
         } finally {
             setIsSaving(false)
         }
@@ -270,12 +299,28 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     })}
                                 </div>
 
+                                {selectedExercises.length > 0 && (
+                                    <ExerciseScheduleFields
+                                        schedule={schedule}
+                                        onChange={(nextSchedule) => {
+                                            setSchedule(nextSchedule)
+                                            setErrorMessage('')
+                                        }}
+                                        title="Plan het startprogramma"
+                                        helpText="Alle gekozen oefeningen verschijnen iedere dag tijdens deze periode."
+                                    />
+                                )}
+
+                                {step === 2 && errorMessage && (
+                                    <p className="form-error-message">{errorMessage}</p>
+                                )}
+
                                 <div className="button-row">
                                     <button className="secondary-btn" onClick={() => setStep(1)}>
                                         Terug
                                     </button>
 
-                                    <button className="primary-btn" onClick={() => setStep(3)}>
+                                    <button className="primary-btn" onClick={goToReview}>
                                         Volgende
                                         {selectedExercises.length > 0 && ` (${selectedExercises.length})`}
                                     </button>
@@ -311,6 +356,14 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     <p>{patientForm.goal || 'Achillespees revalidatie'}</p>
 
                                     <h3>Startprogramma</h3>
+
+                                    {selectedExercises.length > 0 && (
+                                        <p className="exercise-schedule-summary">
+                                            Van {new Date(`${schedule.startDate}T00:00:00`).toLocaleDateString('nl-BE')}
+                                            {' '}tot en met{' '}
+                                            {new Date(`${schedule.endDate}T00:00:00`).toLocaleDateString('nl-BE')}
+                                        </p>
+                                    )}
 
                                     <div className="selected-exercises">
                                         {selectedExercises.length > 0 ? (

@@ -3,27 +3,13 @@ import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
 import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+    getDefaultExerciseSchedule,
+    isValidExerciseSchedule,
+} from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
-
-const formatDateValue = (date) => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-
-    return `${year}-${month}-${day}`
-}
-
-const getScheduleDates = (durationWeeks) => {
-    const startDate = new Date()
-    const endDate = new Date(startDate)
-    endDate.setDate(startDate.getDate() + (Number(durationWeeks) * 7) - 1)
-
-    return {
-        startDate: formatDateValue(startDate),
-        endDate: formatDateValue(endDate),
-    }
-}
 
 export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const [exercise, setExercise] = useState(null)
@@ -34,7 +20,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [saveError, setSaveError] = useState('')
-    const [durationWeeks, setDurationWeeks] = useState('2')
+    const [schedule, setSchedule] = useState(getDefaultExerciseSchedule)
 
     useEffect(() => {
         async function loadData() {
@@ -91,6 +77,11 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const assignExercise = async () => {
         if (!selectedPatientId || !exercise?.id) return
 
+        if (!isValidExerciseSchedule(schedule)) {
+            setSaveError('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
         setIsSaving(true)
         setSaveError('')
         setAlreadyAssigned(false)
@@ -125,7 +116,6 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
         }
 
         const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
-        const { startDate, endDate } = getScheduleDates(durationWeeks)
 
         if (selectedPatient) {
             localStorage.setItem('selectedPatient', JSON.stringify(selectedPatient))
@@ -140,8 +130,8 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                     assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
-                    start_date: startDate,
-                    end_date: endDate,
+                    start_date: schedule.startDate,
+                    end_date: schedule.endDate,
                 },
             ])
             .select('id, patient_id, exercise_id')
@@ -153,7 +143,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                 || error?.message?.includes('end_date')
 
             setSaveError(scheduleMigrationMissing
-                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 002_assignment_schedule.sql uit.'
+                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
                 : 'De oefening kon niet worden opgeslagen. Probeer opnieuw.')
             setIsSaving(false)
             return
@@ -252,21 +242,15 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                     </div>
                                 )}
 
-                                <label className="assign-duration-field">
-                                    <span>Hoe lang moet het kind deze oefening doen?</span>
-                                    <select
-                                        value={durationWeeks}
-                                        onChange={(event) => setDurationWeeks(event.target.value)}
-                                    >
-                                        <option value="1">1 week</option>
-                                        <option value="2">2 weken</option>
-                                        <option value="4">4 weken</option>
-                                        <option value="6">6 weken</option>
-                                    </select>
-                                    <small>
-                                        De oefening verschijnt iedere dag in de ouderplanning tijdens deze periode.
-                                    </small>
-                                </label>
+                                <ExerciseScheduleFields
+                                    schedule={schedule}
+                                    onChange={(nextSchedule) => {
+                                        setSchedule(nextSchedule)
+                                        setSaveError('')
+                                    }}
+                                    title="Plan de oefening"
+                                    helpText="De oefening verschijnt iedere dag in de ouderplanning tijdens deze periode."
+                                />
 
                                 <button
                                     type="button"
