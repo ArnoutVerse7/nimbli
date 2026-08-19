@@ -50,6 +50,16 @@ create table public.exercises (
   level text not null default 'Makkelijk',
   duration text not null default '2 min',
   reps text not null default '10 herhalingen',
+  tracking_type text not null default 'generic' check (
+    tracking_type in (
+      'generic',
+      'jumping_jack',
+      'squat',
+      'heel_drop',
+      'knee_bend',
+      'single_leg_balance'
+    )
+  ),
   cover_image text,
   video_url text,
   created_by uuid references public.profiles(id) on delete set null,
@@ -404,6 +414,7 @@ create or replace function public.update_library_exercise(
   p_level text,
   p_duration text,
   p_reps text,
+  p_tracking_type text,
   p_cover_image text,
   p_video_url text
 )
@@ -425,6 +436,18 @@ begin
       using errcode = '22023';
   end if;
 
+  if coalesce(nullif(trim(p_tracking_type), ''), 'generic') not in (
+    'generic',
+    'jumping_jack',
+    'squat',
+    'heel_drop',
+    'knee_bend',
+    'single_leg_balance'
+  ) then
+    raise exception 'Ongeldig type bewegingscontrole.'
+      using errcode = '22023';
+  end if;
+
   update public.exercises as exercise
   set title = trim(p_title),
       description = coalesce(trim(p_description), ''),
@@ -432,6 +455,7 @@ begin
       level = coalesce(nullif(trim(p_level), ''), 'Makkelijk'),
       duration = coalesce(nullif(trim(p_duration), ''), '2 min'),
       reps = coalesce(nullif(trim(p_reps), ''), '10 herhalingen'),
+      tracking_type = coalesce(nullif(trim(p_tracking_type), ''), 'generic'),
       cover_image = nullif(trim(p_cover_image), ''),
       video_url = nullif(trim(p_video_url), '')
   where exercise.id = p_exercise_id
@@ -641,20 +665,20 @@ revoke all on function public.create_patient(text, text, integer, text) from pub
 revoke all on function public.regenerate_activation_code(uuid) from public, anon;
 revoke all on function public.claim_patient(text) from public, anon;
 revoke all on function public.update_exercise_schedule(uuid, date, date) from public, anon;
-revoke all on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text) from public, anon;
+revoke all on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text, text) from public, anon;
 revoke all on function public.delete_library_exercise(uuid) from public, anon;
 grant execute on function public.create_patient(text, text, integer, text) to authenticated;
 grant execute on function public.regenerate_activation_code(uuid) to authenticated;
 grant execute on function public.claim_patient(text) to authenticated;
 grant execute on function public.update_exercise_schedule(uuid, date, date) to authenticated;
-grant execute on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text) to authenticated;
+grant execute on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text, text) to authenticated;
 grant execute on function public.delete_library_exercise(uuid) to authenticated;
 
 grant usage on schema private to authenticated;
 grant execute on function private.is_kinesist() to authenticated;
 grant execute on function private.can_access_patient(uuid) to authenticated;
 
-insert into public.exercises (title, description, category, level, duration, reps)
+insert into public.exercises (title, description, category, level, duration, reps, tracking_type)
 values
   (
     'Op Eén Been Staan',
@@ -662,7 +686,8 @@ values
     'Evenwicht',
     'Makkelijk',
     '2 min',
-    '3 rondes'
+    '3 rondes',
+    'single_leg_balance'
   ),
   (
     'Jumping Jacks',
@@ -670,7 +695,8 @@ values
     'Conditie',
     'Makkelijk',
     '2 min',
-    '10 herhalingen'
+    '10 herhalingen',
+    'jumping_jack'
   ),
   (
     'Heel Drop',
@@ -678,7 +704,8 @@ values
     'Mobiliteit',
     'Makkelijk',
     '2 min',
-    '10 herhalingen'
+    '10 herhalingen',
+    'heel_drop'
   ),
   (
     'Squats',
@@ -686,7 +713,8 @@ values
     'Kracht',
     'Gemiddeld',
     '3 min',
-    '10 herhalingen'
+    '10 herhalingen',
+    'squat'
   ),
   (
     'Knie Buigen',
@@ -694,7 +722,8 @@ values
     'Mobiliteit',
     'Makkelijk',
     '2 min',
-    '10 herhalingen'
+    '10 herhalingen',
+    'knee_bend'
   )
 on conflict (title) do nothing;
 

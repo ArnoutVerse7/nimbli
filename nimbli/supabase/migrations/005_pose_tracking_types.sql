@@ -1,5 +1,54 @@
 begin;
 
+alter table public.exercises
+  add column if not exists tracking_type text not null default 'generic';
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'exercises_tracking_type_check'
+      and conrelid = 'public.exercises'::regclass
+  ) then
+    alter table public.exercises
+      add constraint exercises_tracking_type_check check (
+        tracking_type in (
+          'generic',
+          'jumping_jack',
+          'squat',
+          'heel_drop',
+          'knee_bend',
+          'single_leg_balance'
+        )
+      );
+  end if;
+end;
+$$;
+
+update public.exercises
+set tracking_type = case
+  when lower(title) like '%jumping jack%' then 'jumping_jack'
+  when lower(title) like '%squat%' then 'squat'
+  when lower(title) like '%heel drop%' then 'heel_drop'
+  when lower(title) like '%knie buig%' then 'knee_bend'
+  when lower(title) like '%een been%' or lower(title) like '%één been%' then 'single_leg_balance'
+  else tracking_type
+end
+where tracking_type = 'generic';
+
+drop function if exists public.update_library_exercise(
+  uuid,
+  text,
+  text,
+  text,
+  text,
+  text,
+  text,
+  text,
+  text
+);
+
 create or replace function public.update_library_exercise(
   p_exercise_id uuid,
   p_title text,
@@ -68,32 +117,6 @@ begin
 end;
 $$;
 
-create or replace function public.delete_library_exercise(p_exercise_id uuid)
-returns void
-language plpgsql
-security definer
-set search_path = ''
-as $$
-begin
-  if not private.is_kinesist() then
-    raise exception 'Alleen een kinesist kan een oefening verwijderen.'
-      using errcode = '42501';
-  end if;
-
-  delete from public.exercises as exercise
-  where exercise.id = p_exercise_id
-    and (
-      exercise.created_by is null
-      or exercise.created_by = (select auth.uid())
-    );
-
-  if not found then
-    raise exception 'Oefening niet gevonden of geen toegang.'
-      using errcode = '42501';
-  end if;
-end;
-$$;
-
 revoke all on function public.update_library_exercise(
   uuid,
   text,
@@ -106,7 +129,6 @@ revoke all on function public.update_library_exercise(
   text,
   text
 ) from public, anon;
-revoke all on function public.delete_library_exercise(uuid) from public, anon;
 
 grant execute on function public.update_library_exercise(
   uuid,
@@ -120,6 +142,5 @@ grant execute on function public.update_library_exercise(
   text,
   text
 ) to authenticated;
-grant execute on function public.delete_library_exercise(uuid) to authenticated;
 
 commit;

@@ -271,7 +271,8 @@
 }
 
 .form-grid input,
-.form-grid textarea {
+.form-grid textarea,
+.form-grid select {
     border: none;
     background: var(--nimbli-page-background);
     border-radius: 10px;
@@ -1891,6 +1892,7 @@ input.kine-search:focus {
 
 .form-grid input,
 .form-grid textarea,
+.form-grid select,
 .logbook-form input,
 .logbook-form textarea {
     min-height: 42px;
@@ -1904,6 +1906,7 @@ input.kine-search:focus {
 
 .form-grid input:focus,
 .form-grid textarea:focus,
+.form-grid select:focus,
 .logbook-form input:focus,
 .logbook-form textarea:focus {
     border-color: var(--kine-green);

@@ -8,6 +8,10 @@ import {
     removeExerciseMediaByUrl,
     uploadExerciseMedia,
 } from '../lib/exerciseMedia'
+import {
+    exerciseTrackingOptions,
+    getExerciseTrackingType,
+} from '../lib/poseExerciseEvaluator'
 import '../styles/KinesistFlow.css'
 
 const emptyForm = {
@@ -17,6 +21,7 @@ const emptyForm = {
     level: '',
     duration: '',
     reps: '',
+    trackingType: 'generic',
 }
 
 export default function NewExercisePage({ exerciseId, onNavigate }) {
@@ -59,6 +64,7 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
                     level: data.level || '',
                     duration: data.duration || '',
                     reps: data.reps || '',
+                    trackingType: getExerciseTrackingType(data),
                 })
                 setStoredCoverUrl(getExerciseCoverReference(data))
                 setOriginalCoverUrl(data.cover_image || null)
@@ -162,6 +168,7 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
                     p_level: form.level,
                     p_duration: form.duration,
                     p_reps: form.reps,
+                    p_tracking_type: form.trackingType,
                     p_cover_image: nextCoverUrl,
                     p_video_url: nextVideoUrl,
                 })
@@ -190,6 +197,7 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
                             level: form.level || 'Makkelijk',
                             duration: form.duration || '2 min',
                             reps: form.reps || '10 herhalingen',
+                            tracking_type: form.trackingType,
                             cover_image: nextCoverUrl,
                             video_url: nextVideoUrl,
                             created_by: userData.user.id,
@@ -294,6 +302,23 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
                                     value={form.reps}
                                     onChange={(e) => setField('reps', e.target.value)}
                                 />
+                            </label>
+
+                            <label className="exercise-form-full">
+                                Bewegingscontrole
+                                <select
+                                    value={form.trackingType}
+                                    onChange={(e) => setField('trackingType', e.target.value)}
+                                >
+                                    {exerciseTrackingOptions.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <small>
+                                    Kies welke houding en beweging de camera moet controleren.
+                                </small>
                             </label>
 
                             <label>

@@ -1043,6 +1043,11 @@
   color: #047857;
 }
 
+.pose-status.guidance {
+  background: #fff8e8;
+  color: #8a6417;
+}
+
 .pose-status.warning {
   background: #fffbeb;
   color: #b45309;
@@ -1139,6 +1144,13 @@
   color: var(--text-dark);
 }
 
+.tracking-label {
+  margin: 6px 0 0;
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .execution-mascot,
 .mascot-large {
   font-size: 110px;
@@ -1164,6 +1176,80 @@
   font-weight: 900;
   color: var(--text-light);
   text-transform: uppercase;
+}
+
+.execution-progress {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8efec;
+}
+
+.execution-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary-color);
+  transition: width .25s ease;
+}
+
+.execution-feedback {
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark);
+  background: var(--nimbli-page-background);
+  font-weight: 900;
+}
+
+.execution-feedback.success {
+  color: var(--nimbli-dark-green);
+  background: rgba(129, 199, 132, .18);
+}
+
+.execution-feedback.guidance {
+  color: #7a5a13;
+  background: rgba(251, 185, 42, .18);
+}
+
+.execution-feedback.warning {
+  color: var(--nimbli-dark-red);
+  background: rgba(239, 83, 80, .12);
+}
+
+.pose-metrics {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pose-metric {
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: var(--nimbli-page-background);
+  display: grid;
+  gap: 3px;
+}
+
+.pose-metric span {
+  overflow: hidden;
+  color: var(--text-light);
+  font-size: 10px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pose-metric strong {
+  color: var(--text-dark);
+  font-size: 14px;
 }
 
 .execution-instructions {
@@ -1194,6 +1280,26 @@
   background: var(--nimbli-white);
   color: var(--text-dark);
   border: 2px solid var(--border-color);
+}
+
+.completion-repetitions {
+  margin: -8px 0 0;
+  color: var(--text-light);
+  font-weight: 800;
+  text-align: center;
+}
+
+.missing-result-card {
+  width: min(560px, 100%);
+  padding: 42px;
+  display: grid;
+  gap: 18px;
+  text-align: center;
+}
+
+.missing-result-card h1,
+.missing-result-card p {
+  margin: 0;
 }
 
 /* ===== COMPLETION ===== */
@@ -1530,6 +1636,11 @@
 
   .pose-camera-card {
     min-height: 360px;
+  }
+
+  .pose-camera-wrapper,
+  .pose-camera-video {
+    min-height: 312px;
   }
 }
 
