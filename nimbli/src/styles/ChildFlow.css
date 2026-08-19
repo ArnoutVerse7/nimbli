@@ -7,7 +7,7 @@
   --bg-light: var(--nimbli-page-background);
   --bg-card: var(--nimbli-white);
   --border-color: var(--nimbli-border);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow: var(--nimbli-card-shadow);
 }
 
 /* ===== CHILD DASHBOARD ===== */
@@ -302,13 +302,13 @@
   background: var(--nimbli-white);
   border-radius: 24px;
   padding: 28px 32px;
-  box-shadow: 0 18px 45px rgba(16, 24, 40, 0.08);
+  box-shadow: var(--shadow);
   max-width: 860px;
 }
 
 .week-strip {
   background: white;
-  border: 1px solid var(--border-color);
+  border: 0;
   border-radius: 14px;
   padding: 14px 18px;
   display: flex;
@@ -1231,6 +1231,24 @@
   font-size: 16px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.child-route-panel,
+.week-strip,
+.exercise-visual-card,
+.description-section,
+.instructions-section,
+.info-card,
+.mission-card,
+.profile-main-card,
+.profile-side-card,
+.pose-camera-card,
+.exercise-live-panel,
+.result-card,
+.stat-card-large,
+.streak-card {
+  border: 0;
+  box-shadow: var(--nimbli-card-shadow);
 }
 
 /* ===== RESPONSIVE ===== */

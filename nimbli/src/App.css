@@ -150,10 +150,10 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  border: 1px solid var(--nimbli-border);
+  border: 0;
   border-radius: 18px;
   background: var(--nimbli-white);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 .hero-copy {
@@ -427,16 +427,17 @@ button:disabled {
   display: grid;
   place-items: center;
   gap: 10px;
-  border: 1px solid #d5deda;
+  border: 0;
   border-radius: 12px;
   color: #20352e;
   background: var(--nimbli-white);
+  box-shadow: var(--nimbli-card-shadow);
   cursor: pointer;
 }
 
 .profile-card:hover,
 .profile-card.selected {
-  border-color: var(--nimbli-main-green);
+  outline: 1px solid var(--nimbli-main-green);
   background: #f4fbf9;
 }
 

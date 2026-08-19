@@ -2268,6 +2268,39 @@ input.kine-search:focus {
 
 /* ===== PATIENT ACTIVATION CODE ===== */
 
+.kine-practice-card,
+.kine-stat-card,
+.patient-list-card,
+.new-patient-card,
+.patient-preview-card,
+.info-box,
+.next-steps-box,
+.patient-detail-hero,
+.patient-detail-card,
+.detail-result-row,
+.session-history-card,
+.logbook-form,
+.logbook-entry,
+.exercise-program-card,
+.exercise-library-card,
+.exercise-detail-video,
+.exercise-detail-info,
+.exercise-info-list div,
+.assign-patient-card,
+.assign-success-card,
+.plan-card,
+.checkout-user-card,
+.checkout-summary {
+    border: 0;
+    box-shadow: var(--nimbli-card-shadow);
+}
+
+.exercise-select-card.selected,
+.assign-patient-card.selected {
+    border: 1px solid var(--kine-green);
+    box-shadow: inset 3px 0 0 var(--kine-green), var(--nimbli-card-shadow);
+}
+
 .patient-activation-panel {
     display: grid;
     justify-items: start;
