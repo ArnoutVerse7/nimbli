@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase'
 import KinesistSidebar from '../components/KinesistSidebar'
 import {
     getExerciseCover,
+    getExerciseCoverReference,
+    noExerciseCoverReference,
     removeExerciseMediaByUrl,
     uploadExerciseMedia,
 } from '../lib/exerciseMedia'
@@ -58,7 +60,7 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
                     duration: data.duration || '',
                     reps: data.reps || '',
                 })
-                setStoredCoverUrl(data.cover_image || null)
+                setStoredCoverUrl(getExerciseCoverReference(data))
                 setOriginalCoverUrl(data.cover_image || null)
                 setCoverPreview(getExerciseCover(data))
                 setStoredVideoUrl(data.video_url || null)
@@ -90,7 +92,7 @@ export default function NewExercisePage({ exerciseId, onNavigate }) {
 
     const removeCover = () => {
         setCoverFile(null)
-        setStoredCoverUrl(null)
+        setStoredCoverUrl(isEditing ? noExerciseCoverReference : null)
         setCoverPreview(null)
     }
 

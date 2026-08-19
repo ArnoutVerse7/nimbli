@@ -14,19 +14,45 @@ const normalizeTitle = (title = '') =>
         .trim()
         .toLowerCase()
 
+export const noExerciseCoverReference = 'local:none'
+
 const localExerciseCovers = {
-    'heel drop': heelDrop,
-    'jumping jacks': jumpingJacks,
-    'knie buigen': kneeBend,
-    'op een been staan': oneLeg,
-    squat,
-    squats: squat,
+    'heel drop': { reference: 'local:heel-drop', source: heelDrop },
+    'jumping jacks': { reference: 'local:jumping-jacks', source: jumpingJacks },
+    'knie buigen': { reference: 'local:knee-bend', source: kneeBend },
+    'op een been staan': { reference: 'local:one-leg', source: oneLeg },
+    squat: { reference: 'local:squat', source: squat },
+    squats: { reference: 'local:squat', source: squat },
+}
+
+const localCoversByReference = Object.values(localExerciseCovers).reduce(
+    (covers, cover) => ({ ...covers, [cover.reference]: cover.source }),
+    {}
+)
+
+const findLocalCover = (title) => {
+    const normalizedTitle = normalizeTitle(title)
+
+    return Object.entries(localExerciseCovers).find(([knownTitle]) =>
+        normalizedTitle === knownTitle || normalizedTitle.startsWith(`${knownTitle} `)
+    )?.[1] || null
 }
 
 export function getExerciseCover(exercise) {
     if (!exercise) return null
 
-    return exercise.cover_image || localExerciseCovers[normalizeTitle(exercise.title)] || null
+    if (exercise.cover_image === noExerciseCoverReference) return null
+
+    return localCoversByReference[exercise.cover_image]
+        || exercise.cover_image
+        || findLocalCover(exercise.title)?.source
+        || null
+}
+
+export function getExerciseCoverReference(exercise) {
+    if (!exercise) return null
+
+    return exercise.cover_image || findLocalCover(exercise.title)?.reference || null
 }
 
 export async function uploadExerciseMedia(file, folderName) {
