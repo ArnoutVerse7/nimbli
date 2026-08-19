@@ -362,6 +362,40 @@ begin
 end;
 $$;
 
+create or replace function public.update_exercise_schedule(
+  p_assignment_id uuid,
+  p_start_date date,
+  p_end_date date
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if p_start_date is null
+     or p_end_date is null
+     or p_end_date < p_start_date then
+    raise exception 'Ongeldige planningsperiode.' using errcode = '22023';
+  end if;
+
+  update public.patient_exercises as assignment
+  set start_date = p_start_date,
+      end_date = p_end_date
+  where assignment.id = p_assignment_id
+    and exists (
+      select 1
+      from public.patients
+      where id = assignment.patient_id
+        and kinesist_id = (select auth.uid())
+    );
+
+  if not found then
+    raise exception 'Toewijzing niet gevonden of geen toegang.' using errcode = '42501';
+  end if;
+end;
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.patients enable row level security;
 alter table public.exercises enable row level security;
@@ -526,9 +560,11 @@ grant select, insert, update on public.subscriptions to authenticated;
 revoke all on function public.create_patient(text, text, integer, text) from public, anon;
 revoke all on function public.regenerate_activation_code(uuid) from public, anon;
 revoke all on function public.claim_patient(text) from public, anon;
+revoke all on function public.update_exercise_schedule(uuid, date, date) from public, anon;
 grant execute on function public.create_patient(text, text, integer, text) to authenticated;
 grant execute on function public.regenerate_activation_code(uuid) to authenticated;
 grant execute on function public.claim_patient(text) to authenticated;
+grant execute on function public.update_exercise_schedule(uuid, date, date) to authenticated;
 
 grant usage on schema private to authenticated;
 grant execute on function private.is_kinesist() to authenticated;

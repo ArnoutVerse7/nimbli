@@ -290,6 +290,13 @@
   background: var(--nimbli-main-dark-green);
 }
 
+.road-popup small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-light);
+  font-size: 10px;
+}
+
 .child-dashboard-content {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -341,6 +348,14 @@
   background: var(--nimbli-light-green);
 }
 
+.week-dot.planned {
+  background: var(--nimbli-blue);
+}
+
+.week-dot.today {
+  background: var(--nimbli-yellow);
+}
+
 .week-dot.missed {
   background: #8d8d8d;
 }
@@ -348,6 +363,22 @@
 .compact-map {
   min-height: 420px;
   background: transparent;
+}
+
+.child-no-exercises {
+  position: absolute;
+  inset: 120px 0 auto;
+  z-index: 10;
+  text-align: center;
+}
+
+.child-no-exercises h3 {
+  margin: 0 0 6px;
+}
+
+.child-no-exercises p {
+  margin: 0;
+  color: var(--text-light);
 }
 
 .child-dashboard-side {

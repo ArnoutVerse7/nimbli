@@ -4,6 +4,7 @@ import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
 import { getExerciseCover } from '../lib/exerciseMedia'
+import { formatExerciseScheduleRange } from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
 function ProgressChart({ items }) {
@@ -102,7 +103,10 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         exercise_id,
                         completion_percentage,
                         completed,
-                        completed_at
+                        completed_at,
+                        assigned_at,
+                        start_date,
+                        end_date
                     `)
                     .eq('patient_id', patient.id),
                 supabase
@@ -606,6 +610,11 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                                             <div>
                                                                 <small>Frequentie</small>
                                                                 <p>Dagelijks</p>
+                                                            </div>
+
+                                                            <div>
+                                                                <small>Planning</small>
+                                                                <p>{formatExerciseScheduleRange(item)}</p>
                                                             </div>
                                                         </div>
 

@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import {
+    formatExerciseScheduleRange,
+    getWeekDates,
+    isAssignmentPlannedForDate,
+} from '../lib/exerciseSchedule'
 import '../styles/ChildFlow.css'
 
 import checkIcon from '../assets/logos/check.png'
 import lockIcon from '../assets/logos/lock.png'
-import moonIcon from '../assets/logos/moon.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
 import trophyIcon from '../assets/logos/trophy.png'
@@ -52,13 +56,19 @@ export default function ChildDashboardPage({ onNavigate }) {
             }
 
             const mappedExercises =
-                exerciseData?.map((item) => ({
+                exerciseData?.filter((item) => item.exercises).map((item) => ({
+                    assignmentId: item.id,
                     id: item.exercises.id,
                     title: item.exercises.title,
                     duration: item.exercises.duration,
                     reps: item.exercises.reps,
                     cover_image: item.exercises.cover_image,
                     video_url: item.exercises.video_url,
+                    completed: item.completed,
+                    completion_percentage: item.completion_percentage,
+                    assigned_at: item.assigned_at,
+                    start_date: item.start_date,
+                    end_date: item.end_date,
                 })) || []
 
             setAssignedExercises(mappedExercises)
@@ -67,50 +77,28 @@ export default function ChildDashboardPage({ onNavigate }) {
         loadPatientData()
     }, [])
 
-    const roadNodes = [
-        {
-            id: 'ma',
-            label: 'MA',
-            icon: checkIcon,
-            status: 'done',
-            exercise: assignedExercises[0] || null,
-        },
-        {
-            id: 'di',
-            label: 'DI',
-            icon: checkIcon,
-            status: 'done',
-            exercise: assignedExercises[1] || null,
-        },
-        {
-            id: 'today',
-            label: 'VANDAAG',
-            icon: starIcon,
-            status: 'active',
-            exercise: assignedExercises[2] || assignedExercises[0] || null,
-        },
-        {
-            id: 'do',
-            label: 'DO',
-            icon: moonIcon,
-            status: assignedExercises[3] ? 'open' : 'open',
-            exercise: assignedExercises[3] || null,
-        },
-        {
-            id: 'vr',
-            label: 'VR',
-            icon: lockIcon,
-            status: 'locked',
-            exercise: null,
-        },
-        {
-            id: 'za',
-            label: 'ZA',
-            icon: lockIcon,
-            status: 'locked',
-            exercise: null,
-        },
-    ]
+    const weekDays = useMemo(() => getWeekDates(0, 0), [])
+    const todayExercises = assignedExercises.filter((item) =>
+        isAssignmentPlannedForDate(item, new Date())
+    )
+    const roadNodes = Array.from({ length: 6 }, (_, index) => {
+        const exercise = todayExercises[index] || null
+        const status = !exercise
+            ? 'locked'
+            : exercise.completed
+                ? 'done'
+                : index === 0
+                    ? 'active'
+                    : 'open'
+
+        return {
+            id: exercise?.assignmentId || `locked-${index}`,
+            label: `OEF. ${index + 1}`,
+            icon: exercise?.completed ? checkIcon : exercise ? starIcon : lockIcon,
+            status,
+            exercise,
+        }
+    })
 
     return (
         <main className="child-road-page">
@@ -149,14 +137,21 @@ export default function ChildDashboardPage({ onNavigate }) {
                     <div className="child-dashboard-content">
                         <section className="child-route-panel">
                             <div className="week-strip">
-                                {['ZO', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZA'].map((day, index) => (
-                                    <div className="week-day" key={day}>
-                                        <span>{day}</span>
-                                        <div className={`week-dot ${index === 0 ? 'missed' : index < 3 ? 'done' : ''}`}>
-                                            {index === 0 ? '×' : index < 3 ? '✓' : ''}
+                                {weekDays.map((date) => {
+                                    const plannedCount = assignedExercises.filter((item) =>
+                                        isAssignmentPlannedForDate(item, date)
+                                    ).length
+                                    const isToday = date.toDateString() === new Date().toDateString()
+
+                                    return (
+                                        <div className="week-day" key={date.toISOString()}>
+                                            <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
+                                            <div className={`week-dot ${isToday ? 'today' : plannedCount ? 'planned' : ''}`}>
+                                                {plannedCount || ''}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
 
                             <div className="child-road-map compact-map">
@@ -187,6 +182,7 @@ export default function ChildDashboardPage({ onNavigate }) {
                                             <div>
                                                 <strong>{selectedExercise.title}</strong>
                                                 <p>{selectedExercise.duration || '2 min'} · {selectedExercise.reps || '10 herhalingen'}</p>
+                                                <small>{formatExerciseScheduleRange(selectedExercise)}</small>
                                             </div>
 
                                             <button
@@ -196,6 +192,13 @@ export default function ChildDashboardPage({ onNavigate }) {
                                                 Start
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+
+                                {todayExercises.length === 0 && (
+                                    <div className="child-no-exercises">
+                                        <h3>Vandaag geen oefeningen</h3>
+                                        <p>Geniet van je rustdag!</p>
                                     </div>
                                 )}
                             </div>

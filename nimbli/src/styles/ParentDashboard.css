@@ -143,6 +143,17 @@
   font-weight: 850;
 }
 
+.parent-data-error {
+  margin: 18px 42px 0;
+  padding: 11px 13px;
+  border-left: 3px solid var(--nimbli-red);
+  border-radius: 7px;
+  color: var(--nimbli-dark-red);
+  background: #fff2f1;
+  font-size: 12px;
+  font-weight: 750;
+}
+
 .parent-patient-header {
   min-height: 78px;
   padding: 14px 42px;
@@ -478,6 +489,14 @@
   font-size: 11px;
 }
 
+.parent-exercise-copy .parent-exercise-period {
+  display: block;
+  margin-top: 2px;
+  color: var(--parent-green-dark);
+  font-size: 10px;
+  font-weight: 750;
+}
+
 .parent-inline-progress { margin-top: 5px; }
 
 .parent-status-pill {
@@ -559,7 +578,7 @@
 }
 
 .parent-calendar-days button {
-  min-height: 52px;
+  min-height: 60px;
   display: grid;
   place-items: center;
   gap: 3px;
@@ -577,6 +596,12 @@
 }
 
 .parent-calendar-days button strong { font-size: 15px; }
+
+.parent-calendar-days button small {
+  min-height: 13px;
+  font-size: 9px;
+  font-weight: 850;
+}
 
 .parent-calendar-days button.active {
   color: var(--nimbli-white);

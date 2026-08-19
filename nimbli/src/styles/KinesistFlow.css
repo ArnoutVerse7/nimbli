@@ -774,7 +774,7 @@
 
 .exercise-details {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 24px;
     margin-bottom: 18px;
 }
@@ -2302,6 +2302,7 @@ input.kine-search:focus {
     .exercise-select-grid,
     .exercise-library-grid,
     .exercise-schedule-grid,
+    .exercise-details,
     .form-grid,
     .review-layout,
     .patient-detail-stats,

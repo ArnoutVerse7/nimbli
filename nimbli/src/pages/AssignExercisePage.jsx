@@ -109,6 +109,19 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
         }
 
         if (existingAssignment) {
+            const { error: updateError } = await supabase.rpc('update_exercise_schedule', {
+                p_assignment_id: existingAssignment.id,
+                p_start_date: schedule.startDate,
+                p_end_date: schedule.endDate,
+            })
+
+            if (updateError) {
+                console.error(updateError)
+                setSaveError('De planning van deze oefening kon niet worden bijgewerkt. Voer migratie 003_assignment_schedule.sql opnieuw uit.')
+                setIsSaving(false)
+                return
+            }
+
             setAlreadyAssigned(true)
             setAssigned(true)
             setIsSaving(false)
@@ -273,7 +286,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
 
                             <p>
                                 {exercise.title}{' '}
-                                {alreadyAssigned ? 'stond al in het oefenprogramma' : 'werd toegevoegd aan het oefenprogramma'}
+                                {alreadyAssigned ? 'stond al in het oefenprogramma en kreeg de nieuwe planning' : 'werd toegevoegd aan het oefenprogramma'}
                                 {selectedPatient
                                     ? ` van ${selectedPatient.first_name} ${selectedPatient.last_name}`
                                     : ''}

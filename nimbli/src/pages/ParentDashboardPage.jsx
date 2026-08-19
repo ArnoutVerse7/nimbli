@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getCurrentUserAndProfile } from '../lib/auth'
 import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+  formatExerciseScheduleRange,
+  getWeekDates,
+  isAssignmentPlannedForDate,
+} from '../lib/exerciseSchedule'
 import ParentSidebar from '../components/ParentSidebar'
 import profileIcon from '../assets/logos/profile.png'
 import checkIcon from '../assets/logos/check.png'
@@ -18,42 +23,8 @@ const sameDay = (firstDate, secondDate) => {
     && first.getDate() === second.getDate()
 }
 
-const getCurrentWeek = (weekOffset = 0) => {
-  const today = new Date()
-  const monday = new Date(today)
-  const day = today.getDay() || 7
-  monday.setDate(today.getDate() - day + 1 + (weekOffset * 7))
-  monday.setHours(0, 0, 0, 0)
-
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday)
-    date.setDate(monday.getDate() + index)
-    return date
-  })
-}
-
 const formatShortDate = (date) =>
   new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'short' }).format(date)
-
-const toDateKey = (date) => {
-  const value = new Date(date)
-  const year = value.getFullYear()
-  const month = String(value.getMonth() + 1).padStart(2, '0')
-  const day = String(value.getDate()).padStart(2, '0')
-
-  return `${year}-${month}-${day}`
-}
-
-const isAssignmentPlannedForDate = (assignment, date) => {
-  const selectedDate = toDateKey(date)
-  const fallbackDate = assignment.assigned_at
-    ? toDateKey(assignment.assigned_at)
-    : selectedDate
-  const startDate = assignment.start_date || fallbackDate
-  const endDate = assignment.end_date || startDate
-
-  return selectedDate >= startDate && selectedDate <= endDate
-}
 
 function ExerciseRow({ assignment, showProgress = false }) {
   const exercise = assignment.exercises
@@ -74,6 +45,9 @@ function ExerciseRow({ assignment, showProgress = false }) {
         <strong>{exercise?.title || 'Oefening'}</strong>
         <span>
           {exercise?.duration || '2 min'} · {exercise?.reps || '10 herhalingen'}
+        </span>
+        <span className="parent-exercise-period">
+          Planning: {formatExerciseScheduleRange(assignment)}
         </span>
         {showProgress && (
           <div className="parent-inline-progress">
@@ -111,6 +85,7 @@ export default function ParentDashboardPage({ onNavigate }) {
   const [patient, setPatient] = useState(null)
   const [parentProfile, setParentProfile] = useState(null)
   const [assignedExercises, setAssignedExercises] = useState([])
+  const [exerciseLoadError, setExerciseLoadError] = useState('')
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [scheduleWeekOffset, setScheduleWeekOffset] = useState(0)
   const [isEditingProfile, setIsEditingProfile] = useState(false)
@@ -169,7 +144,9 @@ export default function ParentDashboardPage({ onNavigate }) {
 
       if (exerciseResult.error) {
         console.error(exerciseResult.error)
+        setExerciseLoadError('De oefenplanning kon niet geladen worden. Probeer de pagina opnieuw te laden.')
       } else {
+        setExerciseLoadError('')
         setAssignedExercises(exerciseResult.data || [])
       }
     }
@@ -177,9 +154,9 @@ export default function ParentDashboardPage({ onNavigate }) {
     loadParentData()
   }, [onNavigate])
 
-  const currentWeekDays = useMemo(() => getCurrentWeek(), [])
+  const currentWeekDays = useMemo(() => getWeekDates(), [])
   const scheduleWeekDays = useMemo(
-    () => getCurrentWeek(scheduleWeekOffset),
+    () => getWeekDates(scheduleWeekOffset),
     [scheduleWeekOffset]
   )
   const completedExercises = assignedExercises.filter((item) => item.completed)
@@ -255,10 +232,10 @@ export default function ParentDashboardPage({ onNavigate }) {
 
   const changeScheduleWeek = (direction) => {
     const nextOffset = scheduleWeekOffset + direction
-    const nextWeek = getCurrentWeek(nextOffset)
+    const nextWeek = getWeekDates(nextOffset)
 
     setScheduleWeekOffset(nextOffset)
-    setSelectedDate(direction > 0 ? nextWeek[0] : nextWeek[6])
+    setSelectedDate(nextWeek[0])
   }
 
   const pageTitles = {
@@ -300,6 +277,10 @@ export default function ParentDashboardPage({ onNavigate }) {
               </div>
             </div>
           </section>
+        )}
+
+        {activeView !== 'settings' && exerciseLoadError && (
+          <p className="parent-data-error" role="alert">{exerciseLoadError}</p>
         )}
 
         {activeView === 'dashboard' && (
@@ -399,16 +380,23 @@ export default function ParentDashboardPage({ onNavigate }) {
                   </button>
                 </div>
                 <div className="parent-calendar-days">
-                  {scheduleWeekDays.map((date) => (
-                    <button
-                      key={date.toISOString()}
-                      className={sameDay(date, selectedDate) ? 'active' : ''}
-                      onClick={() => setSelectedDate(date)}
-                    >
-                      <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
-                      <strong>{date.getDate()}</strong>
-                    </button>
-                  ))}
+                  {scheduleWeekDays.map((date) => {
+                    const plannedCount = assignedExercises.filter((item) =>
+                      isAssignmentPlannedForDate(item, date)
+                    ).length
+
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        className={sameDay(date, selectedDate) ? 'active' : ''}
+                        onClick={() => setSelectedDate(date)}
+                      >
+                        <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
+                        <strong>{date.getDate()}</strong>
+                        <small>{plannedCount || ''}</small>
+                      </button>
+                    )
+                  })}
                 </div>
               </section>
 

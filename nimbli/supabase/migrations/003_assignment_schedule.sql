@@ -37,4 +37,44 @@ $$;
 create index if not exists patient_exercises_schedule_idx
 on public.patient_exercises (patient_id, start_date, end_date);
 
+create or replace function public.update_exercise_schedule(
+  p_assignment_id uuid,
+  p_start_date date,
+  p_end_date date
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if p_start_date is null
+     or p_end_date is null
+     or p_end_date < p_start_date then
+    raise exception 'Ongeldige planningsperiode.' using errcode = '22023';
+  end if;
+
+  update public.patient_exercises as assignment
+  set start_date = p_start_date,
+      end_date = p_end_date
+  where assignment.id = p_assignment_id
+    and exists (
+      select 1
+      from public.patients
+      where id = assignment.patient_id
+        and kinesist_id = (select auth.uid())
+    );
+
+  if not found then
+    raise exception 'Toewijzing niet gevonden of geen toegang.' using errcode = '42501';
+  end if;
+end;
+$$;
+
+revoke all on function public.update_exercise_schedule(uuid, date, date)
+from public, anon;
+
+grant execute on function public.update_exercise_schedule(uuid, date, date)
+to authenticated;
+
 commit;
