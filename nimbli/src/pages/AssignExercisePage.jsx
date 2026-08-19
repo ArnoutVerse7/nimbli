@@ -11,8 +11,10 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const [patients, setPatients] = useState([])
     const [selectedPatientId, setSelectedPatientId] = useState(null)
     const [assigned, setAssigned] = useState(false)
+    const [alreadyAssigned, setAlreadyAssigned] = useState(false)
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState('')
 
     useEffect(() => {
         async function loadData() {
@@ -36,10 +38,25 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
             if (patientsError) {
                 console.error(patientsError)
             } else {
-                setPatients(patientsData || [])
+                const availablePatients = patientsData || []
+                setPatients(availablePatients)
 
-                if (patientsData?.length > 0) {
-                    setSelectedPatientId(patientsData[0].id)
+                if (availablePatients.length > 0) {
+                    let preferredPatientId = null
+
+                    try {
+                        const storedPatient = JSON.parse(
+                            localStorage.getItem('selectedPatient') || 'null'
+                        )
+
+                        if (availablePatients.some((patient) => patient.id === storedPatient?.id)) {
+                            preferredPatientId = storedPatient.id
+                        }
+                    } catch {
+                        localStorage.removeItem('selectedPatient')
+                    }
+
+                    setSelectedPatientId(preferredPatientId || availablePatients[0].id)
                 }
             }
 
@@ -55,6 +72,8 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
         if (!selectedPatientId || !exercise?.id) return
 
         setIsSaving(true)
+        setSaveError('')
+        setAlreadyAssigned(false)
 
         const { data: userData, error: userError } = await supabase.auth.getUser()
 
@@ -66,24 +85,32 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
 
         const { data: existingAssignment, error: existingError } = await supabase
             .from('patient_exercises')
-            .select('*')
+            .select('id')
             .eq('patient_id', selectedPatientId)
             .eq('exercise_id', exercise.id)
+            .maybeSingle()
 
         if (existingError) {
             console.error(existingError)
-            alert('Fout bij controleren van bestaande toewijzing')
+            setSaveError('De bestaande oefeningen konden niet gecontroleerd worden. Probeer opnieuw.')
             setIsSaving(false)
             return
         }
 
-        if (existingAssignment.length > 0) {
+        if (existingAssignment) {
+            setAlreadyAssigned(true)
             setAssigned(true)
             setIsSaving(false)
             return
         }
 
-        const { error } = await supabase
+        const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+
+        if (selectedPatient) {
+            localStorage.setItem('selectedPatient', JSON.stringify(selectedPatient))
+        }
+
+        const { data: savedAssignment, error } = await supabase
             .from('patient_exercises')
             .insert([
                 {
@@ -94,10 +121,12 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                     completion_percentage: 0,
                 },
             ])
+            .select('id, patient_id, exercise_id')
+            .single()
 
-        if (error) {
+        if (error || !savedAssignment) {
             console.error(error)
-            alert('Fout bij toewijzen van oefening')
+            setSaveError('De oefening kon niet worden opgeslagen. Probeer opnieuw.')
             setIsSaving(false)
             return
         }
@@ -164,10 +193,15 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                     <div className="assign-patient-list">
                                         {patients.map((patient) => (
                                             <button
+                                                type="button"
                                                 key={patient.id}
                                                 className={`assign-patient-card ${selectedPatientId === patient.id ? 'selected' : ''
                                                     }`}
-                                                onClick={() => setSelectedPatientId(patient.id)}
+                                                onClick={() => {
+                                                    setSelectedPatientId(patient.id)
+                                                    setSaveError('')
+                                                    localStorage.setItem('selectedPatient', JSON.stringify(patient))
+                                                }}
                                             >
                                                 <div className="patient-list-avatar">
                                                     <img
@@ -191,12 +225,17 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                 )}
 
                                 <button
+                                    type="button"
                                     className="primary-btn assign-btn"
                                     disabled={!selectedPatientId || isSaving}
                                     onClick={assignExercise}
                                 >
                                     {isSaving ? 'Toewijzen...' : 'Oefening toewijzen'}
                                 </button>
+
+                                {saveError && (
+                                    <p className="form-error-message" role="alert">{saveError}</p>
+                                )}
                             </div>
                         </section>
                     ) : (
@@ -205,7 +244,8 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                             <h2>Oefening toegewezen!</h2>
 
                             <p>
-                                {exercise.title} werd toegevoegd aan het oefenprogramma
+                                {exercise.title}{' '}
+                                {alreadyAssigned ? 'stond al in het oefenprogramma' : 'werd toegevoegd aan het oefenprogramma'}
                                 {selectedPatient
                                     ? ` van ${selectedPatient.first_name} ${selectedPatient.last_name}`
                                     : ''}
