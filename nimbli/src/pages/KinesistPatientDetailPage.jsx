@@ -57,6 +57,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         }
     })
     const [assignedExercises, setAssignedExercises] = useState([])
+    const [assignedExercisesError, setAssignedExercisesError] = useState('')
     const [logEntries, setLogEntries] = useState([])
     const [activeTab, setActiveTab] = useState('overview')
     const [showLogForm, setShowLogForm] = useState(false)
@@ -88,29 +89,24 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         async function loadPatientData() {
             if (!patient?.id) return
 
+            setAssignedExercisesError('')
+
             const [assignedResult, logResult] = await Promise.all([
                 supabase
                     .from('patient_exercises')
                     .select(`
-            id,
-            completion_percentage,
-            completed,
-            accuracy_percentage,
-            xp_earned,
-            assigned_at,
-            completed_at,
-            exercises (
-              id,
-              title,
-              category,
-              level,
-              duration,
-              reps,
-              cover_image,
-              video_url
-            )
-          `)
-                    .eq('patient_id', patient.id),
+                        id,
+                        patient_id,
+                        exercise_id,
+                        completion_percentage,
+                        completed,
+                        accuracy_percentage,
+                        xp_earned,
+                        assigned_at,
+                        completed_at
+                    `)
+                    .eq('patient_id', patient.id)
+                    .order('assigned_at', { ascending: false }),
                 supabase
                     .from('logbook_entries')
                     .select('*')
@@ -118,13 +114,46 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                     .order('created_at', { ascending: false }),
             ])
 
-            if (ignore) return
-
             if (assignedResult.error) {
                 console.error(assignedResult.error)
+                if (!ignore) {
+                    setAssignedExercises([])
+                    setAssignedExercisesError('De toegewezen oefeningen konden niet geladen worden.')
+                }
             } else {
-                setAssignedExercises(assignedResult.data || [])
+                const assignments = assignedResult.data || []
+                const exerciseIds = [...new Set(assignments.map((item) => item.exercise_id))]
+                let exercisesById = new Map()
+
+                if (exerciseIds.length > 0) {
+                    const { data: exercisesData, error: exercisesError } = await supabase
+                        .from('exercises')
+                        .select('*')
+                        .in('id', exerciseIds)
+
+                    if (exercisesError) {
+                        console.error(exercisesError)
+                        if (!ignore) {
+                            setAssignedExercisesError('De gegevens van de oefeningen konden niet geladen worden.')
+                        }
+                    } else {
+                        exercisesById = new Map(
+                            (exercisesData || []).map((exercise) => [exercise.id, exercise])
+                        )
+                    }
+                }
+
+                if (!ignore) {
+                    setAssignedExercises(
+                        assignments.map((assignment) => ({
+                            ...assignment,
+                            exercises: exercisesById.get(assignment.exercise_id) || null,
+                        }))
+                    )
+                }
             }
+
+            if (ignore) return
 
             if (logResult.error) {
                 console.error(logResult.error)
@@ -498,7 +527,11 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         <section className="patient-detail-card">
                             <h3>Toegewezen oefeningen</h3>
 
-                            {assignedExercises.length === 0 ? (
+                            {assignedExercisesError ? (
+                                <p className="form-error-message" role="alert">
+                                    {assignedExercisesError}
+                                </p>
+                            ) : assignedExercises.length === 0 ? (
                                 <p className="empty-text">Nog geen oefeningen toegewezen.</p>
                             ) : (
                                 <div className="exercise-program-list">
