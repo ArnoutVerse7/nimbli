@@ -1,20 +1,28 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import KinesistSidebar from '../components/KinesistSidebar'
-import { getExerciseCover } from '../lib/exerciseMedia'
+import ConfirmDialog from '../components/ConfirmDialog'
+import { getExerciseCover, removeExerciseMediaByUrl } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
     const [exercise, setExercise] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [currentUserId, setCurrentUserId] = useState(null)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [actionError, setActionError] = useState('')
 
     useEffect(() => {
         async function loadExercise() {
+            const { data: userData } = await supabase.auth.getUser()
             const { data, error } = await supabase
                 .from('exercises')
                 .select('*')
                 .eq('id', exerciseId)
                 .single()
+
+            setCurrentUserId(userData?.user?.id || null)
 
             if (error) {
                 console.error(error)
@@ -40,6 +48,33 @@ export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
     }
 
     const coverImage = getExerciseCover(exercise)
+    const canManageExercise =
+        !exercise.created_by || exercise.created_by === currentUserId
+
+    const deleteExercise = async () => {
+        setIsDeleting(true)
+        setActionError('')
+
+        const { error } = await supabase.rpc('delete_library_exercise', {
+            p_exercise_id: exercise.id,
+        })
+
+        if (error) {
+            console.error(error)
+            setActionError(error.message || 'De oefening kon niet verwijderd worden.')
+            setIsDeleting(false)
+            setIsDeleteDialogOpen(false)
+            return
+        }
+
+        await Promise.allSettled(
+            [exercise.cover_image, exercise.video_url]
+                .filter(Boolean)
+                .map(removeExerciseMediaByUrl)
+        )
+
+        onNavigate('kinesistExercises')
+    }
 
     return (
         <main className="kine-page">
@@ -112,6 +147,32 @@ export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
                             >
                                 Toewijzen aan patiënt
                             </button>
+
+                            {canManageExercise && (
+                                <div className="exercise-detail-actions">
+                                    <button
+                                        type="button"
+                                        className="secondary-btn"
+                                        onClick={() => onNavigate(`editExercise-${exercise.id}`)}
+                                    >
+                                        Oefening bewerken
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="danger-btn"
+                                        onClick={() => {
+                                            setActionError('')
+                                            setIsDeleteDialogOpen(true)
+                                        }}
+                                    >
+                                        Oefening verwijderen
+                                    </button>
+                                </div>
+                            )}
+
+                            {actionError && (
+                                <p className="form-error-message">{actionError}</p>
+                            )}
                         </aside>
                     </section>
 
@@ -131,6 +192,16 @@ export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
                     </section>
                 </div>
             </section>
+
+            <ConfirmDialog
+                isOpen={isDeleteDialogOpen}
+                title="Oefening volledig verwijderen?"
+                message={`“${exercise.title}” verdwijnt uit de bibliotheek én uit alle patiëntprogramma’s waarin deze oefening is toegewezen. Dit kun je niet ongedaan maken.`}
+                confirmLabel="Volledig verwijderen"
+                isConfirming={isDeleting}
+                onConfirm={deleteExercise}
+                onCancel={() => setIsDeleteDialogOpen(false)}
+            />
         </main>
     )
 }

@@ -113,6 +113,7 @@ function App() {
       page.startsWith('exercise') ||
       page.startsWith('assignExercise-') ||
       page.startsWith('kinesistExerciseDetail-') ||
+      page.startsWith('editExercise-') ||
       page.startsWith('premiumCheckout-')
 
     if ((nextPage === 'login' || nextPage === 'kinesistLogin') && isProtectedRoute) {
@@ -146,6 +147,11 @@ function App() {
     if (pageRoute.startsWith('assignExercise-')) {
       const exerciseId = pageRoute.replace('assignExercise-', '')
       return { component: AssignExercisePage, props: { exerciseId } }
+    }
+
+    if (pageRoute.startsWith('editExercise-')) {
+      const exerciseId = pageRoute.replace('editExercise-', '')
+      return { component: NewExercisePage, props: { exerciseId } }
     }
 
     if (pageRoute.startsWith('premiumCheckout-')) {

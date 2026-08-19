@@ -396,6 +396,86 @@ begin
 end;
 $$;
 
+create or replace function public.update_library_exercise(
+  p_exercise_id uuid,
+  p_title text,
+  p_description text,
+  p_category text,
+  p_level text,
+  p_duration text,
+  p_reps text,
+  p_cover_image text,
+  p_video_url text
+)
+returns public.exercises
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  updated_exercise public.exercises;
+begin
+  if not private.is_kinesist() then
+    raise exception 'Alleen een kinesist kan een oefening aanpassen.'
+      using errcode = '42501';
+  end if;
+
+  if nullif(trim(p_title), '') is null then
+    raise exception 'De oefening heeft een naam nodig.'
+      using errcode = '22023';
+  end if;
+
+  update public.exercises as exercise
+  set title = trim(p_title),
+      description = coalesce(trim(p_description), ''),
+      category = coalesce(nullif(trim(p_category), ''), 'Mobiliteit'),
+      level = coalesce(nullif(trim(p_level), ''), 'Makkelijk'),
+      duration = coalesce(nullif(trim(p_duration), ''), '2 min'),
+      reps = coalesce(nullif(trim(p_reps), ''), '10 herhalingen'),
+      cover_image = nullif(trim(p_cover_image), ''),
+      video_url = nullif(trim(p_video_url), '')
+  where exercise.id = p_exercise_id
+    and (
+      exercise.created_by is null
+      or exercise.created_by = (select auth.uid())
+    )
+  returning exercise.* into updated_exercise;
+
+  if updated_exercise.id is null then
+    raise exception 'Oefening niet gevonden of geen toegang.'
+      using errcode = '42501';
+  end if;
+
+  return updated_exercise;
+end;
+$$;
+
+create or replace function public.delete_library_exercise(p_exercise_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not private.is_kinesist() then
+    raise exception 'Alleen een kinesist kan een oefening verwijderen.'
+      using errcode = '42501';
+  end if;
+
+  delete from public.exercises as exercise
+  where exercise.id = p_exercise_id
+    and (
+      exercise.created_by is null
+      or exercise.created_by = (select auth.uid())
+    );
+
+  if not found then
+    raise exception 'Oefening niet gevonden of geen toegang.'
+      using errcode = '42501';
+  end if;
+end;
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.patients enable row level security;
 alter table public.exercises enable row level security;
@@ -561,10 +641,14 @@ revoke all on function public.create_patient(text, text, integer, text) from pub
 revoke all on function public.regenerate_activation_code(uuid) from public, anon;
 revoke all on function public.claim_patient(text) from public, anon;
 revoke all on function public.update_exercise_schedule(uuid, date, date) from public, anon;
+revoke all on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text) from public, anon;
+revoke all on function public.delete_library_exercise(uuid) from public, anon;
 grant execute on function public.create_patient(text, text, integer, text) to authenticated;
 grant execute on function public.regenerate_activation_code(uuid) to authenticated;
 grant execute on function public.claim_patient(text) to authenticated;
 grant execute on function public.update_exercise_schedule(uuid, date, date) to authenticated;
+grant execute on function public.update_library_exercise(uuid, text, text, text, text, text, text, text, text) to authenticated;
+grant execute on function public.delete_library_exercise(uuid) to authenticated;
 
 grant usage on schema private to authenticated;
 grant execute on function private.is_kinesist() to authenticated;

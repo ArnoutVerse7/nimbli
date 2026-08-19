@@ -270,12 +270,23 @@
     font-weight: 800;
 }
 
-.form-grid input {
+.form-grid input,
+.form-grid textarea {
     border: none;
     background: var(--nimbli-page-background);
     border-radius: 10px;
     padding: 14px 16px;
     font-weight: 700;
+}
+
+.exercise-form-full {
+    grid-column: 1 / -1;
+}
+
+.exercise-form-grid textarea {
+    min-height: 110px;
+    resize: vertical;
+    font: inherit;
 }
 
 .tag-list {
@@ -1196,6 +1207,15 @@
     opacity: 1;
 }
 
+.exercise-media-preview {
+    width: 100%;
+    margin-top: 0;
+}
+
+.exercise-media-preview:hover .delete-video-btn {
+    opacity: 1;
+}
+
 .delete-video-btn:hover {
     transform: scale(1.08);
     background: var(--nimbli-red);
@@ -1358,6 +1378,18 @@
 
 .danger-btn:hover {
     background: var(--nimbli-red);
+}
+
+.exercise-detail-actions {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.exercise-detail-actions .secondary-btn,
+.exercise-detail-actions .danger-btn {
+    width: 100%;
 }
 
 .assign-success-card {
@@ -1858,6 +1890,7 @@ input.kine-search:focus {
 }
 
 .form-grid input,
+.form-grid textarea,
 .logbook-form input,
 .logbook-form textarea {
     min-height: 42px;
@@ -1870,6 +1903,7 @@ input.kine-search:focus {
 }
 
 .form-grid input:focus,
+.form-grid textarea:focus,
 .logbook-form input:focus,
 .logbook-form textarea:focus {
     border-color: var(--kine-green);
