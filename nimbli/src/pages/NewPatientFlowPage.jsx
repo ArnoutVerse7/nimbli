@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profile from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 export default function NewPatientFlowPage({ onNavigate }) {
@@ -237,6 +238,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                         const isSelected = selectedExercises.some(
                                             (item) => item.id === exercise.id
                                         )
+                                        const coverImage = getExerciseCover(exercise)
 
                                         return (
                                             <div
@@ -245,9 +247,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                                 onClick={() => toggleExercise(exercise)}
                                             >
                                                 <div className="exercise-thumb">
-                                                    {exercise.cover_image ? (
+                                                    {coverImage ? (
                                                         <img
-                                                            src={exercise.cover_image}
+                                                            src={coverImage}
                                                             alt={exercise.title}
                                                             className="exercise-thumb-image"
                                                         />
@@ -315,9 +317,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                             selectedExercises.map((exercise) => (
                                                 <div className="selected-exercise" key={exercise.id}>
                                                     <div className="exercise-thumb">
-                                                        {exercise.cover_image ? (
+                                                        {getExerciseCover(exercise) ? (
                                                             <img
-                                                                src={exercise.cover_image}
+                                                                src={getExerciseCover(exercise)}
                                                                 alt={exercise.title}
                                                                 className="exercise-thumb-image"
                                                             />

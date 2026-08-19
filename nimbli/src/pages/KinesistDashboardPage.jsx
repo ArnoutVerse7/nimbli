@@ -12,6 +12,7 @@ export default function KinesistDashboardPage({ onNavigate }) {
     const [patients, setPatients] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [kinesist, setKinesist] = useState(null)
+    const [assignments, setAssignments] = useState([])
 
     const filteredPatients = patients.filter((patient) =>
         `${patient.first_name} ${patient.last_name} ${patient.goal}`
@@ -30,18 +31,72 @@ export default function KinesistDashboardPage({ onNavigate }) {
 
             setKinesist(profile)
 
-            const { data: patientsData, error: patientsError } = await supabase
-                .from('patients')
-                .select('*')
-                .order('created_at', { ascending: false })
+            const [patientsResult, assignmentsResult] = await Promise.all([
+                supabase
+                    .from('patients')
+                    .select('*')
+                    .order('created_at', { ascending: false }),
+                supabase
+                    .from('patient_exercises')
+                    .select('patient_id, completion_percentage, completed, completed_at'),
+            ])
 
-            if (!patientsError) {
-                setPatients(patientsData || [])
+            if (patientsResult.error) {
+                console.error(patientsResult.error)
+            } else {
+                setPatients(patientsResult.data || [])
+            }
+
+            if (assignmentsResult.error) {
+                console.error(assignmentsResult.error)
+            } else {
+                setAssignments(assignmentsResult.data || [])
             }
         }
 
         loadData()
     }, [onNavigate])
+
+    const assignmentsByPatient = assignments.reduce((groups, assignment) => {
+        const current = groups[assignment.patient_id] || []
+        current.push(assignment)
+        groups[assignment.patient_id] = current
+        return groups
+    }, {})
+    const averageProgress = assignments.length
+        ? Math.round(
+            assignments.reduce(
+                (total, assignment) => total + (assignment.completion_percentage || 0),
+                0
+            ) / assignments.length
+        )
+        : 0
+    const activePrograms = Object.values(assignmentsByPatient).filter((items) =>
+        items.some(
+            (item) => !item.completed && (item.completion_percentage || 0) < 100
+        )
+    ).length
+
+    const formatLastSession = (items) => {
+        const completedDates = items
+            .map((item) => item.completed_at)
+            .filter(Boolean)
+            .map((date) => new Date(date))
+            .sort((a, b) => b - a)
+
+        if (completedDates.length === 0) return 'Nog geen sessie'
+
+        const latestDate = completedDates[0]
+        const today = new Date()
+        const todayKey = today.toDateString()
+        const yesterday = new Date(today)
+        yesterday.setDate(today.getDate() - 1)
+
+        if (latestDate.toDateString() === todayKey) return 'Vandaag'
+        if (latestDate.toDateString() === yesterday.toDateString()) return 'Gisteren'
+
+        return latestDate.toLocaleDateString('nl-BE')
+    }
 
     return (
         <main className="kine-page">
@@ -75,12 +130,12 @@ export default function KinesistDashboardPage({ onNavigate }) {
                             </div>
 
                             <div className="kine-stat-card">
-                                <strong>{patients.length > 0 ? '97%' : '0%'}</strong>
-                                <span>Gemiddelde therapietrouw</span>
+                                <strong>{averageProgress}%</strong>
+                                <span>Gemiddelde voortgang</span>
                             </div>
 
                             <div className="kine-stat-card">
-                                <strong>{patients.length > 0 ? '1' : '0'}</strong>
+                                <strong>{activePrograms}</strong>
                                 <span>Actieve programma's</span>
                             </div>
                         </div>
@@ -111,7 +166,22 @@ export default function KinesistDashboardPage({ onNavigate }) {
                                 <h3>Je hebt nog geen patiënten</h3>
                             </div>) : (
                             <div className="patient-list">
-                                {filteredPatients.map((patient) => (
+                                {filteredPatients.map((patient) => {
+                                    const patientAssignments = assignmentsByPatient[patient.id] || []
+                                    const completedCount = patientAssignments.filter(
+                                        (item) => item.completed
+                                    ).length
+                                    const patientProgress = patientAssignments.length
+                                        ? Math.round(
+                                            patientAssignments.reduce(
+                                                (total, item) => total + (item.completion_percentage || 0),
+                                                0
+                                            ) / patientAssignments.length
+                                        )
+                                        : 0
+                                    const lastSession = formatLastSession(patientAssignments)
+
+                                    return (
                                     <button
                                         key={patient.id}
                                         className="patient-list-card"
@@ -134,24 +204,27 @@ export default function KinesistDashboardPage({ onNavigate }) {
                                                 <span>{patient.age} jaar</span>
                                             </div>
 
-                                            <p className="patient-improvement">↗ +23%</p>
+                                            <p className="patient-improvement">
+                                                {completedCount}/{patientAssignments.length} voltooid
+                                            </p>
                                         </div>
 
                                         <p className="patient-goal">{patient.goal}</p>
 
                                         <div className="patient-session">
-                                            <span className="session-dot"></span>
-                                            <span>Laatste sessie: Vandaag</span>
+                                            <span className={`session-dot ${lastSession === 'Nog geen sessie' ? 'empty' : ''}`}></span>
+                                            <span>Laatste sessie: {lastSession}</span>
                                         </div>
 
                                         <div className="patient-progress-row">
                                             <div className="patient-progress-bar">
-                                                <div></div>
+                                                <div style={{ width: `${patientProgress}%` }}></div>
                                             </div>
-                                            <span>60%</span>
+                                            <span>{patientProgress}%</span>
                                         </div>
                                     </button>
-                                ))}
+                                    )
+                                })}
                             </div>
                         )}
                     </section>

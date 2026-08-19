@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 export default function AssignExercisePage({ exerciseId, onNavigate }) {
@@ -106,6 +107,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     }
 
     const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+    const coverImage = getExerciseCover(exercise)
 
     if (loading) {
         return <p>Gegevens laden...</p>
@@ -131,7 +133,15 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                 <h3>Oefening</h3>
 
                                 <div className="selected-exercise">
-                                    <div className="exercise-thumb" />
+                                    <div className="exercise-thumb">
+                                        {coverImage && (
+                                            <img
+                                                src={coverImage}
+                                                alt={exercise.title}
+                                                className="exercise-thumb-image"
+                                            />
+                                        )}
+                                    </div>
 
                                     <div>
                                         <strong>{exercise.title}</strong>

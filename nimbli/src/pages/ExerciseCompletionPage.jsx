@@ -32,7 +32,7 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
           .update({
             completed: true,
             completion_percentage: 100,
-            accuracy: 95,
+            accuracy_percentage: 95,
             xp_earned: 50,
             completed_at: new Date().toISOString(),
           })

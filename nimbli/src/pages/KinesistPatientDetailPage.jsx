@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 function ProgressChart({ items }) {
@@ -105,6 +106,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
               level,
               duration,
               reps,
+              cover_image,
               video_url
             )
           `)
@@ -502,11 +504,20 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                 <div className="exercise-program-list">
                                     {assignedExercises.map((item) => {
                                         const exercise = item.exercises
+                                        const coverImage = getExerciseCover(exercise)
 
                                         return (
                                             <article className="exercise-program-card" key={item.id}>
                                                 <div className="exercise-program-top">
-                                                    <div className="exercise-thumb"></div>
+                                                    <div className="exercise-thumb">
+                                                        {coverImage && (
+                                                            <img
+                                                                src={coverImage}
+                                                                alt={exercise?.title || 'Oefening'}
+                                                                className="exercise-thumb-image"
+                                                            />
+                                                        )}
+                                                    </div>
 
                                                     <div className="exercise-program-content">
                                                         <div className="exercise-header">

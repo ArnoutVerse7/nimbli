@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/ChildFlow.css'
 
 export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
@@ -34,6 +35,8 @@ export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
     )
   }
 
+  const coverImage = getExerciseCover(exercise)
+
   return (
     <div className="exercise-details-page">
       <header className="exercise-header-bar">
@@ -52,6 +55,13 @@ export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
             </video>
           ) : (
             <div className="exercise-video-placeholder">
+              {coverImage && (
+                <img
+                  src={coverImage}
+                  alt={exercise.title}
+                  className="child-exercise-cover"
+                />
+              )}
               <div className="play-button">▶</div>
               <p>Geen instructievideo beschikbaar</p>
             </div>

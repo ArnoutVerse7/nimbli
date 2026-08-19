@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import KinesistSidebar from '../components/KinesistSidebar'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 export default function KinesistExercisesPage({ onNavigate }) {
@@ -72,7 +73,10 @@ export default function KinesistExercisesPage({ onNavigate }) {
                         {filteredExercises.length === 0 ? (
                             <p className="empty-text">Nog geen oefeningen gevonden.</p>
                         ) : (
-                            filteredExercises.map((exercise) => (
+                            filteredExercises.map((exercise) => {
+                                const coverImage = getExerciseCover(exercise)
+
+                                return (
                                 <button
                                     key={exercise.id}
                                     className="exercise-library-card"
@@ -81,8 +85,8 @@ export default function KinesistExercisesPage({ onNavigate }) {
                                     }}
                                 >
                                     <div className="exercise-thumb exercise-cover-thumb">
-                                        {exercise.cover_image ? (
-                                            <img src={exercise.cover_image} alt={exercise.title} />
+                                        {coverImage ? (
+                                            <img src={coverImage} alt={exercise.title} />
                                         ) : (
                                             <span></span>
                                         )}
@@ -102,7 +106,8 @@ export default function KinesistExercisesPage({ onNavigate }) {
                                         </p>
                                     </div>
                                 </button>
-                            ))
+                                )
+                            })
                         )}
                     </section>
                 </div>

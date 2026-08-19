@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import KinesistSidebar from '../components/KinesistSidebar'
+import { getExerciseCover } from '../lib/exerciseMedia'
 import '../styles/KinesistFlow.css'
 
 export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
@@ -38,6 +39,8 @@ export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
         return <p>Oefening niet gevonden.</p>
     }
 
+    const coverImage = getExerciseCover(exercise)
+
     return (
         <main className="kine-page">
             <KinesistSidebar active="exercises" onNavigate={onNavigate} />
@@ -63,8 +66,17 @@ export default function KinesistExerciseDetailPage({ exerciseId, onNavigate }) {
                                 </video>
                             ) : (
                                 <div className="video-placeholder">
-                                    <button>▶</button>
-                                    <p>Nog geen video toegevoegd</p>
+                                    {coverImage && (
+                                        <img
+                                            src={coverImage}
+                                            alt={exercise.title}
+                                            className="exercise-video-cover"
+                                        />
+                                    )}
+                                    <div className="video-placeholder-copy">
+                                        <span className="video-play-icon">▶</span>
+                                        <p>Nog geen video toegevoegd</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
