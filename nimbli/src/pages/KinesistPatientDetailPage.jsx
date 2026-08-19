@@ -100,13 +100,9 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         exercise_id,
                         completion_percentage,
                         completed,
-                        accuracy_percentage,
-                        xp_earned,
-                        assigned_at,
                         completed_at
                     `)
-                    .eq('patient_id', patient.id)
-                    .order('assigned_at', { ascending: false }),
+                    .eq('patient_id', patient.id),
                 supabase
                     .from('logbook_entries')
                     .select('*')
