@@ -16,7 +16,7 @@
   --nimbli-dark-yellow: #bd9546;
   --nimbli-main-dark-green: #259783;
   --nimbli-black: #000000;
-  --nimbli-page-background: var(--nimbli-offwhite);
+  --nimbli-page-background: var(--nimbli-white);
   --nimbli-surface: var(--nimbli-white);
   --nimbli-border: var(--nimbli-gray);
   --nimbli-text: var(--nimbli-black);
