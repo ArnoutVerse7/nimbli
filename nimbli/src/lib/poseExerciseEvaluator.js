@@ -449,7 +449,11 @@ const evaluateGenericPose = (points) => {
 }
 
 export const getExerciseTrackingType = (exercise) => {
-  if (exercise?.tracking_type && TRACKING_TYPES[exercise.tracking_type]) {
+  if (
+    exercise?.tracking_type
+    && exercise.tracking_type !== 'generic'
+    && TRACKING_TYPES[exercise.tracking_type]
+  ) {
     return exercise.tracking_type
   }
 
