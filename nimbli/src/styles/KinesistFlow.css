@@ -879,6 +879,20 @@
     margin-bottom: 10px;
 }
 
+.logbook-delete-btn {
+    padding: 3px 0;
+    border: 0;
+    color: var(--nimbli-dark-red);
+    background: transparent;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.logbook-delete-btn:hover {
+    text-decoration: underline;
+}
+
 .logbook-entry strong {
     display: block;
     margin-bottom: 8px;
@@ -1189,6 +1203,33 @@
 .assign-btn {
     margin-top: 20px;
     width: 100%;
+}
+
+.assign-duration-field {
+    margin-top: 18px;
+    display: grid;
+    gap: 7px;
+    color: var(--kine-ink);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.assign-duration-field select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid var(--kine-border);
+    border-radius: 7px;
+    color: var(--kine-ink);
+    background: var(--nimbli-white);
+    font: inherit;
+}
+
+.assign-duration-field small {
+    color: var(--kine-muted);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.45;
 }
 
 .assign-success-card {

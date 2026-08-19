@@ -67,9 +67,15 @@ create table public.patient_exercises (
   accuracy_percentage integer check (accuracy_percentage between 0 and 100),
   xp_earned integer not null default 0 check (xp_earned >= 0),
   assigned_at timestamptz not null default now(),
+  start_date date not null default current_date,
+  end_date date not null default (current_date + 13),
   completed_at timestamptz,
+  constraint patient_exercises_schedule_dates_check check (end_date >= start_date),
   unique (patient_id, exercise_id)
 );
+
+create index patient_exercises_schedule_idx
+on public.patient_exercises (patient_id, start_date, end_date);
 
 create table public.logbook_entries (
   id uuid primary key default gen_random_uuid(),

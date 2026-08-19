@@ -34,7 +34,7 @@
 .parent-sidebar-label {
   margin: 0 12px 10px;
   color: #9aa8a3;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -57,7 +57,7 @@
   border-radius: 8px;
   color: var(--nimbli-text-muted);
   background: transparent;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 750;
   text-align: left;
   cursor: pointer;
@@ -127,7 +127,7 @@
 
 .parent-topbar h1 {
   margin: 0;
-  font-size: 19px;
+  font-size: 22px;
   letter-spacing: -.02em;
 }
 
@@ -139,7 +139,7 @@
   border-radius: 50%;
   color: var(--nimbli-white);
   background: var(--parent-green);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 850;
 }
 
@@ -171,14 +171,14 @@
 
 .parent-patient-header h2 {
   margin: 0 0 5px;
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .parent-child-meta {
   display: flex;
   gap: 18px;
   color: var(--parent-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parent-child-meta strong { color: var(--parent-green-dark); }
@@ -229,7 +229,7 @@
 
 .parent-week-day > span {
   color: #7d817d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 850;
   text-transform: uppercase;
 }
@@ -242,7 +242,7 @@
   border-radius: 50%;
   color: var(--nimbli-white);
   background: #d6dcda;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 850;
 }
 
@@ -268,13 +268,13 @@
 
 .parent-summary-item span {
   color: var(--parent-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
 }
 
 .parent-summary-item strong {
   color: var(--parent-green-dark);
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .parent-card,
@@ -308,9 +308,9 @@
   letter-spacing: -.015em;
 }
 
-.parent-section-title h3 { font-size: 13px; }
+.parent-section-title h3 { font-size: 16px; }
 .parent-settings-heading h2,
-.parent-agenda-heading h2 { font-size: 17px; }
+.parent-agenda-heading h2 { font-size: 20px; }
 
 .parent-section-title span,
 .parent-settings-heading span,
@@ -318,7 +318,7 @@
   display: block;
   margin-bottom: 3px;
   color: #98a39f;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -327,7 +327,7 @@
 .parent-section-title > strong,
 .parent-agenda-heading > strong {
   color: var(--parent-green-dark);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parent-section-title button,
@@ -336,7 +336,7 @@
   border: 0;
   color: var(--parent-green-dark);
   background: transparent;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -378,7 +378,7 @@
 
 .parent-chart-column span {
   color: #8e9894;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -396,7 +396,7 @@
   margin-bottom: 6px;
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .parent-metric strong { color: var(--parent-green-dark); }
@@ -467,7 +467,7 @@
   display: block;
   overflow: hidden;
   color: var(--parent-ink);
-  font-size: 10px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -475,7 +475,7 @@
 .parent-exercise-copy > span,
 .parent-recent-item span {
   color: var(--parent-muted);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .parent-inline-progress { margin-top: 5px; }
@@ -483,7 +483,7 @@
 .parent-status-pill {
   padding: 5px 7px;
   border-radius: 999px;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 850;
 }
 
@@ -518,14 +518,14 @@
 
 .parent-recent-item b {
   color: #58b46c;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .parent-empty-text,
 .parent-empty-agenda p {
   margin: 0;
   color: var(--parent-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parent-calendar-heading {
@@ -535,7 +535,22 @@
   justify-content: space-between;
 }
 
-.parent-calendar-heading strong { font-size: 11px; }
+.parent-calendar-heading strong { font-size: 13px; }
+
+.parent-calendar-heading button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--parent-green-dark);
+  background: var(--nimbli-white);
+  box-shadow: var(--nimbli-card-shadow);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
 
 .parent-calendar-days {
   display: grid;
@@ -556,12 +571,12 @@
 }
 
 .parent-calendar-days button span {
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.parent-calendar-days button strong { font-size: 13px; }
+.parent-calendar-days button strong { font-size: 15px; }
 
 .parent-calendar-days button.active {
   color: var(--nimbli-white);
@@ -592,7 +607,7 @@
 
 .parent-empty-agenda h3 {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: 16px;
 }
 
 .parent-settings-layout {
@@ -631,13 +646,13 @@
 .parent-settings-form label,
 .parent-toggle-row > span {
   color: var(--parent-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
 }
 
 .parent-profile-rows strong {
   color: var(--parent-ink);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .parent-settings-form {
@@ -673,7 +688,7 @@
 
 .parent-settings-form small {
   color: #929d98;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .parent-form-actions {
@@ -690,7 +705,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   text-align: center;
   cursor: pointer;
@@ -711,7 +726,7 @@
 .parent-settings-message {
   margin: 11px 0 0;
   color: var(--parent-green-dark);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
 }
 
@@ -758,7 +773,7 @@
 
 .parent-support-card > span {
   color: #98a39f;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -766,13 +781,13 @@
 
 .parent-support-card h2 {
   margin: -4px 0 0;
-  font-size: 17px;
+  font-size: 20px;
 }
 
 .parent-support-card p {
   margin: 0 0 3px;
   color: var(--parent-muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 

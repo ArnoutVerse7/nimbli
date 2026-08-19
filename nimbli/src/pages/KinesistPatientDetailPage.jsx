@@ -63,6 +63,8 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     const [showLogForm, setShowLogForm] = useState(false)
     const [newLogTitle, setNewLogTitle] = useState('')
     const [newLogText, setNewLogText] = useState('')
+    const [deletingLogId, setDeletingLogId] = useState(null)
+    const [logbookError, setLogbookError] = useState('')
     const [activationCode, setActivationCode] = useState('')
     const [activationError, setActivationError] = useState('')
     const [isGeneratingCode, setIsGeneratingCode] = useState(false)
@@ -196,6 +198,33 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         setNewLogText('')
         setShowLogForm(false)
         loadLogEntries(patient.id)
+    }
+
+    const deleteLogEntry = async (entryId) => {
+        const confirmed = window.confirm('Wil je deze notitie definitief verwijderen?')
+
+        if (!confirmed || !patient?.id) return
+
+        setDeletingLogId(entryId)
+        setLogbookError('')
+
+        const { error } = await supabase
+            .from('logbook_entries')
+            .delete()
+            .eq('id', entryId)
+            .eq('patient_id', patient.id)
+
+        setDeletingLogId(null)
+
+        if (error) {
+            console.error(error)
+            setLogbookError('De notitie kon niet worden verwijderd. Probeer opnieuw.')
+            return
+        }
+
+        setLogEntries((currentEntries) =>
+            currentEntries.filter((entry) => entry.id !== entryId)
+        )
     }
 
     const generateActivationCode = async () => {
@@ -635,6 +664,12 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                             )}
 
                             <div className="logbook-list">
+                                {logbookError && (
+                                    <p className="form-error-message" role="alert">
+                                        {logbookError}
+                                    </p>
+                                )}
+
                                 {logEntries.length === 0 ? (
                                     <p className="empty-text">Nog geen logboeknotities.</p>
                                 ) : (
@@ -644,6 +679,14 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                                 <span>
                                                     {new Date(entry.created_at).toLocaleDateString('nl-BE')}
                                                 </span>
+                                                <button
+                                                    type="button"
+                                                    className="logbook-delete-btn"
+                                                    onClick={() => deleteLogEntry(entry.id)}
+                                                    disabled={deletingLogId === entry.id}
+                                                >
+                                                    {deletingLogId === entry.id ? 'Verwijderen...' : 'Verwijderen'}
+                                                </button>
                                             </div>
 
                                             <strong>{entry.title}</strong>

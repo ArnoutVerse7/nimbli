@@ -18,11 +18,11 @@ const sameDay = (firstDate, secondDate) => {
     && first.getDate() === second.getDate()
 }
 
-const getCurrentWeek = () => {
+const getCurrentWeek = (weekOffset = 0) => {
   const today = new Date()
   const monday = new Date(today)
   const day = today.getDay() || 7
-  monday.setDate(today.getDate() - day + 1)
+  monday.setDate(today.getDate() - day + 1 + (weekOffset * 7))
   monday.setHours(0, 0, 0, 0)
 
   return Array.from({ length: 7 }, (_, index) => {
@@ -34,6 +34,26 @@ const getCurrentWeek = () => {
 
 const formatShortDate = (date) =>
   new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'short' }).format(date)
+
+const toDateKey = (date) => {
+  const value = new Date(date)
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+const isAssignmentPlannedForDate = (assignment, date) => {
+  const selectedDate = toDateKey(date)
+  const fallbackDate = assignment.assigned_at
+    ? toDateKey(assignment.assigned_at)
+    : selectedDate
+  const startDate = assignment.start_date || fallbackDate
+  const endDate = assignment.end_date || startDate
+
+  return selectedDate >= startDate && selectedDate <= endDate
+}
 
 function ExerciseRow({ assignment, showProgress = false }) {
   const exercise = assignment.exercises
@@ -92,6 +112,7 @@ export default function ParentDashboardPage({ onNavigate }) {
   const [parentProfile, setParentProfile] = useState(null)
   const [assignedExercises, setAssignedExercises] = useState([])
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [scheduleWeekOffset, setScheduleWeekOffset] = useState(0)
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [settingsMessage, setSettingsMessage] = useState('')
@@ -156,7 +177,11 @@ export default function ParentDashboardPage({ onNavigate }) {
     loadParentData()
   }, [onNavigate])
 
-  const weekDays = useMemo(() => getCurrentWeek(), [])
+  const currentWeekDays = useMemo(() => getCurrentWeek(), [])
+  const scheduleWeekDays = useMemo(
+    () => getCurrentWeek(scheduleWeekOffset),
+    [scheduleWeekOffset]
+  )
   const completedExercises = assignedExercises.filter((item) => item.completed)
   const overallProgress = assignedExercises.length
     ? Math.round(
@@ -167,7 +192,7 @@ export default function ParentDashboardPage({ onNavigate }) {
     )
     : 0
   const totalXp = assignedExercises.reduce((total, item) => total + (item.xp_earned || 0), 0)
-  const activityPerDay = weekDays.map((date) => ({
+  const activityPerDay = currentWeekDays.map((date) => ({
     date,
     count: completedExercises.filter((item) => sameDay(item.completed_at, date)).length,
   }))
@@ -175,9 +200,12 @@ export default function ParentDashboardPage({ onNavigate }) {
   const recentActivities = [...completedExercises]
     .sort((first, second) => new Date(second.completed_at || 0) - new Date(first.completed_at || 0))
     .slice(0, 4)
-  const selectedDayExercises = sameDay(selectedDate, new Date())
-    ? assignedExercises
-    : completedExercises.filter((item) => sameDay(item.completed_at, selectedDate))
+  const todayExercises = assignedExercises.filter((item) =>
+    isAssignmentPlannedForDate(item, new Date())
+  )
+  const selectedDayExercises = assignedExercises.filter((item) =>
+    isAssignmentPlannedForDate(item, selectedDate)
+  )
   const categoryProgress = Object.values(
     assignedExercises.reduce((categories, item) => {
       const category = item.exercises?.category || 'Overig'
@@ -225,6 +253,14 @@ export default function ParentDashboardPage({ onNavigate }) {
     })
   }
 
+  const changeScheduleWeek = (direction) => {
+    const nextOffset = scheduleWeekOffset + direction
+    const nextWeek = getCurrentWeek(nextOffset)
+
+    setScheduleWeekOffset(nextOffset)
+    setSelectedDate(direction > 0 ? nextWeek[0] : nextWeek[6])
+  }
+
   const pageTitles = {
     dashboard: 'Dashboard',
     schedule: 'Oefenplanning',
@@ -242,7 +278,6 @@ export default function ParentDashboardPage({ onNavigate }) {
       <section className="parent-main">
         <header className="parent-topbar">
           <div>
-            <span>Ouderportaal</span>
             <h1>{pageTitles[activeView]}</h1>
           </div>
           <div className="parent-account-avatar" title={parentProfile?.full_name || 'Ouder'}>
@@ -271,7 +306,7 @@ export default function ParentDashboardPage({ onNavigate }) {
           <div className="parent-content parent-dashboard-layout">
             <section className="parent-dashboard-primary">
               <section className="parent-week-strip-card">
-                {weekDays.map((date) => {
+                {currentWeekDays.map((date) => {
                   const count = completedExercises.filter((item) => sameDay(item.completed_at, date)).length
                   const isToday = sameDay(date, new Date())
                   const isPast = date < new Date() && !isToday
@@ -328,9 +363,9 @@ export default function ParentDashboardPage({ onNavigate }) {
               <section className="parent-side-section">
                 <div className="parent-section-title"><h3>Oefeningen van vandaag</h3><button onClick={() => setActiveView('schedule')}>Bekijk planning</button></div>
                 <div className="parent-exercise-list">
-                  {assignedExercises.length ? assignedExercises.slice(0, 3).map((item) => (
+                  {todayExercises.length ? todayExercises.slice(0, 3).map((item) => (
                     <ExerciseRow assignment={item} key={item.id} />
-                  )) : <p className="parent-empty-text">Nog geen oefeningen toegewezen.</p>}
+                  )) : <p className="parent-empty-text">Vandaag staan er geen oefeningen gepland.</p>}
                 </div>
               </section>
 
@@ -347,12 +382,24 @@ export default function ParentDashboardPage({ onNavigate }) {
             <section className="parent-schedule-primary">
               <section className="parent-calendar-card">
                 <div className="parent-calendar-heading">
-                  <span />
-                  <strong>{formatShortDate(weekDays[0])} – {formatShortDate(weekDays[6])}</strong>
-                  <span />
+                  <button
+                    type="button"
+                    aria-label="Vorige week"
+                    onClick={() => changeScheduleWeek(-1)}
+                  >
+                    ←
+                  </button>
+                  <strong>{formatShortDate(scheduleWeekDays[0])} – {formatShortDate(scheduleWeekDays[6])}</strong>
+                  <button
+                    type="button"
+                    aria-label="Volgende week"
+                    onClick={() => changeScheduleWeek(1)}
+                  >
+                    →
+                  </button>
                 </div>
                 <div className="parent-calendar-days">
-                  {weekDays.map((date) => (
+                  {scheduleWeekDays.map((date) => (
                     <button
                       key={date.toISOString()}
                       className={sameDay(date, selectedDate) ? 'active' : ''}
@@ -375,8 +422,8 @@ export default function ParentDashboardPage({ onNavigate }) {
                   <ExerciseRow assignment={item} showProgress key={item.id} />
                 )) : (
                   <div className="parent-empty-agenda">
-                    <h3>Geen sessies geregistreerd</h3>
-                    <p>Voor deze dag zijn er geen voltooide oefeningen gevonden.</p>
+                    <h3>Geen oefeningen gepland</h3>
+                    <p>Voor deze dag heeft de kinesist geen oefeningen ingepland.</p>
                   </div>
                 )}
               </section>
