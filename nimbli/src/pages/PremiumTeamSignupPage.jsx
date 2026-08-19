@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
+import KinesistSidebar from '../components/KinesistSidebar'
 import '../styles/KinesistFlow.css'
 
 export default function PremiumTeamSignupPage({ onNavigate }) {
@@ -36,25 +35,7 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="settings" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">

@@ -1,10 +1,47 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
+import KinesistSidebar from '../components/KinesistSidebar'
 import '../styles/KinesistFlow.css'
+
+function ProgressChart({ items }) {
+    const width = 560
+    const height = 190
+    const paddingX = 34
+    const paddingY = 24
+    const usableWidth = width - paddingX * 2
+    const usableHeight = height - paddingY * 2
+    const points = items.map((item, index) => {
+        const x = items.length === 1
+            ? width / 2
+            : paddingX + (index / (items.length - 1)) * usableWidth
+        const y = paddingY + (1 - item.progress / 100) * usableHeight
+
+        return { ...item, x, y }
+    })
+
+    return (
+        <div className="progress-chart" aria-label="Voortgangsgrafiek">
+            <svg viewBox={`0 0 ${width} ${height}`} role="img">
+                {[0, 25, 50, 75, 100].map((value) => {
+                    const y = paddingY + (1 - value / 100) * usableHeight
+                    return <line key={value} x1={paddingX} x2={width - paddingX} y1={y} y2={y} />
+                })}
+                <polyline points={points.map(({ x, y }) => `${x},${y}`).join(' ')} />
+                {points.map(({ category, progress, x, y }) => (
+                    <g key={category}>
+                        <circle cx={x} cy={y} r="5" />
+                        <text x={x} y={height - 4} textAnchor="middle">
+                            {category.slice(0, 10)}
+                        </text>
+                        <title>{category}: {progress}%</title>
+                    </g>
+                ))}
+            </svg>
+        </div>
+    )
+}
 
 export default function KinesistPatientDetailPage({ onNavigate }) {
     const [patient] = useState(() => {
@@ -181,25 +218,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="dashboard" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
@@ -306,23 +325,26 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                             <div className="patient-detail-card">
                                 <h3>Voortgang per categorie</h3>
 
-                                <div className="category-progress-list">
-                                    {categoryProgress.length === 0 ? (
-                                        <p className="empty-text">Nog geen voortgang beschikbaar.</p>
-                                    ) : (
-                                        categoryProgress.map((item) => (
-                                            <div className="category-progress-item" key={item.category}>
-                                                <div>
-                                                    <strong>{item.category}</strong>
-                                                    <span>{item.progress}%</span>
+                                {categoryProgress.length === 0 ? (
+                                    <p className="empty-text">Nog geen voortgang beschikbaar.</p>
+                                ) : (
+                                    <>
+                                        <ProgressChart items={categoryProgress} />
+                                        <div className="category-progress-list">
+                                            {categoryProgress.map((item) => (
+                                                <div className="category-progress-item" key={item.category}>
+                                                    <div>
+                                                        <strong>{item.category}</strong>
+                                                        <span>{item.progress}%</span>
+                                                    </div>
+                                                    <div className="category-progress-bar">
+                                                        <div style={{ width: `${item.progress}%` }}></div>
+                                                    </div>
                                                 </div>
-                                                <div className="category-progress-bar">
-                                                    <div style={{ width: `${item.progress}%` }}></div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="patient-detail-card">

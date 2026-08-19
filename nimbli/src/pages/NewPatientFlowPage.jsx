@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
 import profile from '../assets/logos/profile.png'
+import KinesistSidebar from '../components/KinesistSidebar'
 import '../styles/KinesistFlow.css'
 
 export default function NewPatientFlowPage({ onNavigate }) {
@@ -143,25 +142,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="dashboard" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
