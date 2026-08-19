@@ -53,10 +53,18 @@ export const formatScheduleDate = (value) => {
     return new Date(`${dateValue}T00:00:00`).toLocaleDateString('nl-BE')
 }
 
-export const formatExerciseScheduleRange = (assignment) => {
+export const getAssignmentSchedule = (assignment) => {
     const fallbackDate = toDateValue(assignment.assigned_at)
     const startDate = assignment.start_date || fallbackDate
-    const endDate = assignment.end_date || startDate
+
+    return {
+        startDate,
+        endDate: assignment.end_date || startDate,
+    }
+}
+
+export const formatExerciseScheduleRange = (assignment) => {
+    const { startDate, endDate } = getAssignmentSchedule(assignment)
 
     if (!startDate) return 'Niet ingesteld'
 

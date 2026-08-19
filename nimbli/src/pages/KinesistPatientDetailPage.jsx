@@ -2,9 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
+import ConfirmDialog from '../components/ConfirmDialog'
+import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
 import KinesistSidebar from '../components/KinesistSidebar'
 import { getExerciseCover } from '../lib/exerciseMedia'
-import { formatExerciseScheduleRange } from '../lib/exerciseSchedule'
+import {
+    formatExerciseScheduleRange,
+    getAssignmentSchedule,
+    isValidExerciseSchedule,
+} from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
 function ProgressChart({ items }) {
@@ -65,7 +71,15 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     const [newLogTitle, setNewLogTitle] = useState('')
     const [newLogText, setNewLogText] = useState('')
     const [deletingLogId, setDeletingLogId] = useState(null)
+    const [logEntryToDelete, setLogEntryToDelete] = useState(null)
     const [logbookError, setLogbookError] = useState('')
+    const [openExerciseMenuId, setOpenExerciseMenuId] = useState(null)
+    const [editingAssignment, setEditingAssignment] = useState(null)
+    const [assignmentToDelete, setAssignmentToDelete] = useState(null)
+    const [scheduleDraft, setScheduleDraft] = useState(null)
+    const [isSavingAssignment, setIsSavingAssignment] = useState(false)
+    const [deletingAssignmentId, setDeletingAssignmentId] = useState(null)
+    const [assignmentActionError, setAssignmentActionError] = useState('')
     const [activationCode, setActivationCode] = useState('')
     const [activationError, setActivationError] = useState('')
     const [isGeneratingCode, setIsGeneratingCode] = useState(false)
@@ -171,13 +185,30 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         }
     }, [patient])
 
+    useEffect(() => {
+        if (!editingAssignment) return undefined
+
+        const closeEditorOnEscape = (event) => {
+            if (event.key === 'Escape' && !isSavingAssignment) {
+                setEditingAssignment(null)
+                setScheduleDraft(null)
+                setAssignmentActionError('')
+            }
+        }
+
+        window.addEventListener('keydown', closeEditorOnEscape)
+        return () => window.removeEventListener('keydown', closeEditorOnEscape)
+    }, [editingAssignment, isSavingAssignment])
+
     const saveLogEntry = async () => {
         if (!newLogText.trim()) return
+
+        setLogbookError('')
 
         const { data: userData, error: userError } = await supabase.auth.getUser()
 
         if (userError || !userData.user) {
-            alert('Je sessie is verlopen. Log opnieuw in.')
+            setLogbookError('Je sessie is verlopen. Log opnieuw in.')
             return
         }
 
@@ -194,7 +225,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
 
         if (error) {
             console.error(error)
-            alert('Fout bij opslaan van notitie')
+            setLogbookError('De notitie kon niet worden opgeslagen. Probeer opnieuw.')
             return
         }
 
@@ -205,9 +236,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     }
 
     const deleteLogEntry = async (entryId) => {
-        const confirmed = window.confirm('Wil je deze notitie definitief verwijderen?')
-
-        if (!confirmed || !patient?.id) return
+        if (!patient?.id) return
 
         setDeletingLogId(entryId)
         setLogbookError('')
@@ -223,12 +252,84 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         if (error) {
             console.error(error)
             setLogbookError('De notitie kon niet worden verwijderd. Probeer opnieuw.')
+            setLogEntryToDelete(null)
             return
         }
 
         setLogEntries((currentEntries) =>
             currentEntries.filter((entry) => entry.id !== entryId)
         )
+        setLogEntryToDelete(null)
+    }
+
+    const openScheduleEditor = (assignment) => {
+        setEditingAssignment(assignment)
+        setScheduleDraft(getAssignmentSchedule(assignment))
+        setOpenExerciseMenuId(null)
+        setAssignmentActionError('')
+    }
+
+    const saveAssignmentSchedule = async () => {
+        if (!editingAssignment || !isValidExerciseSchedule(scheduleDraft)) {
+            setAssignmentActionError('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
+        setIsSavingAssignment(true)
+        setAssignmentActionError('')
+
+        const { error } = await supabase.rpc('update_exercise_schedule', {
+            p_assignment_id: editingAssignment.id,
+            p_start_date: scheduleDraft.startDate,
+            p_end_date: scheduleDraft.endDate,
+        })
+
+        setIsSavingAssignment(false)
+
+        if (error) {
+            console.error(error)
+            setAssignmentActionError('De planning kon niet worden opgeslagen. Voer migratie 003 opnieuw uit en probeer opnieuw.')
+            return
+        }
+
+        setAssignedExercises((currentExercises) =>
+            currentExercises.map((item) => item.id === editingAssignment.id
+                ? {
+                    ...item,
+                    start_date: scheduleDraft.startDate,
+                    end_date: scheduleDraft.endDate,
+                }
+                : item)
+        )
+        setEditingAssignment(null)
+        setScheduleDraft(null)
+    }
+
+    const deleteAssignedExercise = async (assignmentId) => {
+        if (!patient?.id) return
+
+        setDeletingAssignmentId(assignmentId)
+        setAssignmentActionError('')
+
+        const { error } = await supabase
+            .from('patient_exercises')
+            .delete()
+            .eq('id', assignmentId)
+            .eq('patient_id', patient.id)
+
+        setDeletingAssignmentId(null)
+
+        if (error) {
+            console.error(error)
+            setAssignmentActionError('De oefening kon niet uit het programma verwijderd worden.')
+            setAssignmentToDelete(null)
+            return
+        }
+
+        setAssignedExercises((currentExercises) =>
+            currentExercises.filter((item) => item.id !== assignmentId)
+        )
+        setAssignmentToDelete(null)
     }
 
     const generateActivationCode = async () => {
@@ -556,6 +657,12 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         <section className="patient-detail-card">
                             <h3>Toegewezen oefeningen</h3>
 
+                            {assignmentActionError && (
+                                <p className="form-error-message" role="alert">
+                                    {assignmentActionError}
+                                </p>
+                            )}
+
                             {assignedExercisesError ? (
                                 <p className="form-error-message" role="alert">
                                     {assignedExercisesError}
@@ -584,7 +691,40 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                                     <div className="exercise-program-content">
                                                         <div className="exercise-header">
                                                             <strong>{exercise?.title}</strong>
-                                                            <button className="exercise-menu">⋮</button>
+                                                            <div className="exercise-actions">
+                                                                <button
+                                                                    type="button"
+                                                                    className="exercise-menu"
+                                                                    aria-label={`Acties voor ${exercise?.title || 'oefening'}`}
+                                                                    aria-expanded={openExerciseMenuId === item.id}
+                                                                    onClick={() => setOpenExerciseMenuId((currentId) =>
+                                                                        currentId === item.id ? null : item.id
+                                                                    )}
+                                                                >
+                                                                    ⋮
+                                                                </button>
+
+                                                                {openExerciseMenuId === item.id && (
+                                                                    <div className="exercise-action-menu">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => openScheduleEditor(item)}
+                                                                        >
+                                                                            Planning aanpassen
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="danger"
+                                                                            onClick={() => {
+                                                                                setAssignmentToDelete(item)
+                                                                                setOpenExerciseMenuId(null)
+                                                                            }}
+                                                                        >
+                                                                            Uit programma verwijderen
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
 
                                                         <div className="exercise-badges">
@@ -691,7 +831,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                                 <button
                                                     type="button"
                                                     className="logbook-delete-btn"
-                                                    onClick={() => deleteLogEntry(entry.id)}
+                                                    onClick={() => setLogEntryToDelete(entry)}
                                                     disabled={deletingLogId === entry.id}
                                                 >
                                                     {deletingLogId === entry.id ? 'Verwijderen...' : 'Verwijderen'}
@@ -712,6 +852,87 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                     )}
                 </div>
             </section>
+
+            {editingAssignment && scheduleDraft && (
+                <div
+                    className="nimbli-modal-backdrop"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget && !isSavingAssignment) {
+                            setEditingAssignment(null)
+                            setScheduleDraft(null)
+                        }
+                    }}
+                >
+                    <section
+                        className="nimbli-modal-card schedule-edit-modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="schedule-edit-title"
+                    >
+                        <h2 id="schedule-edit-title">Planning aanpassen</h2>
+                        <p>
+                            Kies de periode voor {editingAssignment.exercises?.title || 'deze oefening'}.
+                        </p>
+
+                        <ExerciseScheduleFields
+                            schedule={scheduleDraft}
+                            onChange={(nextSchedule) => {
+                                setScheduleDraft(nextSchedule)
+                                setAssignmentActionError('')
+                            }}
+                            helpText="De wijziging wordt ook zichtbaar voor de ouder en het kind."
+                        />
+
+                        {assignmentActionError && (
+                            <p className="form-error-message" role="alert">
+                                {assignmentActionError}
+                            </p>
+                        )}
+
+                        <div className="nimbli-modal-actions">
+                            <button
+                                type="button"
+                                className="secondary-btn"
+                                disabled={isSavingAssignment}
+                                onClick={() => {
+                                    setEditingAssignment(null)
+                                    setScheduleDraft(null)
+                                    setAssignmentActionError('')
+                                }}
+                            >
+                                Annuleren
+                            </button>
+                            <button
+                                type="button"
+                                className="primary-btn"
+                                disabled={isSavingAssignment}
+                                onClick={saveAssignmentSchedule}
+                            >
+                                {isSavingAssignment ? 'Opslaan...' : 'Planning opslaan'}
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            )}
+
+            <ConfirmDialog
+                isOpen={Boolean(logEntryToDelete)}
+                title="Notitie verwijderen?"
+                message={`De notitie “${logEntryToDelete?.title || 'Zonder titel'}” wordt definitief verwijderd.`}
+                isConfirming={Boolean(deletingLogId)}
+                onCancel={() => setLogEntryToDelete(null)}
+                onConfirm={() => deleteLogEntry(logEntryToDelete.id)}
+            />
+
+            <ConfirmDialog
+                isOpen={Boolean(assignmentToDelete)}
+                title="Oefening verwijderen?"
+                message={`${assignmentToDelete?.exercises?.title || 'Deze oefening'} verdwijnt uit het programma van deze patiënt en is daarna ook niet meer zichtbaar voor ouder en kind.`}
+                confirmLabel="Uit programma verwijderen"
+                isConfirming={Boolean(deletingAssignmentId)}
+                onCancel={() => setAssignmentToDelete(null)}
+                onConfirm={() => deleteAssignedExercise(assignmentToDelete.id)}
+            />
         </main>
     )
 }

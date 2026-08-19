@@ -731,6 +731,7 @@
 }
 
 .exercise-header {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -747,6 +748,45 @@
     cursor: pointer;
     font-size: 20px;
     color: var(--nimbli-text-muted);
+}
+
+.exercise-actions {
+    position: relative;
+}
+
+.exercise-action-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    z-index: 30;
+    width: 210px;
+    padding: 6px;
+    display: grid;
+    gap: 2px;
+    border-radius: 9px;
+    background: var(--nimbli-white);
+    box-shadow: var(--nimbli-card-shadow);
+}
+
+.exercise-action-menu button {
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--kine-ink);
+    background: transparent;
+    font-size: 11px;
+    font-weight: 750;
+    text-align: left;
+    cursor: pointer;
+}
+
+.exercise-action-menu button:hover {
+    background: var(--nimbli-offwhite);
+}
+
+.exercise-action-menu button.danger {
+    color: var(--nimbli-dark-red);
 }
 
 .exercise-badges {
@@ -1246,6 +1286,78 @@
 
 .exercise-schedule-summary {
     margin: -4px 0 12px;
+}
+
+/* ===== MODALS ===== */
+
+.nimbli-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    padding: 24px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, .38);
+}
+
+.nimbli-modal-card {
+    width: min(100%, 440px);
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--nimbli-white);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .2);
+}
+
+.nimbli-modal-card.schedule-edit-modal {
+    width: min(100%, 560px);
+}
+
+.nimbli-modal-card h2 {
+    margin: 0 0 8px;
+    color: var(--kine-ink);
+    font-size: 22px;
+}
+
+.nimbli-modal-card > p {
+    margin: 0;
+    color: var(--kine-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.nimbli-modal-card .exercise-schedule-panel {
+    margin-top: 20px;
+}
+
+.nimbli-modal-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.nimbli-modal-actions .primary-btn,
+.nimbli-modal-actions .secondary-btn,
+.nimbli-modal-actions .danger-btn {
+    width: auto;
+    min-height: 40px;
+    margin: 0;
+    padding: 9px 14px;
+}
+
+.danger-btn {
+    border: 1px solid var(--nimbli-dark-red);
+    border-radius: 7px;
+    color: var(--nimbli-white);
+    background: var(--nimbli-dark-red);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.danger-btn:hover {
+    background: var(--nimbli-red);
 }
 
 .assign-success-card {
