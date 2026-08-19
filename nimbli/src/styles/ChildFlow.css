@@ -408,6 +408,14 @@
   border-color: #e5f5e7;
 }
 
+.road-node.done {
+  cursor: default;
+}
+
+.road-node.done .road-node-label {
+  color: var(--nimbli-dark-green);
+}
+
 .road-node.active .road-node-circle {
   background: var(--nimbli-yellow);
   border-color: #fff1bf;
@@ -524,6 +532,14 @@
 .child-rest-card h3,
 .child-rest-card p {
   margin: 0;
+}
+
+.child-completed-card {
+  background: rgba(129, 199, 132, .14);
+}
+
+.child-completed-card h3 {
+  color: var(--nimbli-dark-green);
 }
 
 .child-rest-card p {
@@ -1424,6 +1440,18 @@
   font-size: 16px;
   font-weight: 900;
   cursor: pointer;
+}
+
+.completion-cta:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.completion-save-error {
+  margin: -8px 0 0;
+  color: var(--nimbli-dark-red);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 @media (max-width: 900px) {

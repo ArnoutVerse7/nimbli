@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
@@ -25,6 +25,47 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
       return emptyResult
     }
   })
+  const [isSavingResult, setIsSavingResult] = useState(result.completed)
+  const [saveError, setSaveError] = useState('')
+
+  const saveCompletion = useCallback(async () => {
+    if (!result.completed) {
+      setIsSavingResult(false)
+      return
+    }
+
+    const patientId = localStorage.getItem('patientId')
+
+    if (!patientId) {
+      setSaveError('De gekoppelde patiënt kon niet gevonden worden.')
+      setIsSavingResult(false)
+      return
+    }
+
+    setIsSavingResult(true)
+    setSaveError('')
+
+    const { data, error } = await supabase
+      .from('patient_exercises')
+      .update({
+        completed: true,
+        completion_percentage: 100,
+        accuracy_percentage: result.accuracy,
+        xp_earned: result.xp,
+        completed_at: result.completedAt || new Date().toISOString(),
+      })
+      .eq('patient_id', patientId)
+      .eq('exercise_id', exerciseId)
+      .select('id')
+      .maybeSingle()
+
+    if (error || !data) {
+      console.error(error || 'Geen oefentoewijzing gevonden.')
+      setSaveError('Het resultaat kon niet worden opgeslagen. Probeer opnieuw.')
+    }
+
+    setIsSavingResult(false)
+  }, [exerciseId, result])
 
   useEffect(() => {
     async function loadExercise() {
@@ -40,28 +81,11 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
       }
 
       setExercise(data)
-
-      const patientId = localStorage.getItem('patientId')
-
-      if (patientId && result.completed) {
-        const { error: progressError } = await supabase
-          .from('patient_exercises')
-          .update({
-            completed: true,
-            completion_percentage: 100,
-            accuracy_percentage: result.accuracy,
-            xp_earned: result.xp,
-            completed_at: result.completedAt || new Date().toISOString(),
-          })
-          .eq('patient_id', patientId)
-          .eq('exercise_id', exerciseId)
-
-        if (progressError) console.error(progressError)
-      }
+      await saveCompletion()
     }
 
     if (exerciseId) loadExercise()
-  }, [exerciseId, result])
+  }, [exerciseId, saveCompletion])
 
   if (!exercise) {
     return (
@@ -126,11 +150,24 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
             </p>
           )}
 
+          {saveError && <p className="completion-save-error">{saveError}</p>}
+
           <button
             className="completion-cta"
-            onClick={() => onNavigate('childDashboard')}
+            disabled={isSavingResult}
+            onClick={() => {
+              if (saveError) {
+                saveCompletion()
+              } else {
+                onNavigate('childDashboard')
+              }
+            }}
           >
-            Dat was het voor vandaag!
+            {isSavingResult
+              ? 'Resultaat opslaan...'
+              : saveError
+                ? 'Opnieuw proberen'
+                : 'Dat was het voor vandaag!'}
           </button>
         </section>
       </div>

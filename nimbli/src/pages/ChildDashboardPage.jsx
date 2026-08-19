@@ -102,7 +102,6 @@ export default function ChildDashboardPage({ onNavigate }) {
             setAssignedExercises(mappedExercises)
             setSelectedExercise(
                 exercisesForToday.find((item) => !item.completed)
-                || exercisesForToday[0]
                 || null
             )
         }
@@ -133,7 +132,11 @@ export default function ChildDashboardPage({ onNavigate }) {
 
         return {
             id: exercise?.assignmentId || `locked-${index}`,
-            label: exercise ? `Oefening ${index + 1}` : 'Vergrendeld',
+            label: exercise?.completed
+                ? 'Voltooid'
+                : exercise
+                    ? `Oefening ${index + 1}`
+                    : 'Vergrendeld',
             icon: exercise?.completed ? checkIcon : exercise ? starIcon : lockIcon,
             status,
             exercise,
@@ -252,9 +255,11 @@ export default function ChildDashboardPage({ onNavigate }) {
                                                         ? 'selected'
                                                         : ''
                                                 }`}
-                                                disabled={node.status === 'locked'}
+                                                disabled={node.status === 'locked' || node.status === 'done'}
                                                 onClick={() => {
-                                                    if (node.exercise) setSelectedExercise(node.exercise)
+                                                    if (node.exercise && !node.exercise.completed) {
+                                                        setSelectedExercise(node.exercise)
+                                                    }
                                                 }}
                                             >
                                                 <span className="road-node-circle">
@@ -277,7 +282,7 @@ export default function ChildDashboardPage({ onNavigate }) {
                                         </div>
 
                                         <div className="child-selected-copy">
-                                            <span>{selectedExercise.completed ? 'Voltooid' : 'Klaar om te starten'}</span>
+                                            <span>Klaar om te starten</span>
                                             <h3>{selectedExercise.title}</h3>
                                             <p>
                                                 {selectedExercise.duration || '2 min'} ·{' '}
@@ -290,9 +295,17 @@ export default function ChildDashboardPage({ onNavigate }) {
                                             type="button"
                                             onClick={() => onNavigate(`exerciseDetails-${selectedExercise.id}`)}
                                         >
-                                            {selectedExercise.completed ? 'Opnieuw oefenen' : 'Start oefening'}
+                                            Start oefening
                                         </button>
                                     </article>
+                                ) : todayExercises.length > 0 ? (
+                                    <div className="child-rest-card child-completed-card">
+                                        <img src={mascotIcon} alt="Nimbli mascotte" />
+                                        <div>
+                                            <h3>Alles voltooid voor vandaag!</h3>
+                                            <p>Goed gedaan. Je voltooide oefeningen kunnen niet opnieuw gestart worden.</p>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <div className="child-rest-card">
                                         <img src={mascotIcon} alt="Nimbli mascotte" />

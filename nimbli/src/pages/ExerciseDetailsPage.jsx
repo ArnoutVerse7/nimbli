@@ -8,24 +8,43 @@ export default function ExerciseDetailsPage({ exerciseId, onNavigate }) {
 
   useEffect(() => {
     async function loadExercise() {
-      const { data, error } = await supabase
-        .from('exercises')
-        .select('*')
-        .eq('id', exerciseId)
-        .single()
+      const patientId = localStorage.getItem('patientId')
+      const exerciseQuery = supabase
+          .from('exercises')
+          .select('*')
+          .eq('id', exerciseId)
+          .single()
+      const assignmentQuery = patientId
+        ? supabase
+            .from('patient_exercises')
+            .select('completed')
+            .eq('patient_id', patientId)
+            .eq('exercise_id', exerciseId)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null })
 
-      if (error) {
-        console.error(error)
+      const [exerciseResult, assignmentResult] = await Promise.all([
+        exerciseQuery,
+        assignmentQuery,
+      ])
+
+      if (exerciseResult.error || assignmentResult.error) {
+        console.error(exerciseResult.error || assignmentResult.error)
         return
       }
 
-      setExercise(data)
+      if (assignmentResult.data?.completed) {
+        onNavigate('childDashboard')
+        return
+      }
+
+      setExercise(exerciseResult.data)
     }
 
     if (exerciseId) {
       loadExercise()
     }
-  }, [exerciseId])
+  }, [exerciseId, onNavigate])
 
   if (!exercise) {
     return (
