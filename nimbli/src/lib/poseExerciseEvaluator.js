@@ -303,22 +303,31 @@ const evaluateHeelDrop = (points) => {
 const evaluateSingleLegBalance = (points) => {
   const requiredIndexes = [11, 12, 23, 24, 25, 26, 27, 28]
 
-  if (!hasVisiblePoints(points, requiredIndexes, 0.45)) return notVisibleResult()
+  if (!hasVisiblePoints(points, requiredIndexes, 0.35)) return notVisibleResult()
 
   const shoulders = midpoint(points[11], points[12])
   const hips = midpoint(points[23], points[24])
-  const bodyHeight = Math.max(
-    distance(shoulders, midpoint(points[27], points[28])),
-    0.2
-  )
   const leftIsSupport = points[27].y >= points[28].y
   const supportSide = leftIsSupport ? 'left' : 'right'
+  const raisedSide = leftIsSupport ? 'right' : 'left'
+  const supportAnkleIndex = leftIsSupport ? 27 : 28
+  const raisedAnkleIndex = leftIsSupport ? 28 : 27
+  const bodyHeight = Math.max(
+    distance(shoulders, points[supportAnkleIndex]),
+    0.2
+  )
   const supportKneeAngle = getLegAngle(points, supportSide)
-  const ankleDifference = Math.abs(points[27].y - points[28].y) / bodyHeight
+  const raisedKneeAngle = getLegAngle(points, raisedSide)
+  const ankleDifference = (
+    points[supportAnkleIndex].y - points[raisedAnkleIndex].y
+  ) / bodyHeight
   const torsoLean = angleFromVertical(shoulders, hips)
-  const footIsRaised = ankleDifference >= 0.11
-  const supportIsStraight = supportKneeAngle === null || supportKneeAngle >= 145
-  const torsoIsStable = torsoLean <= 22
+  const footIsClearlyHigher = ankleDifference >= 0.045
+  const liftedLegIsBent = raisedKneeAngle !== null && raisedKneeAngle <= 125
+  const footIsRaised = footIsClearlyHigher
+    || (ankleDifference >= 0.02 && liftedLegIsBent)
+  const supportIsStraight = supportKneeAngle === null || supportKneeAngle >= 130
+  const torsoIsStable = torsoLean <= 32
   const isCorrectPosition = footIsRaised && supportIsStraight && torsoIsStable
 
   let feedback = 'Til één voet van de grond'
@@ -333,7 +342,7 @@ const evaluateSingleLegBalance = (points) => {
     tone = 'success'
   }
 
-  const heightScore = clamp((ankleDifference / 0.11) * 100)
+  const heightScore = clamp((ankleDifference / 0.08) * 100)
   const score = isCorrectPosition
     ? Math.round((heightScore * 0.45) + 55)
     : Math.round((heightScore * 0.45) + (supportIsStraight ? 25 : 10) + (torsoIsStable ? 20 : 8))
@@ -348,24 +357,29 @@ const evaluateSingleLegBalance = (points) => {
     metrics: [
       { label: 'Voet', value: footIsRaised ? 'Omhoog' : 'Op de grond' },
       { label: 'Balans', value: torsoIsStable ? 'Stabiel' : 'Zoeken' },
+      { label: 'Voethoogte', value: `${Math.max(0, Math.round(ankleDifference * 100))}%` },
     ],
   }
 }
 
 const evaluateJumpingJack = (points) => {
-  const requiredIndexes = [11, 12, 15, 16, 23, 24, 27, 28]
+  const requiredIndexes = [11, 12, 13, 14, 15, 16, 23, 24, 27, 28]
 
-  if (!hasVisiblePoints(points, requiredIndexes, 0.45)) return notVisibleResult()
+  if (!hasVisiblePoints(points, requiredIndexes, 0.35)) return notVisibleResult()
 
   const shoulderWidth = Math.max(distance(points[11], points[12]), 0.08)
+  const hipWidth = Math.max(distance(points[23], points[24]), 0.08)
+  const referenceWidth = Math.max(shoulderWidth, hipWidth)
   const ankleWidth = distance(points[27], points[28])
-  const ankleRatio = ankleWidth / shoulderWidth
-  const armsUp = points[15].y < points[11].y - 0.04
-    && points[16].y < points[12].y - 0.04
-  const armsDown = points[15].y > points[11].y + 0.16
-    && points[16].y > points[12].y + 0.16
-  const legsOpen = ankleRatio >= 1.55
-  const legsClosed = ankleRatio <= 1.15
+  const ankleRatio = ankleWidth / referenceWidth
+  const armsUp = points[15].y < points[11].y + 0.02
+    && points[16].y < points[12].y + 0.02
+    && points[13].y < points[23].y
+    && points[14].y < points[24].y
+  const armsDown = points[15].y > points[11].y + 0.1
+    && points[16].y > points[12].y + 0.1
+  const legsOpen = ankleRatio >= 1.3
+  const legsClosed = ankleRatio <= 1.45
   const phase = armsUp && legsOpen
     ? 'open'
     : armsDown && legsClosed
@@ -376,16 +390,20 @@ const evaluateJumpingJack = (points) => {
   let feedback = 'Open je armen en benen tegelijk'
   let tone = 'guidance'
 
-  if (armsUp && !legsOpen) {
-    feedback = 'Zet je voeten nog wat verder uit elkaar'
-  } else if (legsOpen && !armsUp) {
-    feedback = 'Breng beide handen boven je schouders'
-  } else if (phase === 'open') {
+  if (phase === 'open') {
     feedback = 'Mooi open! Spring gecontroleerd terug'
     tone = 'success'
   } else if (phase === 'closed') {
     feedback = 'Goed gesloten, klaar voor de volgende'
     tone = 'success'
+  } else if (armsUp && !legsOpen) {
+    feedback = 'Zet je voeten nog wat verder uit elkaar'
+  } else if (legsOpen && !armsUp) {
+    feedback = 'Breng beide handen boven je schouders'
+  } else if (armsDown && !legsClosed) {
+    feedback = 'Breng je voeten terug dichter bij elkaar'
+  } else if (legsClosed && !armsDown) {
+    feedback = 'Breng je armen volledig terug omlaag'
   }
 
   const armScore = armsUp || armsDown ? 100 : 60
@@ -400,7 +418,15 @@ const evaluateJumpingJack = (points) => {
     feedback,
     metrics: [
       { label: 'Armen', value: armsUp ? 'Omhoog' : armsDown ? 'Omlaag' : 'Bewegen' },
-      { label: 'Benen', value: legsOpen ? 'Open' : legsClosed ? 'Gesloten' : 'Bewegen' },
+      {
+        label: 'Benen',
+        value: phase === 'open'
+          ? 'Open'
+          : phase === 'closed'
+            ? 'Gesloten'
+            : 'Bewegen',
+      },
+      { label: 'Spreiding', value: `${ankleRatio.toFixed(1)}×` },
     ],
   }
 }
