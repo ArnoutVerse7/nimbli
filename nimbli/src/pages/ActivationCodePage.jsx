@@ -4,14 +4,14 @@ import CodeInput from '../components/CodeInput'
 import PageShell from '../components/PageShell'
 import { supabase } from '../lib/supabase'
 export default function ActivationCodePage({ onNavigate }) {
-  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const [code, setCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const activationCode = code.join('').trim().toUpperCase()
+    const activationCode = code.trim().toUpperCase()
 
     if (activationCode.length !== 6) {
       setErrorMessage('Voer een geldige activatiecode in.')
@@ -68,7 +68,7 @@ export default function ActivationCodePage({ onNavigate }) {
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <CodeInput values={code} onChange={setCode} />
+        <CodeInput value={code} onChange={setCode} />
 
         {errorMessage && (
           <p className="form-error-message">

@@ -355,32 +355,43 @@ button:disabled {
 
 /* ===== ACTIVATION CODE ===== */
 
-.code-inputs {
+.code-input-label {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  margin: 2px 0;
+  gap: 6px;
 }
 
-.code-digit {
+.code-input-label span {
+  color: #34433e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.activation-code-field {
   width: 100%;
-  min-width: 0;
-  min-height: 48px;
-  padding: 0;
+  min-height: 52px;
+  padding: 0 16px;
   border: 1px solid #d5deda;
   border-radius: 9px;
   color: #1d232a;
   background: #fbfdfc;
-  text-align: center;
-  font-size: 1rem;
-  font-weight: 750;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   outline: none;
 }
 
-.code-digit:focus {
+.activation-code-field:focus {
   border-color: #19a383;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(25, 163, 131, 0.12);
+}
+
+.activation-code-field::placeholder {
+  color: #9aa5a1;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 /* ===== CHECKBOX ===== */
@@ -502,14 +513,6 @@ button:disabled {
 @media (max-width: 420px) {
   .auth-sidebar-link {
     font-size: 0.8rem;
-  }
-
-  .code-inputs {
-    gap: 5px;
-  }
-
-  .code-digit {
-    min-height: 44px;
   }
 
   .profile-grid {
