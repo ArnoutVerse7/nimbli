@@ -61,6 +61,10 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     const [showLogForm, setShowLogForm] = useState(false)
     const [newLogTitle, setNewLogTitle] = useState('')
     const [newLogText, setNewLogText] = useState('')
+    const [activationCode, setActivationCode] = useState('')
+    const [activationError, setActivationError] = useState('')
+    const [isGeneratingCode, setIsGeneratingCode] = useState(false)
+    const [copyMessage, setCopyMessage] = useState('')
 
     const loadLogEntries = useCallback(async (patientId) => {
         const { data, error } = await supabase
@@ -167,6 +171,43 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         loadLogEntries(patient.id)
     }
 
+    const generateActivationCode = async () => {
+        if (!patient?.id || patient.parent_id) return
+
+        setIsGeneratingCode(true)
+        setActivationError('')
+        setCopyMessage('')
+
+        const { data, error } = await supabase.rpc('regenerate_activation_code', {
+            p_patient_id: patient.id,
+        })
+
+        setIsGeneratingCode(false)
+
+        if (error) {
+            console.error(error)
+            setActivationError('De activatiecode kon niet worden aangemaakt. Probeer opnieuw.')
+            return
+        }
+
+        if (!data) {
+            setActivationError('Er werd geen activatiecode ontvangen.')
+            return
+        }
+
+        setActivationCode(String(data).toUpperCase())
+    }
+
+    const copyActivationCode = async () => {
+        try {
+            await navigator.clipboard.writeText(activationCode)
+            setCopyMessage('Code gekopieerd')
+        } catch (error) {
+            console.error(error)
+            setCopyMessage('Kopiëren lukte niet. Selecteer de code handmatig.')
+        }
+    }
+
     const completedExercises = assignedExercises.filter((item) => item.completed)
     const measuredExercises = completedExercises.filter(
         (item) => Number.isFinite(item.accuracy_percentage)
@@ -270,6 +311,59 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                 </strong>
                                 <span>Ouder/verzorger</span>
                             </div>
+
+                            {!patient.parent_id && (
+                                <div className="patient-activation-panel">
+                                    <div>
+                                        <strong>Activatiecode voor ouder</strong>
+                                        <span>
+                                            Maak een nieuwe code wanneer de oorspronkelijke code niet meer beschikbaar is.
+                                        </span>
+                                    </div>
+
+                                    {activationCode && (
+                                        <div className="patient-activation-code-row">
+                                            <code>{activationCode}</code>
+                                            <button
+                                                type="button"
+                                                className="secondary-btn"
+                                                onClick={copyActivationCode}
+                                            >
+                                                Kopiëren
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {copyMessage && (
+                                        <p className="activation-feedback" aria-live="polite">
+                                            {copyMessage}
+                                        </p>
+                                    )}
+
+                                    {activationError && (
+                                        <p className="activation-feedback error" role="alert">
+                                            {activationError}
+                                        </p>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        className="primary-btn activation-generate-btn"
+                                        onClick={generateActivationCode}
+                                        disabled={isGeneratingCode}
+                                    >
+                                        {isGeneratingCode
+                                            ? 'Code maken...'
+                                            : activationCode
+                                                ? 'Andere code maken'
+                                                : 'Nieuwe activatiecode maken'}
+                                    </button>
+
+                                    <small>
+                                        De code blijft 7 dagen geldig. Een nieuwe code maakt de vorige ongeldig.
+                                    </small>
+                                </div>
+                            )}
                         </div>
                     </section>
 
