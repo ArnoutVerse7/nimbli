@@ -975,7 +975,24 @@
 
 .profile-main-card h2 {
   text-align: center;
-  margin: 0 0 24px;
+  margin: 0 0 8px;
+}
+
+.profile-patient-details {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.profile-patient-details span {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--nimbli-page-background);
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .profile-stats-grid {
@@ -1010,6 +1027,31 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.mini-mission.completed {
+  background: color-mix(in srgb, var(--nimbli-light-green) 18%, white);
+}
+
+.mini-mission > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-mission strong,
+.mini-mission small {
+  display: block;
+}
+
+.mini-mission strong {
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.mini-mission small {
+  margin-bottom: 8px;
+  color: var(--text-light);
+  font-size: 12px;
 }
 
 .mini-mission img {
