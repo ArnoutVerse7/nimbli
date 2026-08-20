@@ -1,3 +1,4 @@
+-- Run after 001_initial_schema.sql to configure the exercise media bucket.
 begin;
 
 insert into storage.buckets (id, name, public, file_size_limit)

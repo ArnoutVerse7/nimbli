@@ -1250,17 +1250,6 @@
 .exercise-execution-page {
   background: var(--bg-light);
   overflow-x: hidden;
-
-}
-
-.execution-header {
-  height: 74px;
-  background: var(--bg-card);
-  padding: 0 24px;
-  box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
 }
 
 .execution-mascot-img {
@@ -1345,8 +1334,7 @@
   font-weight: 800;
 }
 
-.execution-mascot,
-.mascot-large {
+.execution-mascot {
   font-size: 110px;
 }
 
@@ -1357,7 +1345,6 @@
   gap: 14px;
 }
 
-.counter-large,
 .timer-large {
   font-size: 76px;
   font-weight: 900;
@@ -1444,12 +1431,6 @@
 .pose-metric strong {
   color: var(--text-dark);
   font-size: 14px;
-}
-
-.execution-instructions {
-  font-size: 16px;
-  color: var(--text-dark);
-  font-weight: 700;
 }
 
 .execution-controls {

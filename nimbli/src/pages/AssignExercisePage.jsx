@@ -118,7 +118,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
 
             if (updateError) {
                 console.error(updateError)
-                setSaveError('De planning van deze oefening kon niet worden bijgewerkt. Voer migratie 003_assignment_schedule.sql opnieuw uit.')
+                setSaveError('De planning van deze oefening kon niet worden bijgewerkt. Probeer opnieuw.')
                 setIsSaving(false)
                 return
             }
@@ -157,7 +157,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                 || error?.message?.includes('end_date')
 
             setSaveError(scheduleMigrationMissing
-                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
+                ? 'De Supabase-database mist de planningsconfiguratie.'
                 : 'De oefening kon niet worden opgeslagen. Probeer opnieuw.')
             setIsSaving(false)
             return

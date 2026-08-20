@@ -1,3 +1,4 @@
+-- Run once on an empty Supabase project, before 002_storage_policies.sql.
 begin;
 
 create extension if not exists pgcrypto with schema extensions;

@@ -164,7 +164,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
                 || error?.message?.includes('end_date')
 
             setErrorMessage(scheduleMigrationMissing
-                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
+                ? 'De Supabase-database mist de planningsconfiguratie.'
                 : error.message || 'Er ging iets mis bij het opslaan.')
         } finally {
             setIsSaving(false)

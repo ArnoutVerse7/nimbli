@@ -363,14 +363,6 @@
     margin-bottom: 18px;
 }
 
-.patient-image-placeholder {
-    width: 150px;
-    height: 150px;
-    background: var(--nimbli-gray);
-    border: 3px solid var(--nimbli-black);
-    margin: 0 auto 16px;
-}
-
 .patient-preview-card h3 {
     margin: 0 0 4px;
 }
@@ -415,21 +407,6 @@
     color: white;
     letter-spacing: 8px;
     font-weight: 900;
-}
-
-.share-options {
-    display: flex;
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.share-options button {
-    border: 1px solid var(--nimbli-border);
-    background: white;
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-weight: 800;
-    color: var(--nimbli-text-muted);
 }
 
 .next-steps-box {
@@ -650,17 +627,6 @@
     padding: 5px 10px;
     font-weight: 900;
     font-size: 12px;
-}
-
-.session-meta {
-    display: flex;
-    gap: 24px;
-    color: var(--nimbli-text-muted);
-    margin-bottom: 14px;
-}
-
-.session-meta p {
-    margin: 0;
 }
 
 .session-label {
@@ -994,13 +960,6 @@
 
 .exercise-library-card:hover {
     border-color: var(--nimbli-main-green);
-}
-
-.video-thumb {
-    display: grid;
-    place-items: center;
-    color: white;
-    font-size: 20px;
 }
 
 .exercise-card-badges {
