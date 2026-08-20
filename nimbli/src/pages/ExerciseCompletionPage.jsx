@@ -45,19 +45,12 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
     setIsSavingResult(true)
     setSaveError('')
 
-    const { data, error } = await supabase
-      .from('patient_exercises')
-      .update({
-        completed: true,
-        completion_percentage: 100,
-        accuracy_percentage: result.accuracy,
-        xp_earned: result.xp,
-        completed_at: result.completedAt || new Date().toISOString(),
-      })
-      .eq('patient_id', patientId)
-      .eq('exercise_id', exerciseId)
-      .select('id')
-      .maybeSingle()
+    const { data, error } = await supabase.rpc('complete_patient_exercise', {
+      p_patient_id: patientId,
+      p_exercise_id: exerciseId,
+      p_accuracy_percentage: result.accuracy,
+      p_xp_earned: result.xp,
+    })
 
     if (error || !data) {
       console.error(error || 'Geen oefentoewijzing gevonden.')
