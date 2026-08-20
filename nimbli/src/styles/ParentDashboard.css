@@ -394,25 +394,6 @@
   text-transform: uppercase;
 }
 
-.parent-category-card { padding-bottom: 21px; }
-
-.parent-metrics {
-  margin-top: 15px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px 22px;
-}
-
-.parent-metric > div:first-child {
-  margin-bottom: 6px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-}
-
-.parent-metric strong { color: var(--parent-green-dark); }
-
-.parent-bar,
 .parent-inline-progress {
   height: 5px;
   overflow: hidden;
@@ -420,7 +401,6 @@
   background: #e8eeeb;
 }
 
-.parent-bar div,
 .parent-inline-progress div {
   height: 100%;
   border-radius: inherit;
@@ -882,7 +862,6 @@
   .parent-content { padding: 22px 18px 38px; }
 
   .parent-summary-grid,
-  .parent-metrics,
   .parent-dashboard-side { grid-template-columns: 1fr; }
 
   .parent-week-strip-card,

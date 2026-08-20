@@ -26,10 +26,36 @@ const sameDay = (firstDate, secondDate) => {
 const formatShortDate = (date) =>
   new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'short' }).format(date)
 
-function ExerciseRow({ assignment, showProgress = false }) {
+function ExerciseRow({ assignment, showProgress = false, statusDate = null }) {
   const exercise = assignment.exercises
   const coverImage = getExerciseCover(exercise)
   const progress = assignment.completion_percentage || 0
+  const completedOnDate = statusDate
+    ? assignment.completed && sameDay(assignment.completed_at, statusDate)
+    : assignment.completed
+  const selectedDay = statusDate ? new Date(statusDate) : null
+  const today = new Date()
+
+  selectedDay?.setHours(0, 0, 0, 0)
+  today.setHours(0, 0, 0, 0)
+
+  let statusLabel = completedOnDate ? 'Voltooid' : `${progress}%`
+  let displayedProgress = completedOnDate ? 100 : progress
+
+  if (statusDate && !completedOnDate) {
+    displayedProgress = 0
+
+    if (selectedDay > today) {
+      statusLabel = 'Gepland'
+    } else if (assignment.completed_at && new Date(assignment.completed_at) < selectedDay) {
+      statusLabel = 'Eerder voltooid'
+    } else if (selectedDay < today) {
+      statusLabel = 'Niet voltooid'
+    } else {
+      displayedProgress = assignment.completed ? 0 : progress
+      statusLabel = displayedProgress ? `${displayedProgress}%` : 'Nog te doen'
+    }
+  }
 
   return (
     <article className="parent-exercise-row">
@@ -51,13 +77,13 @@ function ExerciseRow({ assignment, showProgress = false }) {
         </span>
         {showProgress && (
           <div className="parent-inline-progress">
-            <div style={{ width: `${progress}%` }} />
+            <div style={{ width: `${displayedProgress}%` }} />
           </div>
         )}
       </div>
 
-      <span className={`parent-status-pill ${assignment.completed ? 'done' : 'open'}`}>
-        {assignment.completed ? 'Voltooid' : `${progress}%`}
+      <span className={`parent-status-pill ${completedOnDate ? 'done' : 'open'}`}>
+        {statusLabel}
       </span>
     </article>
   )
@@ -183,17 +209,6 @@ export default function ParentDashboardPage({ onNavigate }) {
   const selectedDayExercises = assignedExercises.filter((item) =>
     isAssignmentPlannedForDate(item, selectedDate)
   )
-  const categoryProgress = Object.values(
-    assignedExercises.reduce((categories, item) => {
-      const category = item.exercises?.category || 'Overig'
-      const current = categories[category] || { label: category, total: 0, count: 0 }
-      current.total += item.completion_percentage || 0
-      current.count += 1
-      categories[category] = current
-      return categories
-    }, {})
-  ).map((item) => ({ ...item, progress: Math.round(item.total / item.count) }))
-
   const saveProfile = async () => {
     if (!parentProfile?.id || !profileForm.fullName.trim()) return
 
@@ -325,19 +340,6 @@ export default function ParentDashboardPage({ onNavigate }) {
                 </div>
               </section>
 
-              <section className="parent-card parent-category-card">
-                <div className="parent-section-title"><h3>Voortgang per categorie</h3></div>
-                {categoryProgress.length ? (
-                  <div className="parent-metrics">
-                    {categoryProgress.map((metric) => (
-                      <div className="parent-metric" key={metric.label}>
-                        <div><span>{metric.label}</span><strong>{metric.progress}%</strong></div>
-                        <div className="parent-bar"><div style={{ width: `${metric.progress}%` }} /></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : <p className="parent-empty-text">Nog geen voortgang beschikbaar.</p>}
-              </section>
             </section>
 
             <aside className="parent-dashboard-side">
@@ -345,7 +347,7 @@ export default function ParentDashboardPage({ onNavigate }) {
                 <div className="parent-section-title"><h3>Oefeningen van vandaag</h3><button onClick={() => setActiveView('schedule')}>Bekijk planning</button></div>
                 <div className="parent-exercise-list">
                   {todayExercises.length ? todayExercises.slice(0, 3).map((item) => (
-                    <ExerciseRow assignment={item} key={item.id} />
+                    <ExerciseRow assignment={item} statusDate={new Date()} key={item.id} />
                   )) : <p className="parent-empty-text">Vandaag staan er geen oefeningen gepland.</p>}
                 </div>
               </section>
@@ -407,7 +409,12 @@ export default function ParentDashboardPage({ onNavigate }) {
                 </div>
 
                 {selectedDayExercises.length ? selectedDayExercises.map((item) => (
-                  <ExerciseRow assignment={item} showProgress key={item.id} />
+                  <ExerciseRow
+                    assignment={item}
+                    showProgress
+                    statusDate={selectedDate}
+                    key={item.id}
+                  />
                 )) : (
                   <div className="parent-empty-agenda">
                     <h3>Geen oefeningen gepland</h3>
