@@ -513,6 +513,7 @@
   padding: 7px;
   border-radius: 50%;
   background: var(--nimbli-light-green);
+  filter: brightness(0) invert(1);
 }
 
 .parent-recent-item b {

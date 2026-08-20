@@ -186,6 +186,7 @@
   object-fit: contain;
   padding: 8px;
   border-radius: 50%;
+  filter: brightness(0) invert(1);
 }
 
 .child-road-stats > span:nth-child(1) img {
@@ -1595,6 +1596,7 @@
   width: 24px;
   height: 24px;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .result-label {
