@@ -452,23 +452,13 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
             ) / measuredExercises.length
         )
         : 0
-    const categoryProgress = Object.values(
-        measuredExercises.reduce((categories, item) => {
-            const category = item.exercises?.category || 'Overig'
-            const current = categories[category] || { category, total: 0, count: 0 }
-
-            current.total += getAccuracy(item)
-            current.count += 1
-            categories[category] = current
-
-            return categories
-        }, {})
-    ).map((item) => ({
-        category: item.category,
-        progress: Math.round(item.total / item.count),
-    }))
     const sessionResults = [...completedExercises]
         .sort((a, b) => new Date(b.completed_at || 0) - new Date(a.completed_at || 0))
+    const hasDailyAccuracy = sessionResults.some((item) => {
+        if (getAccuracy(item) === null || !item.completed_at) return false
+
+        return !Number.isNaN(new Date(item.completed_at).getTime())
+    })
     const recentResults = sessionResults.slice(0, 3)
 
     if (!patient) {
@@ -653,28 +643,10 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                             <div className="patient-detail-card">
                                 <h3>Juistheid per dag</h3>
 
-                                {categoryProgress.length === 0 ? (
+                                {!hasDailyAccuracy ? (
                                     <p className="empty-text">Nog geen voortgang beschikbaar.</p>
                                 ) : (
-                                    <>
-                                        <ProgressChart sessions={sessionResults} />
-                                        <h4 className="category-progress-title">
-                                            Gemiddelde juistheid per categorie
-                                        </h4>
-                                        <div className="category-progress-list">
-                                            {categoryProgress.map((item) => (
-                                                <div className="category-progress-item" key={item.category}>
-                                                    <div>
-                                                        <strong>{item.category}</strong>
-                                                        <span>{item.progress}%</span>
-                                                    </div>
-                                                    <div className="category-progress-bar">
-                                                        <div style={{ width: `${item.progress}%` }}></div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
+                                    <ProgressChart sessions={sessionResults} />
                                 )}
                             </div>
 
