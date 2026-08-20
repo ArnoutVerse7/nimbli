@@ -74,4 +74,6 @@ grant execute on function public.complete_patient_exercise(
   integer
 ) to authenticated;
 
+notify pgrst, 'reload schema';
+
 commit;
