@@ -117,6 +117,8 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         exercise_id,
                         completion_percentage,
                         completed,
+                        accuracy_percentage,
+                        xp_earned,
                         completed_at,
                         assigned_at,
                         start_date,
@@ -370,13 +372,21 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     }
 
     const completedExercises = assignedExercises.filter((item) => item.completed)
+    const getAccuracy = (item) => {
+        if (item.accuracy_percentage === null || item.accuracy_percentage === undefined) {
+            return null
+        }
+
+        const accuracy = Number(item.accuracy_percentage)
+        return Number.isFinite(accuracy) ? accuracy : null
+    }
     const measuredExercises = completedExercises.filter(
-        (item) => Number.isFinite(item.accuracy_percentage)
+        (item) => getAccuracy(item) !== null
     )
     const averageAccuracy = measuredExercises.length
         ? Math.round(
             measuredExercises.reduce(
-                (total, item) => total + item.accuracy_percentage,
+                (total, item) => total + getAccuracy(item),
                 0
             ) / measuredExercises.length
         )
@@ -396,9 +406,9 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         category: item.category,
         progress: Math.round(item.total / item.count),
     }))
-    const recentResults = [...completedExercises]
+    const sessionResults = [...completedExercises]
         .sort((a, b) => new Date(b.completed_at || 0) - new Date(a.completed_at || 0))
-        .slice(0, 3)
+    const recentResults = sessionResults.slice(0, 3)
 
     if (!patient) {
         return (
@@ -530,7 +540,9 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
 
                     <section className="patient-detail-stats">
                         <div className="kine-stat-card">
-                            <strong>{averageAccuracy}%</strong>
+                            <strong>
+                                {measuredExercises.length ? `${averageAccuracy}%` : '—'}
+                            </strong>
                             <span>Gemiddelde juistheid</span>
                         </div>
 
@@ -612,7 +624,11 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                         <div className="detail-result-row" key={item.id}>
                                             <img src={checkIcon} alt="" />
                                             <span>{item.exercises?.title || 'Oefening'} voltooid</span>
-                                            <strong>{item.accuracy_percentage || 0}%</strong>
+                                            <strong>
+                                                {getAccuracy(item) === null
+                                                    ? 'Geen meting'
+                                                    : `${getAccuracy(item)}%`}
+                                            </strong>
                                         </div>
                                     ))
                                 )}
@@ -624,11 +640,11 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                         <section className="patient-detail-card">
                             <h3>Sessie geschiedenis</h3>
 
-                            {recentResults.length === 0 ? (
+                            {sessionResults.length === 0 ? (
                                 <p className="empty-text">Nog geen voltooide sessies.</p>
                             ) : (
                                 <div className="session-history-list">
-                                    {recentResults.map((item) => (
+                                    {sessionResults.map((item) => (
                                         <article className="session-history-card" key={item.id}>
                                             <div className="session-check">✓</div>
 
@@ -639,11 +655,16 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                                             ? new Date(item.completed_at).toLocaleDateString('nl-BE')
                                                             : 'Datum onbekend'}
                                                     </strong>
-                                                    <span>{item.accuracy_percentage || 0}% juist</span>
+                                                    <span>
+                                                        {getAccuracy(item) === null
+                                                            ? 'Geen juistheidsmeting'
+                                                            : `${getAccuracy(item)}% juist`}
+                                                    </span>
                                                 </div>
 
                                                 <div className="session-tags">
                                                     <span>{item.exercises?.title || 'Oefening'}</span>
+                                                    <span>+{item.xp_earned || 0} XP</span>
                                                 </div>
                                             </div>
                                         </article>
