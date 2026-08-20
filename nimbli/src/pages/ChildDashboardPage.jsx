@@ -267,8 +267,8 @@ export default function ChildDashboardPage({ onNavigate }) {
                                                                 ? 'check'
                                                                 : node.status === 'active'
                                                                     ? 'star'
-                                                                    : node.status === 'open'
-                                                                        ? 'moon'
+                                                                : node.status === 'open'
+                                                                        ? 'play'
                                                                         : 'lock'
                                                         }
                                                     />

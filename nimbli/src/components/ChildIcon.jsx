@@ -17,6 +17,7 @@ const iconPaths = {
     ),
     cross: <path d="m7 7 10 10M17 7 7 17" />,
     moon: <path d="M19 15.5A8 8 0 0 1 8.5 5a8 8 0 1 0 10.5 10.5Z" />,
+    play: <path d="m9 7 8 5-8 5Z" />,
     lock: (
         <>
             <rect x="5" y="10" width="14" height="10" rx="2.5" />

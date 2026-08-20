@@ -430,6 +430,11 @@
   stroke: var(--nimbli-white);
 }
 
+.road-node.open .child-symbol {
+  fill: var(--nimbli-white);
+  stroke: var(--nimbli-white);
+}
+
 .road-node.locked .child-symbol {
   color: #626b67;
 }
