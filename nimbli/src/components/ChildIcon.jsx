@@ -15,6 +15,7 @@ const iconPaths = {
             <path d="m13.5 10.5 6-6M16 4.5h3.5V8" />
         </>
     ),
+    cross: <path d="m7 7 10 10M17 7 7 17" />,
     moon: <path d="M19 15.5A8 8 0 0 1 8.5 5a8 8 0 1 0 10.5 10.5Z" />,
     lock: (
         <>

@@ -167,17 +167,60 @@ export default function ChildDashboardPage({ onNavigate }) {
                                             isAssignmentPlannedForDate(item, date)
                                         )
                                         const plannedCount = plannedExercises.length
-                                        const completedCount = plannedExercises.filter((item) => item.completed).length
-                                        const isToday = date.toDateString() === new Date().toDateString()
-                                        const isComplete = plannedCount > 0 && completedCount === plannedCount
+                                        const today = new Date()
+                                        today.setHours(0, 0, 0, 0)
+                                        const calendarDate = new Date(date)
+                                        calendarDate.setHours(0, 0, 0, 0)
+                                        const isToday = calendarDate.getTime() === today.getTime()
+                                        const isPast = calendarDate < today
+                                        const isFuture = calendarDate > today
+                                        const completedOnDate = plannedExercises.filter((item) =>
+                                            item.completed_at
+                                            && new Date(item.completed_at).toDateString() === date.toDateString()
+                                        ).length
+                                        const completedCount = isToday
+                                            ? plannedExercises.filter((item) => item.completed).length
+                                            : completedOnDate
+                                        const isComplete =
+                                            plannedCount > 0
+                                            && completedCount === plannedCount
+                                        const status = isFuture
+                                            ? 'upcoming'
+                                            : isComplete
+                                                ? 'done'
+                                                : isToday && plannedCount > 0
+                                                    ? 'active'
+                                                    : isPast && plannedCount > 0
+                                                        ? 'missed'
+                                                        : 'rest'
+                                        const iconName = status === 'done'
+                                            ? 'check'
+                                            : status === 'active'
+                                                ? 'star'
+                                                : status === 'missed'
+                                                    ? 'cross'
+                                                    : null
 
                                         return (
-                                            <div className={`week-day ${isToday ? 'today' : ''}`} key={date.toISOString()}>
+                                            <div
+                                                className={`week-day ${status}`}
+                                                key={date.toISOString()}
+                                                title={
+                                                    status === 'done'
+                                                        ? 'Voltooid'
+                                                        : status === 'active'
+                                                            ? 'Vandaag actief'
+                                                            : status === 'missed'
+                                                                ? 'Niet voltooid'
+                                                                : status === 'rest'
+                                                                    ? 'Rustdag'
+                                                                    : 'Komende dag'
+                                                }
+                                            >
                                                 <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
-                                                <div className={`week-dot ${isComplete ? 'done' : plannedCount ? 'planned' : ''}`}>
-                                                    {date.getDate()}
+                                                <div className="week-status-circle">
+                                                    {iconName && <ChildIcon name={iconName} />}
                                                 </div>
-                                                <small>{plannedCount ? `${plannedCount} oef.` : 'Rust'}</small>
                                             </div>
                                         )
                                     })}
