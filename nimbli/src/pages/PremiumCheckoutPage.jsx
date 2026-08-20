@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
+import KinesistSidebar from '../components/KinesistSidebar'
+import IconBadge from '../components/IconBadge'
 import '../styles/KinesistFlow.css'
 
-export default function PremiumCheckoutPage({ memberId, onNavigate }) {
+export default function PremiumCheckoutPage({ onNavigate }) {
     const [member, setMember] = useState(null)
     const [mainKinesist, setMainKinesist] = useState(null)
     const [success, setSuccess] = useState(false)
@@ -13,29 +13,27 @@ export default function PremiumCheckoutPage({ memberId, onNavigate }) {
 
     useEffect(() => {
         async function loadData() {
+            const { data: userData } = await supabase.auth.getUser()
+
+            if (!userData.user) return
+
             const { data: mainData } = await supabase
-                .from('kinesists')
+                .from('profiles')
                 .select('*')
-                .eq('email', 'testkinesist@nimbli.com')
+                .eq('id', userData.user.id)
                 .single()
 
             setMainKinesist(mainData)
 
-            if (memberId) {
-                const { data: memberData, error: memberError } = await supabase
-                    .from('kinesists')
-                    .select('*')
-                    .eq('id', memberId)
-                    .single()
+            const pendingMember = sessionStorage.getItem('pendingTeamMember')
 
-                if (!memberError) {
-                    setMember(memberData)
-                }
+            if (pendingMember) {
+                setMember(JSON.parse(pendingMember))
             }
         }
 
         loadData()
-    }, [memberId])
+    }, [])
 
     const confirmUpgrade = async () => {
         if (!mainKinesist?.id) return
@@ -62,29 +60,12 @@ export default function PremiumCheckoutPage({ memberId, onNavigate }) {
         }
 
         setSuccess(true)
+        sessionStorage.removeItem('pendingTeamMember')
     }
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="settings" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
@@ -144,7 +125,7 @@ export default function PremiumCheckoutPage({ memberId, onNavigate }) {
                         </section>
                     ) : (
                         <section className="assign-success-card">
-                            <img src={checkIcon} alt="" />
+                            <IconBadge src={checkIcon} className="assign-success-icon" />
                             <h2>Praktijkaccount geactiveerd!</h2>
                             <p>Je abonnement werd bijgewerkt naar Premium.</p>
 

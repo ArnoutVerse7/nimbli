@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
+import KinesistSidebar from '../components/KinesistSidebar'
 import '../styles/KinesistFlow.css'
 
 export default function PremiumTeamSignupPage({ onNavigate }) {
@@ -12,55 +10,32 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
     })
 
     const [isSaving, setIsSaving] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
-    const saveTeamMember = async () => {
-        setIsSaving(true)
+    const saveTeamMember = () => {
+        setErrorMessage('')
 
-        const { data, error } = await supabase
-            .from('kinesists')
-            .upsert(
-                {
-                    name: teamMember.name || 'Nieuwe kinesist',
-                    email: teamMember.email || 'kinesist@email.com',
-                    role: teamMember.role || 'kinesist',
-                },
-                { onConflict: 'email' }
-            )
-            .select()
-            .single()
-
-        if (error) {
-            console.error(error)
-            alert('Fout bij opslaan van teamlid')
-            setIsSaving(false)
+        if (!teamMember.name.trim() || !teamMember.email.trim()) {
+            setErrorMessage('Vul de naam en het e-mailadres van het teamlid in.')
             return
         }
 
+        setIsSaving(true)
+        sessionStorage.setItem(
+            'pendingTeamMember',
+            JSON.stringify({
+                name: teamMember.name.trim(),
+                email: teamMember.email.trim().toLowerCase(),
+                role: teamMember.role.trim() || 'kinesist',
+            })
+        )
         setIsSaving(false)
-        onNavigate(`premiumCheckout-${data.id}`)
+        onNavigate('premiumCheckout-team')
     }
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="settings" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
@@ -79,6 +54,10 @@ export default function PremiumTeamSignupPage({ onNavigate }) {
                             <div className="active"></div>
                             <div></div>
                         </div>
+
+                        {errorMessage && (
+                            <p className="form-error-message">{errorMessage}</p>
+                        )}
 
                         <h2>Teamlid toevoegen</h2>
                         <p>Voeg een extra kinesist toe aan je praktijkaccount.</p>

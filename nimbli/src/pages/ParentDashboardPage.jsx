@@ -1,230 +1,499 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
+import { getCurrentUserAndProfile } from '../lib/auth'
+import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+  formatExerciseScheduleRange,
+  getWeekDates,
+  isAssignmentPlannedForDate,
+} from '../lib/exerciseSchedule'
+import ParentSidebar from '../components/ParentSidebar'
+import IconBadge from '../components/IconBadge'
 import profileIcon from '../assets/logos/profile.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
-import starIcon from '../assets/logos/star.png'
-import trophyIcon from '../assets/logos/trophy.png'
-import streakIcon from '../assets/logos/streak.png'
 import '../styles/ParentDashboard.css'
 
+const sameDay = (firstDate, secondDate) => {
+  if (!firstDate || !secondDate) return false
+
+  const first = new Date(firstDate)
+  const second = new Date(secondDate)
+
+  return first.getFullYear() === second.getFullYear()
+    && first.getMonth() === second.getMonth()
+    && first.getDate() === second.getDate()
+}
+
+const formatShortDate = (date) =>
+  new Intl.DateTimeFormat('nl-BE', { day: 'numeric', month: 'short' }).format(date)
+
+function ExerciseRow({ assignment, showProgress = false, statusDate = null }) {
+  const exercise = assignment.exercises
+  const coverImage = getExerciseCover(exercise)
+  const progress = assignment.completion_percentage || 0
+  const completedOnDate = statusDate
+    ? assignment.completed && sameDay(assignment.completed_at, statusDate)
+    : assignment.completed
+  const selectedDay = statusDate ? new Date(statusDate) : null
+  const today = new Date()
+
+  selectedDay?.setHours(0, 0, 0, 0)
+  today.setHours(0, 0, 0, 0)
+
+  let statusLabel = completedOnDate ? 'Voltooid' : `${progress}%`
+  let displayedProgress = completedOnDate ? 100 : progress
+
+  if (statusDate && !completedOnDate) {
+    displayedProgress = 0
+
+    if (selectedDay > today) {
+      statusLabel = 'Gepland'
+    } else if (assignment.completed_at && new Date(assignment.completed_at) < selectedDay) {
+      statusLabel = 'Eerder voltooid'
+    } else if (selectedDay < today) {
+      statusLabel = 'Niet voltooid'
+    } else {
+      displayedProgress = assignment.completed ? 0 : progress
+      statusLabel = displayedProgress ? `${displayedProgress}%` : 'Nog te doen'
+    }
+  }
+
+  return (
+    <article className="parent-exercise-row">
+      <div className="parent-exercise-thumb">
+        {coverImage ? (
+          <img src={coverImage} alt={exercise?.title || 'Oefening'} />
+        ) : (
+          <span>{exercise?.title?.slice(0, 1) || 'O'}</span>
+        )}
+      </div>
+
+      <div className="parent-exercise-copy">
+        <strong>{exercise?.title || 'Oefening'}</strong>
+        <span>
+          {exercise?.duration || '2 min'} · {exercise?.reps || '10 herhalingen'}
+        </span>
+        <span className="parent-exercise-period">
+          Planning: {formatExerciseScheduleRange(assignment)}
+        </span>
+        {showProgress && (
+          <div className="parent-inline-progress">
+            <div style={{ width: `${displayedProgress}%` }} />
+          </div>
+        )}
+      </div>
+
+      <span className={`parent-status-pill ${completedOnDate ? 'done' : 'open'}`}>
+        {statusLabel}
+      </span>
+    </article>
+  )
+}
+
+function RecentActivityList({ activities }) {
+  if (!activities.length) {
+    return <p className="parent-empty-text">Nog geen activiteiten geregistreerd.</p>
+  }
+
+  return activities.map((item) => (
+    <div className="parent-recent-item" key={item.id}>
+      <IconBadge src={checkIcon} className="parent-recent-icon" />
+      <div>
+        <strong>{item.exercises?.title || 'Oefening'}</strong>
+        <span>{new Date(item.completed_at).toLocaleDateString('nl-BE')}</span>
+      </div>
+      <b>+{item.xp_earned || 0} XP</b>
+    </div>
+  ))
+}
+
 export default function ParentDashboardPage({ onNavigate }) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeView, setActiveView] = useState('dashboard')
   const [patient, setPatient] = useState(null)
+  const [parentProfile, setParentProfile] = useState(null)
   const [assignedExercises, setAssignedExercises] = useState([])
+  const [exerciseLoadError, setExerciseLoadError] = useState('')
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [scheduleWeekOffset, setScheduleWeekOffset] = useState(0)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [settingsMessage, setSettingsMessage] = useState('')
+  const [profileForm, setProfileForm] = useState({ fullName: '' })
+  const [notifications, setNotifications] = useState({
+    exerciseReminder: true,
+    progressUpdates: true,
+    weeklySummary: true,
+  })
 
   useEffect(() => {
     async function loadParentData() {
       const patientId = localStorage.getItem('patientId')
+      const { profile, error: profileError } = await getCurrentUserAndProfile('parent')
+
+      if (profileError || !profile) {
+        console.error(profileError)
+        onNavigate('login')
+        return
+      }
+
+      setParentProfile(profile)
+      setProfileForm({ fullName: profile.full_name || '' })
+
+      const storedNotifications = localStorage.getItem(`parentNotifications-${profile.id}`)
+      if (storedNotifications) {
+        try {
+          setNotifications(JSON.parse(storedNotifications))
+        } catch {
+          localStorage.removeItem(`parentNotifications-${profile.id}`)
+        }
+      }
 
       if (!patientId) return
 
-      const { data: patientData, error: patientError } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('id', patientId)
-        .single()
+      const [patientResult, exerciseResult] = await Promise.all([
+        supabase
+          .from('patients')
+          .select('*')
+          .eq('id', patientId)
+          .single(),
+        supabase
+          .from('patient_exercises')
+          .select('*, exercises (*)')
+          .eq('patient_id', patientId)
+          .order('assigned_at', { ascending: false }),
+      ])
 
-      if (!patientError) {
-        setPatient(patientData)
+      if (patientResult.error) {
+        console.error(patientResult.error)
+      } else {
+        setPatient(patientResult.data)
       }
 
-      const { data: exerciseData, error: exerciseError } = await supabase
-        .from('patient_exercises')
-        .select(`
-          *,
-          exercises (*)
-        `)
-        .eq('patient_id', patientId)
-
-      if (!exerciseError) {
-        setAssignedExercises(exerciseData || [])
+      if (exerciseResult.error) {
+        console.error(exerciseResult.error)
+        setExerciseLoadError('De oefenplanning kon niet geladen worden. Probeer de pagina opnieuw te laden.')
+      } else {
+        setExerciseLoadError('')
+        setAssignedExercises(exerciseResult.data || [])
       }
     }
 
     loadParentData()
-  }, [])
+  }, [onNavigate])
 
-  const weekData = [
-    { day: 'ZA', date: '01', exercises: 2, status: 'done' },
-    { day: 'ZO', date: '02', exercises: 1, status: 'done' },
-    { day: 'MA', date: '03', exercises: assignedExercises.length, status: 'current' },
-    { day: 'DI', date: '04', exercises: 2, status: 'pending' },
-    { day: 'WO', date: '05', exercises: 0, status: 'pending' },
-    { day: 'DO', date: '06', exercises: 2, status: 'pending' },
-    { day: 'VR', date: '07', exercises: 1, status: 'pending' },
-  ]
-
-  const activities = assignedExercises.map((item) => ({
-    title: item.exercises?.title || 'Oefening',
-    date: 'Vandaag',
-    xp: '+10XP',
+  const currentWeekDays = useMemo(() => getWeekDates(), [])
+  const scheduleWeekDays = useMemo(
+    () => getWeekDates(scheduleWeekOffset),
+    [scheduleWeekOffset]
+  )
+  const completedExercises = assignedExercises.filter((item) => item.completed)
+  const overallProgress = assignedExercises.length
+    ? Math.round(
+      assignedExercises.reduce(
+        (total, item) => total + (item.completion_percentage || 0),
+        0
+      ) / assignedExercises.length
+    )
+    : 0
+  const totalXp = assignedExercises.reduce((total, item) => total + (item.xp_earned || 0), 0)
+  const activityPerDay = currentWeekDays.map((date) => ({
+    date,
+    count: completedExercises.filter((item) => sameDay(item.completed_at, date)).length,
   }))
+  const maxDailyActivity = Math.max(...activityPerDay.map((item) => item.count), 1)
+  const recentActivities = [...completedExercises]
+    .sort((first, second) => new Date(second.completed_at || 0) - new Date(first.completed_at || 0))
+    .slice(0, 4)
+  const todayExercises = assignedExercises.filter((item) =>
+    isAssignmentPlannedForDate(item, new Date())
+  )
+  const selectedDayExercises = assignedExercises.filter((item) =>
+    isAssignmentPlannedForDate(item, selectedDate)
+  )
+  const saveProfile = async () => {
+    if (!parentProfile?.id || !profileForm.fullName.trim()) return
 
-  const metrics = [
-    { label: 'Mobiliteit', value: '+5%', progress: 60 },
-    { label: 'Kracht', value: '+8%', progress: 75 },
-    { label: 'Balans', value: '+3%', progress: 45 },
-  ]
+    setIsSaving(true)
+    setSettingsMessage('')
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ full_name: profileForm.fullName.trim() })
+      .eq('id', parentProfile.id)
+      .select()
+      .single()
+
+    setIsSaving(false)
+
+    if (error) {
+      console.error(error)
+      setSettingsMessage('Je profiel kon niet worden opgeslagen.')
+      return
+    }
+
+    setParentProfile(data)
+    setIsEditingProfile(false)
+    setSettingsMessage('Je profiel werd opgeslagen.')
+  }
+
+  const toggleNotification = (key) => {
+    setNotifications((current) => {
+      const next = { ...current, [key]: !current[key] }
+      if (parentProfile?.id) {
+        localStorage.setItem(`parentNotifications-${parentProfile.id}`, JSON.stringify(next))
+      }
+      return next
+    })
+  }
+
+  const changeScheduleWeek = (direction) => {
+    const nextOffset = scheduleWeekOffset + direction
+    const nextWeek = getWeekDates(nextOffset)
+
+    setScheduleWeekOffset(nextOffset)
+    setSelectedDate(nextWeek[0])
+  }
+
+  const pageTitles = {
+    dashboard: 'Dashboard',
+    schedule: 'Oefenplanning',
+    settings: 'Instellingen',
+  }
 
   return (
     <main className="parent-page">
-      <aside className="parent-sidebar">
-        <img src={logo} alt="Nimbli logo" className="parent-logo" />
-
-        <button className="sidebar-link active" onClick={() => onNavigate('parentDashboard')}>
-          Dashboard
-        </button>
-
-        <button className="sidebar-link" onClick={() => onNavigate('login')}>
-          <img src={exitIcon} alt="Uitloggen" />
-        </button>
-      </aside>
+      <ParentSidebar
+        active={activeView}
+        onSelect={setActiveView}
+        onLogout={() => onNavigate('login')}
+      />
 
       <section className="parent-main">
         <header className="parent-topbar">
-          <h1>Ouder Dashboard</h1>
+          <div>
+            <h1>{pageTitles[activeView]}</h1>
+          </div>
+          <div className="parent-account-avatar" title={parentProfile?.full_name || 'Ouder'}>
+            {(parentProfile?.full_name || 'O').slice(0, 1).toUpperCase()}
+          </div>
         </header>
 
-        {activeTab === 'overview' && (
-          <div className="parent-content">
-            <section className="parent-child-card">
-              <div className="parent-child-avatar">
-                <img src={profileIcon} alt="Profiel" className="parent-profile-icon" />
+        {activeView !== 'settings' && (
+          <section className="parent-patient-header">
+            <div className="parent-child-avatar">
+              <img src={profileIcon} alt="Profiel" />
+            </div>
+            <div>
+              <h2>
+                {patient ? `${patient.first_name} ${patient.last_name}` : 'Kindprofiel laden...'}
+              </h2>
+              <div className="parent-child-meta">
+                <span><strong>{patient?.age || '-'}</strong> jaar</span>
+                <span>{patient?.goal || 'Behandeldoel laden...'}</span>
               </div>
+            </div>
+          </section>
+        )}
 
-              <div>
-                <h2>
-                  {patient
-                    ? `${patient.first_name} ${patient.last_name}`
-                    : 'Kindprofiel laden...'}
-                </h2>
+        {activeView !== 'settings' && exerciseLoadError && (
+          <p className="parent-data-error" role="alert">{exerciseLoadError}</p>
+        )}
 
-                <div className="parent-child-meta">
-                  <div>
-                    <strong>{patient?.age || '-'}</strong>
-                    <span>Leeftijd</span>
-                  </div>
+        {activeView === 'dashboard' && (
+          <div className="parent-content parent-dashboard-layout">
+            <section className="parent-dashboard-primary">
+              <section className="parent-week-strip-card">
+                {currentWeekDays.map((date) => {
+                  const count = completedExercises.filter((item) => sameDay(item.completed_at, date)).length
+                  const isToday = sameDay(date, new Date())
+                  const isPast = date < new Date() && !isToday
 
-                  <div>
-                    <strong>{patient?.goal || '-'}</strong>
-                    <span>Doel</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="parent-grid">
-              <div className="parent-card parent-progress-card">
-                <div>
-                  <p>Voortgang t.o.v. vorige week</p>
-                  <span>Verbeterd tegenover vorige week</span>
-                </div>
-
-                <strong>+23%</strong>
-              </div>
-
-              <div className="parent-card">
-                <h3>Voortgang per categorie</h3>
-
-                <div className="parent-metrics">
-                  {metrics.map((metric) => (
-                    <div className="parent-metric" key={metric.label}>
-                      <div>
-                        <span>{metric.label}</span>
-                        <strong>{metric.value}</strong>
+                  return (
+                    <div className="parent-week-day" key={date.toISOString()}>
+                      <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
+                      <div className={`parent-week-dot ${count ? 'done' : isToday ? 'today' : isPast ? 'past' : ''}`}>
+                        {count ? '✓' : isToday ? date.getDate() : ''}
                       </div>
+                    </div>
+                  )
+                })}
+              </section>
 
-                      <div className="parent-bar">
-                        <div style={{ width: `${metric.progress}%` }} />
-                      </div>
+              <section className="parent-summary-grid">
+                <div className="parent-summary-item"><span>Totale voortgang</span><strong>{overallProgress}%</strong></div>
+                <div className="parent-summary-item"><span>Voltooide oefeningen</span><strong>{completedExercises.length}/{assignedExercises.length}</strong></div>
+                <div className="parent-summary-item"><span>Verdiende XP</span><strong>{totalXp}</strong></div>
+              </section>
+
+              <section className="parent-card parent-chart-card">
+                <div className="parent-section-title">
+                  <div><span>Deze week</span><h3>Oefenactiviteit</h3></div>
+                  <strong>{completedExercises.length} voltooid</strong>
+                </div>
+
+                <div className="parent-bar-chart" aria-label="Voltooide oefeningen per dag">
+                  {activityPerDay.map(({ date, count }) => (
+                    <div className="parent-chart-column" key={date.toISOString()}>
+                      <div className="parent-chart-value"><div style={{ height: `${(count / maxDailyActivity) * 100}%` }} /></div>
+                      <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
+
             </section>
 
-            <section className="parent-card parent-week-card">
-              <h3>Weekoverzicht</h3>
-
-              <div className="parent-week-grid">
-                {weekData.map((day) => (
-                  <div className={`parent-day-card ${day.status}`} key={day.day}>
-                    <span>{day.day}</span>
-                    <strong>{day.date}</strong>
-                    <p>{day.exercises} oef.</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="parent-bottom-grid">
-              <div className="parent-card">
-                <h3>Toegewezen oefeningen</h3>
-
-                <div className="parent-activity-list">
-                  {activities.length > 0 ? (
-                    activities.map((activity, index) => (
-                      <div className="parent-activity" key={index}>
-                        <img src={checkIcon} alt="" />
-
-                        <div>
-                          <strong>{activity.title}</strong>
-                          <span>{activity.date}</span>
-                        </div>
-
-                        <p>{activity.xp}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p>Nog geen oefeningen toegewezen.</p>
-                  )}
+            <aside className="parent-dashboard-side">
+              <section className="parent-side-section">
+                <div className="parent-section-title"><h3>Oefeningen van vandaag</h3><button onClick={() => setActiveView('schedule')}>Bekijk planning</button></div>
+                <div className="parent-exercise-list">
+                  {todayExercises.length ? todayExercises.slice(0, 3).map((item) => (
+                    <ExerciseRow assignment={item} statusDate={new Date()} key={item.id} />
+                  )) : <p className="parent-empty-text">Vandaag staan er geen oefeningen gepland.</p>}
                 </div>
-              </div>
+              </section>
 
-              <div className="parent-card">
-                <h3>Status</h3>
-
-                <div className="parent-status-grid">
-                  <div>
-                    <img src={trophyIcon} alt="" />
-                    <strong>3</strong>
-                    <span>Badges</span>
-                  </div>
-
-                  <div>
-                    <img src={starIcon} alt="" />
-                    <strong>12 XP</strong>
-                    <span>Verzameld</span>
-                  </div>
-
-                  <div>
-                    <img src={streakIcon} alt="" />
-                    <strong>20</strong>
-                    <span>Dagen streak</span>
-                  </div>
-                </div>
-              </div>
-            </section>
+              <section className="parent-side-section">
+                <div className="parent-section-title"><h3>Recente activiteiten</h3></div>
+                <div className="parent-recent-list"><RecentActivityList activities={recentActivities} /></div>
+              </section>
+            </aside>
           </div>
         )}
 
-        {activeTab === 'schedule' && (
-          <div className="parent-content">
-            <section className="parent-card parent-empty-card">
-              <h2>Oefenplanning</h2>
-              <p>Hier komt later de planning van toegewezen oefeningen.</p>
+        {activeView === 'schedule' && (
+          <div className="parent-content parent-schedule-layout">
+            <section className="parent-schedule-primary">
+              <section className="parent-calendar-card">
+                <div className="parent-calendar-heading">
+                  <button
+                    type="button"
+                    aria-label="Vorige week"
+                    onClick={() => changeScheduleWeek(-1)}
+                  >
+                    ←
+                  </button>
+                  <strong>{formatShortDate(scheduleWeekDays[0])} – {formatShortDate(scheduleWeekDays[6])}</strong>
+                  <button
+                    type="button"
+                    aria-label="Volgende week"
+                    onClick={() => changeScheduleWeek(1)}
+                  >
+                    →
+                  </button>
+                </div>
+                <div className="parent-calendar-days">
+                  {scheduleWeekDays.map((date) => {
+                    const plannedCount = assignedExercises.filter((item) =>
+                      isAssignmentPlannedForDate(item, date)
+                    ).length
+
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        className={sameDay(date, selectedDate) ? 'active' : ''}
+                        onClick={() => setSelectedDate(date)}
+                      >
+                        <span>{date.toLocaleDateString('nl-BE', { weekday: 'short' }).slice(0, 2)}</span>
+                        <strong>{date.getDate()}</strong>
+                        <small>{plannedCount || ''}</small>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+
+              <section className="parent-agenda-list">
+                <div className="parent-agenda-heading">
+                  <div><span>Geselecteerde dag</span><h2>{selectedDate.toLocaleDateString('nl-BE', { weekday: 'long', day: 'numeric', month: 'long' })}</h2></div>
+                  <strong>{selectedDayExercises.length} oefeningen</strong>
+                </div>
+
+                {selectedDayExercises.length ? selectedDayExercises.map((item) => (
+                  <ExerciseRow
+                    assignment={item}
+                    showProgress
+                    statusDate={selectedDate}
+                    key={item.id}
+                  />
+                )) : (
+                  <div className="parent-empty-agenda">
+                    <h3>Geen oefeningen gepland</h3>
+                    <p>Voor deze dag heeft de kinesist geen oefeningen ingepland.</p>
+                  </div>
+                )}
+              </section>
             </section>
+
+            <aside className="parent-dashboard-side">
+              <section className="parent-side-section">
+                <div className="parent-section-title"><h3>Toegewezen oefeningen</h3></div>
+                <div className="parent-exercise-list">
+                  {assignedExercises.length ? assignedExercises.slice(0, 3).map((item) => (
+                    <ExerciseRow assignment={item} key={item.id} />
+                  )) : <p className="parent-empty-text">Nog geen oefeningen toegewezen.</p>}
+                </div>
+              </section>
+              <section className="parent-side-section">
+                <div className="parent-section-title"><h3>Recente activiteiten</h3></div>
+                <div className="parent-recent-list"><RecentActivityList activities={recentActivities} /></div>
+              </section>
+            </aside>
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div className="parent-content">
-            <section className="parent-card parent-empty-card">
-              <h2>Instellingen</h2>
-              <p>Hier komen later ouderinstellingen en meldingen.</p>
+        {activeView === 'settings' && (
+          <div className="parent-content parent-settings-layout">
+            <section className="parent-settings-primary">
+              <section className="parent-settings-section">
+                <div className="parent-settings-heading">
+                  <div><span>Account</span><h2>Profielgegevens</h2></div>
+                  {!isEditingProfile && <button className="parent-text-button" onClick={() => setIsEditingProfile(true)}>Bewerken</button>}
+                </div>
+
+                {isEditingProfile ? (
+                  <div className="parent-settings-form">
+                    <label>Naam<input value={profileForm.fullName} onChange={(event) => setProfileForm({ fullName: event.target.value })} /></label>
+                    <label>E-mail<input value={parentProfile?.email || ''} disabled /><small>Je e-mailadres wordt beheerd door je beveiligde account.</small></label>
+                    <div className="parent-form-actions">
+                      <button className="parent-secondary-button" onClick={() => setIsEditingProfile(false)}>Annuleren</button>
+                      <button className="parent-primary-button" onClick={saveProfile} disabled={isSaving}>{isSaving ? 'Opslaan...' : 'Wijzigingen opslaan'}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="parent-profile-rows">
+                    <div><span>Naam</span><strong>{parentProfile?.full_name || 'Niet ingesteld'}</strong></div>
+                    <div><span>E-mail</span><strong>{parentProfile?.email || 'Niet ingesteld'}</strong></div>
+                    <div><span>Gekoppeld kind</span><strong>{patient ? `${patient.first_name} ${patient.last_name}` : 'Geen kind gekoppeld'}</strong></div>
+                  </div>
+                )}
+                {settingsMessage && <p className="parent-settings-message" aria-live="polite">{settingsMessage}</p>}
+              </section>
+
+              <section className="parent-settings-section">
+                <div className="parent-settings-heading"><div><span>Voorkeuren</span><h2>Meldingen</h2></div></div>
+                <div className="parent-toggle-list">
+                  {[
+                    ['exerciseReminder', 'Herinnering voor oefeningen'],
+                    ['progressUpdates', 'Updates over voortgang'],
+                    ['weeklySummary', 'Wekelijks overzicht'],
+                  ].map(([key, label]) => (
+                    <div className="parent-toggle-row" key={key}>
+                      <span>{label}</span>
+                      <button role="switch" aria-checked={notifications[key]} className={notifications[key] ? 'active' : ''} onClick={() => toggleNotification(key)}><span /></button>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </section>
+
+            <aside className="parent-support-card">
+              <span>Hulp nodig?</span>
+              <h2>Support</h2>
+              <p>Vind snel een antwoord of neem contact op met Nimbli.</p>
+              <a className="parent-primary-button" href="mailto:support@nimbli.be">Contact opnemen</a>
+              <button className="parent-secondary-button" onClick={() => setActiveView('dashboard')}>Terug naar dashboard</button>
+            </aside>
           </div>
         )}
       </section>

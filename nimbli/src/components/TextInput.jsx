@@ -1,7 +1,7 @@
 export default function TextInput({ label, type = 'text', placeholder, value, onChange, className = '', ...props }) {
   return (
     <label className={`input-label ${className}`}>
-      <span className="visually-hidden">{label}</span>
+      <span className="input-label-text">{label}</span>
       <input
         className="login-field"
         type={type}

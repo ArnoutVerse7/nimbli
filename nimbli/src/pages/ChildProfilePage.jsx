@@ -1,102 +1,146 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getChildProgress } from '../lib/childProgress'
 import '../styles/ChildFlow.css'
+import ChildSidebar from '../components/ChildSidebar'
+import ChildIcon, { MissionIcon } from '../components/ChildIcon'
+import IconBadge from '../components/IconBadge'
 
-import logo from '../assets/logos/nimbli-logo.png'
 import mascotte from '../assets/logos/mascotte.png'
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
-import checkIcon from '../assets/logos/check.png'
-import lockIcon from '../assets/logos/lock.png'
-import exitIcon from '../assets/logos/exit.png'
 
 export default function ChildProfilePage({ onNavigate }) {
     const [patient, setPatient] = useState(null)
+    const [assignedExercises, setAssignedExercises] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
 
     useEffect(() => {
-        async function loadPatient() {
+        async function loadProfile() {
             const patientId = localStorage.getItem('patientId')
 
-            if (!patientId) return
-
-            const { data, error } = await supabase
-                .from('patients')
-                .select('*')
-                .eq('id', patientId)
-                .single()
-
-            if (error) {
-                console.error(error)
+            if (!patientId) {
+                setLoadError('De gekoppelde patiënt kon niet gevonden worden.')
+                setIsLoading(false)
                 return
             }
 
-            setPatient(data)
+            const [patientResult, exerciseResult] = await Promise.all([
+                supabase
+                    .from('patients')
+                    .select('id, first_name, last_name, age, goal')
+                    .eq('id', patientId)
+                    .single(),
+                supabase
+                    .from('patient_exercises')
+                    .select(`
+                        id,
+                        completed,
+                        xp_earned,
+                        completed_at,
+                        start_date,
+                        end_date
+                    `)
+                    .eq('patient_id', patientId)
+                    .order('assigned_at', { ascending: true }),
+            ])
+
+            if (patientResult.error || exerciseResult.error) {
+                console.error(patientResult.error || exerciseResult.error)
+                setLoadError('Het profiel kon niet geladen worden.')
+            } else {
+                setPatient(patientResult.data)
+                setAssignedExercises(exerciseResult.data || [])
+            }
+
+            setIsLoading(false)
         }
 
-        loadPatient()
+        loadProfile()
     }, [])
+
+    const {
+        completedExercises,
+        totalXp,
+        completionStreak,
+        missions,
+    } = getChildProgress(assignedExercises)
     return (
         <main className="child-road-page">
             <section className="child-dashboard-shell">
-                <aside className="child-sidebar">
-                    <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childDashboard')}>
-                        Dashboard
-                    </button>
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childMissions')}>
-                        Dagelijkse missies
-                    </button>
-
-                    <button className="sidebar-link active" onClick={() => onNavigate('childProfile')}>
-                        Profiel
-                    </button>
-                    <button className="sidebar-link" onClick={() => onNavigate('login')}>
-                        <img src={exitIcon} alt="Uitloggen" />
-                    </button>
-                </aside>
+                <ChildSidebar active="profile" onNavigate={onNavigate} />
 
                 <section className="child-main-area">
                     <header className="child-road-header">
                         <h1>Profiel</h1>
 
                         <div className="child-road-stats">
-                            <span><img src={trophyIcon} alt="" /> 3</span>
-                            <span><img src={starIcon} alt="" /> 12 XP</span>
-                            <span><img src={streakIcon} alt="" /> 20 days</span>
+                            <span>
+                                <IconBadge src={trophyIcon} />
+                                <span><strong>{completedExercises.length}</strong><small>klaar</small></span>
+                            </span>
+                            <span>
+                                <IconBadge src={starIcon} />
+                                <span><strong>{totalXp} XP</strong><small>verzameld</small></span>
+                            </span>
+                            <span>
+                                <IconBadge src={streakIcon} />
+                                <span><strong>{completionStreak}</strong><small>dagreeks</small></span>
+                            </span>
                         </div>
                     </header>
 
                     <div className="profile-content">
                         <section className="profile-main-card">
+                            {loadError && <p className="form-error">{loadError}</p>}
                             <img src={mascotte} alt="Mascotte" className="profile-mascot" />
                             <h2>
                                 {patient
                                     ? `${patient.first_name} ${patient.last_name}`
                                     : 'Profiel laden...'}
                             </h2>
-                            
+
+                            {patient && (
+                                <div className="profile-patient-details">
+                                    <span>{patient.age} jaar</span>
+                                    <span>{patient.goal}</span>
+                                </div>
+                            )}
+
                             <div className="profile-stats-grid">
-                                <div><strong>20</strong><span>dagen streak</span></div>
-                                <div><strong>12</strong><span>XP verzameld</span></div>
-                                <div><strong>7</strong><span>badges gehaald</span></div>
+                                <div><strong>{completionStreak}</strong><span>dagen op rij</span></div>
+                                <div><strong>{totalXp}</strong><span>XP verzameld</span></div>
+                                <div><strong>{completedExercises.length}</strong><span>oefeningen voltooid</span></div>
                             </div>
                         </section>
 
                         <section className="profile-side-card">
                             <h3>Dagmissies</h3>
 
-                            <div className="mini-mission">
-                                <img src={checkIcon} alt="" /> Complete 1 oefening
-                            </div>
-                            <div className="mini-mission">
-                                <img src={starIcon} alt="" /> Verdien 10 XP
-                            </div>
-                            <div className="mini-mission">
-                                <img src={lockIcon} alt="" /> Nieuwe badge ontgrendelen
-                            </div>
+                            {isLoading && <p>Missies laden...</p>}
+
+                            {!isLoading && !loadError && missions.map((mission) => (
+                                <div
+                                    className={`mini-mission ${mission.id} ${mission.completed ? 'completed' : ''}`}
+                                    key={mission.id}
+                                >
+                                    <span className={`mini-mission-icon ${mission.id}`}>
+                                        <MissionIcon missionId={mission.id} />
+                                    </span>
+                                    <div>
+                                        <strong>{mission.title}</strong>
+                                        <small>{mission.detail}</small>
+                                        <div className="mission-progress small">
+                                            <div style={{ width: `${mission.progress}%` }} />
+                                        </div>
+                                    </div>
+                                    <span className={`mini-mission-reward ${mission.completed ? 'completed' : ''}`}>
+                                        <ChildIcon name="chest" />
+                                    </span>
+                                </div>
+                            ))}
 
                             <button className="large-cta-button" onClick={() => onNavigate('childDashboard')}>
                                 Terug naar oefeningen

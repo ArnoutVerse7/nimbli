@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
+import KinesistSidebar from '../components/KinesistSidebar'
+import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
+import IconBadge from '../components/IconBadge'
+import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+    getDefaultExerciseSchedule,
+    isValidExerciseSchedule,
+} from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
 export default function AssignExercisePage({ exerciseId, onNavigate }) {
@@ -11,8 +17,11 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const [patients, setPatients] = useState([])
     const [selectedPatientId, setSelectedPatientId] = useState(null)
     const [assigned, setAssigned] = useState(false)
+    const [alreadyAssigned, setAlreadyAssigned] = useState(false)
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState('')
+    const [schedule, setSchedule] = useState(getDefaultExerciseSchedule)
 
     useEffect(() => {
         async function loadData() {
@@ -36,10 +45,25 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
             if (patientsError) {
                 console.error(patientsError)
             } else {
-                setPatients(patientsData || [])
+                const availablePatients = patientsData || []
+                setPatients(availablePatients)
 
-                if (patientsData?.length > 0) {
-                    setSelectedPatientId(patientsData[0].id)
+                if (availablePatients.length > 0) {
+                    let preferredPatientId = null
+
+                    try {
+                        const storedPatient = JSON.parse(
+                            localStorage.getItem('selectedPatient') || 'null'
+                        )
+
+                        if (availablePatients.some((patient) => patient.id === storedPatient?.id)) {
+                            preferredPatientId = storedPatient.id
+                        }
+                    } catch {
+                        localStorage.removeItem('selectedPatient')
+                    }
+
+                    setSelectedPatientId(preferredPatientId || availablePatients[0].id)
                 }
             }
 
@@ -54,41 +78,87 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     const assignExercise = async () => {
         if (!selectedPatientId || !exercise?.id) return
 
+        if (!isValidExerciseSchedule(schedule)) {
+            setSaveError('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
         setIsSaving(true)
+        setSaveError('')
+        setAlreadyAssigned(false)
 
-        const { data: existingAssignment, error: existingError } = await supabase
-            .from('patient_exercises')
-            .select('*')
-            .eq('patient_id', selectedPatientId)
-            .eq('exercise_id', exercise.id)
+        const { data: userData, error: userError } = await supabase.auth.getUser()
 
-        if (existingError) {
-            console.error(existingError)
-            alert('Fout bij controleren van bestaande toewijzing')
+        if (userError || !userData.user) {
+            alert('Je sessie is verlopen. Log opnieuw in.')
             setIsSaving(false)
             return
         }
 
-        if (existingAssignment.length > 0) {
+        const { data: existingAssignment, error: existingError } = await supabase
+            .from('patient_exercises')
+            .select('id')
+            .eq('patient_id', selectedPatientId)
+            .eq('exercise_id', exercise.id)
+            .maybeSingle()
+
+        if (existingError) {
+            console.error(existingError)
+            setSaveError('De bestaande oefeningen konden niet gecontroleerd worden. Probeer opnieuw.')
+            setIsSaving(false)
+            return
+        }
+
+        if (existingAssignment) {
+            const { error: updateError } = await supabase.rpc('update_exercise_schedule', {
+                p_assignment_id: existingAssignment.id,
+                p_start_date: schedule.startDate,
+                p_end_date: schedule.endDate,
+            })
+
+            if (updateError) {
+                console.error(updateError)
+                setSaveError('De planning van deze oefening kon niet worden bijgewerkt. Voer migratie 003_assignment_schedule.sql opnieuw uit.')
+                setIsSaving(false)
+                return
+            }
+
+            setAlreadyAssigned(true)
             setAssigned(true)
             setIsSaving(false)
             return
         }
 
-        const { error } = await supabase
+        const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+
+        if (selectedPatient) {
+            localStorage.setItem('selectedPatient', JSON.stringify(selectedPatient))
+        }
+
+        const { data: savedAssignment, error } = await supabase
             .from('patient_exercises')
             .insert([
                 {
                     patient_id: selectedPatientId,
                     exercise_id: exercise.id,
+                    assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
+                    start_date: schedule.startDate,
+                    end_date: schedule.endDate,
                 },
             ])
+            .select('id, patient_id, exercise_id')
+            .single()
 
-        if (error) {
+        if (error || !savedAssignment) {
             console.error(error)
-            alert('Fout bij toewijzen van oefening')
+            const scheduleMigrationMissing = error?.message?.includes('start_date')
+                || error?.message?.includes('end_date')
+
+            setSaveError(scheduleMigrationMissing
+                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
+                : 'De oefening kon niet worden opgeslagen. Probeer opnieuw.')
             setIsSaving(false)
             return
         }
@@ -98,6 +168,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
     }
 
     const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+    const coverImage = getExerciseCover(exercise)
 
     if (loading) {
         return <p>Gegevens laden...</p>
@@ -109,25 +180,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('login')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="exercises" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
@@ -141,7 +194,15 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                 <h3>Oefening</h3>
 
                                 <div className="selected-exercise">
-                                    <div className="exercise-thumb" />
+                                    <div className="exercise-thumb">
+                                        {coverImage && (
+                                            <img
+                                                src={coverImage}
+                                                alt={exercise.title}
+                                                className="exercise-thumb-image"
+                                            />
+                                        )}
+                                    </div>
 
                                     <div>
                                         <strong>{exercise.title}</strong>
@@ -164,10 +225,15 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                     <div className="assign-patient-list">
                                         {patients.map((patient) => (
                                             <button
+                                                type="button"
                                                 key={patient.id}
                                                 className={`assign-patient-card ${selectedPatientId === patient.id ? 'selected' : ''
                                                     }`}
-                                                onClick={() => setSelectedPatientId(patient.id)}
+                                                onClick={() => {
+                                                    setSelectedPatientId(patient.id)
+                                                    setSaveError('')
+                                                    localStorage.setItem('selectedPatient', JSON.stringify(patient))
+                                                }}
                                             >
                                                 <div className="patient-list-avatar">
                                                     <img
@@ -190,22 +256,38 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                                     </div>
                                 )}
 
+                                <ExerciseScheduleFields
+                                    schedule={schedule}
+                                    onChange={(nextSchedule) => {
+                                        setSchedule(nextSchedule)
+                                        setSaveError('')
+                                    }}
+                                    title="Plan de oefening"
+                                    helpText="De oefening verschijnt iedere dag in de ouderplanning tijdens deze periode."
+                                />
+
                                 <button
+                                    type="button"
                                     className="primary-btn assign-btn"
                                     disabled={!selectedPatientId || isSaving}
                                     onClick={assignExercise}
                                 >
                                     {isSaving ? 'Toewijzen...' : 'Oefening toewijzen'}
                                 </button>
+
+                                {saveError && (
+                                    <p className="form-error-message" role="alert">{saveError}</p>
+                                )}
                             </div>
                         </section>
                     ) : (
                         <section className="assign-success-card">
-                            <img src={checkIcon} alt="" />
+                            <IconBadge src={checkIcon} className="assign-success-icon" />
                             <h2>Oefening toegewezen!</h2>
 
                             <p>
-                                {exercise.title} werd toegevoegd aan het oefenprogramma
+                                {exercise.title}{' '}
+                                {alreadyAssigned ? 'stond al in het oefenprogramma en kreeg de nieuwe planning' : 'werd toegevoegd aan het oefenprogramma'}
                                 {selectedPatient
                                     ? ` van ${selectedPatient.first_name} ${selectedPatient.last_name}`
                                     : ''}

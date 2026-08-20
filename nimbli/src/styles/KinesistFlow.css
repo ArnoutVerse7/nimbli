@@ -1,8 +1,6 @@
 .kine-page {
     min-height: 100vh;
-    background: var(--bg-light, #f4f9f6);
     display: grid;
-    grid-template-columns: 240px 1fr;
 }
 
 .kine-main {
@@ -11,70 +9,31 @@
     flex-direction: column;
 }
 
-.kine-content,
-.new-patient-content,
-.patient-detail-content {
-    padding: 36px;
-    min-height: calc(100vh - 74px);
-}
-
 /* ===== KINESIST DASHBOARD ===== */
-
-.kine-welcome h2 {
-    margin: 0 0 22px;
-    color: #1d232a;
-}
 
 .kine-stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-.kine-stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .kine-stat-card strong {
     display: block;
-    font-size: 34px;
-    color: #7bb7e8;
-    margin-bottom: 6px;
 }
 
 .kine-stat-card span {
-    color: #67707b;
-    font-size: 13px;
     font-weight: 700;
 }
 
 .kine-practice-card {
     display: flex;
     align-items: center;
-    gap: 20px;
     background: white;
-    border-radius: 20px;
-    padding: 24px;
-    margin: 24px 0;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-    max-width: 390px;
 }
 
 .practice-avatar {
-    width: 80px;
-    height: 80px;
-    background: #eef7f5;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.practice-avatar img {
-    width: 56px;
 }
 
 .practice-info h3 {
@@ -92,18 +51,13 @@
     font-size: 14px;
 }
 
-.kine-patients-section {
-    margin-top: 34px;
-    max-width: 980px;
-}
-
 .section-header {
     margin-bottom: 18px;
 }
 
 .section-header h3 {
     margin: 0;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .add-patient-btn {
@@ -125,7 +79,6 @@
 }
 
 .empty-patients {
-    min-height: 340px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -133,30 +86,24 @@
 }
 
 .empty-patients img {
-    width: 150px;
     height: auto;
     margin-bottom: 14px;
 }
 
 .empty-patients h3 {
     margin: 0 0 18px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== PATIENT LIST ===== */
 
 .patient-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
 }
 
 .patient-list-card {
     width: 100%;
-    background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
     cursor: pointer;
     text-align: left;
     box-shadow: none;
@@ -164,17 +111,12 @@
 }
 
 .patient-list-card:hover {
-    border-color: #19a383;
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
     transform: translateY(-1px);
 }
 
 .patient-list-top {
     display: grid;
-    grid-template-columns: 48px 1fr auto;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
 }
 
 .patient-list-avatar {
@@ -196,18 +138,18 @@
 
 .patient-list-card strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 4px;
     font-size: 15px;
 }
 
 .patient-list-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
 .patient-improvement {
-    color: #7bc77e;
+    color: var(--nimbli-light-green);
     font-weight: 900;
     margin: 0;
     font-size: 13px;
@@ -215,7 +157,7 @@
 
 .patient-goal {
     margin: 0 0 12px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
     font-weight: 700;
 }
@@ -230,8 +172,12 @@
 .session-dot {
     width: 11px;
     height: 11px;
-    background: #20c25e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
+}
+
+.session-dot.empty {
+    background: var(--nimbli-gray);
 }
 
 .patient-progress-row {
@@ -251,21 +197,20 @@
 .patient-progress-bar div {
     height: 100%;
     width: 60%;
-    background: #f7c948;
+    background: var(--nimbli-yellow);
     border-radius: 999px;
 }
 
 .patient-progress-row span {
     font-size: 13px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== BUTTONS ===== */
 
 .primary-btn {
     border: none;
-    background: #19a383;
     color: white;
     border-radius: 10px;
     padding: 12px 24px;
@@ -273,14 +218,9 @@
     cursor: pointer;
 }
 
-.primary-btn:hover {
-    background: #178f75;
-}
-
 .secondary-btn {
-    border: 2px solid #19a383;
+    border: 2px solid var(--nimbli-main-green);
     background: white;
-    color: #19a383;
     border-radius: 10px;
     padding: 10px 24px;
     font-weight: 900;
@@ -291,103 +231,85 @@
 
 .new-patient-card {
     width: 100%;
-    max-width: 960px;
-    background: white;
-    border-radius: 20px;
-    padding: 34px;
-    box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .step-label {
     margin: 0 0 10px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
-    font-size: 13px;
 }
 
 .step-progress {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    max-width: 420px;
-    margin-bottom: 32px;
 }
 
 .step-progress div {
-    height: 7px;
-    background: #e5e9ed;
+    background: var(--nimbli-border);
     border-radius: 999px;
-}
-
-.step-progress div.active {
-    background: #7bb7e8;
 }
 
 .patient-step h2 {
     margin: 0 0 22px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .patient-step>p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin-top: -12px;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    max-width: 620px;
 }
 
 .form-grid label {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    color: #67707b;
-    font-size: 13px;
     font-weight: 800;
 }
 
-.form-grid input {
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
     border: none;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 10px;
     padding: 14px 16px;
     font-weight: 700;
 }
 
+.exercise-form-full {
+    grid-column: 1 / -1;
+}
+
+.exercise-form-grid textarea {
+    min-height: 110px;
+    resize: vertical;
+    font: inherit;
+}
+
 .tag-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 22px 0 28px;
     max-width: 700px;
 }
 
 .tag-list span {
-    background: #f3f5f6;
     border-radius: 999px;
-    padding: 10px 14px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 700;
-    font-size: 13px;
 }
 
 .exercise-select-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
 }
 
 .exercise-select-card,
 .selected-exercise {
-    border: 1px solid #e5e9ed;
-    border-radius: 14px;
-    padding: 16px;
+    border: 1px solid var(--nimbli-border);
     display: grid;
-    grid-template-columns: 58px 1fr;
-    gap: 14px;
     align-items: center;
 }
 
@@ -402,25 +324,17 @@
 
 .exercise-select-card.selected {
     border: 2px solid var(--primary-color);
-    background: rgba(37, 174, 140, 0.08);
-}
-
-.exercise-thumb {
-    width: 58px;
-    height: 58px;
-    border-radius: 10px;
-    background: #1d232a;
 }
 
 .exercise-select-card strong,
 .selected-exercise strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 6px;
 }
 
 .exercise-select-card span {
-    color: #19a383;
+    color: var(--nimbli-main-green);
     font-size: 13px;
     font-weight: 800;
 }
@@ -428,27 +342,23 @@
 .exercise-select-card p,
 .selected-exercise p {
     margin: 4px 0 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
 .button-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 28px;
 }
 
 .review-layout {
     display: grid;
     grid-template-columns: 0.9fr 1.1fr;
-    gap: 42px;
 }
 
 .patient-preview-card {
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 16px;
-    padding: 24px;
     text-align: center;
     margin-bottom: 18px;
 }
@@ -456,8 +366,8 @@
 .patient-image-placeholder {
     width: 150px;
     height: 150px;
-    background: #ddd;
-    border: 3px solid #1d232a;
+    background: var(--nimbli-gray);
+    border: 3px solid var(--nimbli-black);
     margin: 0 auto 16px;
 }
 
@@ -466,20 +376,19 @@
 }
 
 .patient-preview-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .info-box,
 .next-steps-box {
-    background: #fff8ed;
+    background: var(--nimbli-page-background);
     border-radius: 16px;
-    padding: 18px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .info-box strong,
 .next-steps-box strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .selected-exercises {
@@ -496,23 +405,16 @@
 .success-icon {
     width: 58px;
     height: 58px;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
-    padding: 14px;
-    object-fit: contain;
     margin-bottom: 18px;
 }
 
 .activation-code {
     width: fit-content;
-    background: #7bb7e8;
     color: white;
-    font-size: 32px;
     letter-spacing: 8px;
     font-weight: 900;
-    border-radius: 12px;
-    padding: 18px 28px;
-    margin: 18px 0;
 }
 
 .share-options {
@@ -522,12 +424,12 @@
 }
 
 .share-options button {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     background: white;
     border-radius: 12px;
     padding: 14px 18px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .next-steps-box {
@@ -540,9 +442,6 @@
 }
 
 .exercise-thumb {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -558,26 +457,19 @@
 .patient-back-btn {
     border: none;
     background: transparent;
-    color: #1d232a;
     font-weight: 800;
     cursor: pointer;
-    margin-bottom: 18px;
     padding: 0;
-    font-size: 15px;
 }
 
 .patient-detail-hero {
-    background: white;
     border-radius: 20px;
-    padding: 24px 28px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
 .patient-detail-hero.extended {
     display: grid;
-    grid-template-columns: 80px 1fr auto;
     align-items: start;
-    gap: 22px;
 }
 
 .patient-photo-placeholder {
@@ -590,8 +482,6 @@
 }
 
 .patient-photo-placeholder img {
-    width: 80px;
-    height: 80px;
     object-fit: contain;
 }
 
@@ -609,24 +499,22 @@
 .patient-title-row h2,
 .patient-main-info h2 {
     margin: 0;
-    font-size: 28px;
     line-height: 1.1;
 }
 
 .patient-title-row span,
 .patient-main-info p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 6px 0;
 }
 
 .patient-main-info strong {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .patient-contact-info {
     grid-column: 1 / -1;
-    border-top: 1px solid #e5e9ed;
-    padding-top: 18px;
+    border-top: 1px solid var(--nimbli-border);
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: start;
@@ -634,13 +522,13 @@
 
 .patient-contact-info strong {
     display: block;
-    color: #1d232a;
+    color: var(--nimbli-black);
     margin-bottom: 4px;
 }
 
 .patient-contact-info span,
 .patient-contact-info p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 4px 0;
 }
 
@@ -649,7 +537,7 @@
     align-items: center;
     gap: 10px;
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .patient-contact-info p img {
@@ -665,41 +553,25 @@
 .patient-detail-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin: 24px 0;
 }
 
 .patient-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
 }
 
 .patient-tabs button {
     border: none;
-    background: white;
-    padding: 12px 22px;
-    border-radius: 999px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     cursor: pointer;
 }
 
-.patient-tabs button.active {
-    background: #19a383;
-    color: white;
-}
-
 .patient-detail-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 24px;
 }
 
 .patient-detail-card {
-    background: white;
     border-radius: 18px;
-    padding: 24px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
@@ -707,45 +579,9 @@
     margin: 0 0 20px;
 }
 
-.category-progress-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.category-progress-item>div:first-child {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.category-progress-item strong {
-    color: #1d232a;
-}
-
-.category-progress-item span {
-    color: #19a383;
-    font-weight: 900;
-}
-
-.category-progress-bar {
-    height: 12px;
-    background: #e8ecef;
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.category-progress-bar div {
-    height: 100%;
-    background: #19a383;
-    border-radius: 999px;
-}
-
 .detail-result-row {
-    background: #f8fafb;
+    background: var(--nimbli-page-background);
     border-radius: 14px;
-    padding: 14px;
     display: grid;
     grid-template-columns: 32px 1fr auto;
     gap: 12px;
@@ -753,16 +589,15 @@
     margin-bottom: 12px;
 }
 
-.detail-result-row img {
+.detail-result-row .detail-result-icon {
     width: 28px;
     height: 28px;
-    padding: 7px;
     border-radius: 50%;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
 }
 
 .detail-result-row strong {
-    color: #19a383;
+    color: var(--nimbli-main-green);
 }
 
 .session-history-list {
@@ -772,8 +607,8 @@
 }
 
 .session-history-card {
-    background: #f8fafb;
-    border: 1px solid #e5e9ed;
+    background: var(--nimbli-page-background);
+    border: 1px solid var(--nimbli-border);
     border-radius: 16px;
     padding: 18px;
     display: grid;
@@ -786,7 +621,7 @@
     height: 36px;
     border-radius: 50%;
     background: #d8f8e5;
-    color: #20c25e;
+    color: var(--nimbli-light-green);
     display: grid;
     place-items: center;
     font-weight: 900;
@@ -805,12 +640,12 @@
 }
 
 .session-history-top strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .session-history-top span {
     background: #d8f8e5;
-    color: #20c25e;
+    color: var(--nimbli-light-green);
     border-radius: 999px;
     padding: 5px 10px;
     font-weight: 900;
@@ -820,7 +655,7 @@
 .session-meta {
     display: flex;
     gap: 24px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin-bottom: 14px;
 }
 
@@ -830,7 +665,7 @@
 
 .session-label {
     margin: 0 0 8px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     font-size: 13px;
 }
@@ -859,10 +694,7 @@
 }
 
 .exercise-program-card {
-    background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
 }
 
 .exercise-program-top {
@@ -876,6 +708,7 @@
 }
 
 .exercise-header {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -883,8 +716,7 @@
 }
 
 .exercise-header strong {
-    font-size: 18px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-menu {
@@ -892,7 +724,46 @@
     background: none;
     cursor: pointer;
     font-size: 20px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
+}
+
+.exercise-actions {
+    position: relative;
+}
+
+.exercise-action-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    z-index: 30;
+    width: 210px;
+    padding: 6px;
+    display: grid;
+    gap: 2px;
+    border-radius: 9px;
+    background: var(--nimbli-white);
+    box-shadow: var(--nimbli-card-shadow);
+}
+
+.exercise-action-menu button {
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 6px;
+    color: var(--kine-ink);
+    background: transparent;
+    font-size: 11px;
+    font-weight: 750;
+    text-align: left;
+    cursor: pointer;
+}
+
+.exercise-action-menu button:hover {
+    background: var(--nimbli-offwhite);
+}
+
+.exercise-action-menu button.danger {
+    color: var(--nimbli-dark-red);
 }
 
 .exercise-badges {
@@ -915,12 +786,12 @@
 
 .badge-category {
     background: #eef7f5;
-    color: #19a383;
+    color: var(--nimbli-main-green);
 }
 
 .exercise-details {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 24px;
     margin-bottom: 18px;
 }
@@ -934,7 +805,7 @@
 .exercise-details p {
     margin: 0;
     font-weight: 700;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-progress {
@@ -954,14 +825,14 @@
 
 .exercise-progress-bar div {
     height: 100%;
-    background: #f7c948;
+    background: var(--nimbli-yellow);
     border-radius: 999px;
 }
 
 .exercise-progress span {
     font-size: 13px;
     font-weight: 800;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .last-completed {
@@ -981,8 +852,8 @@
 }
 
 .logbook-form {
-    background: #f8fafb;
-    border: 1px solid #e5e9ed;
+    background: var(--nimbli-page-background);
+    border: 1px solid var(--nimbli-border);
     border-radius: 16px;
     padding: 18px;
     margin-bottom: 18px;
@@ -993,7 +864,7 @@
 
 .logbook-form input,
 .logbook-form textarea {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     border-radius: 10px;
     padding: 12px 14px;
     font: inherit;
@@ -1012,7 +883,7 @@
 
 .logbook-entry {
     background: white;
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     border-radius: 14px;
     padding: 18px;
 }
@@ -1025,20 +896,34 @@
     margin-bottom: 10px;
 }
 
+.logbook-delete-btn {
+    padding: 3px 0;
+    border: 0;
+    color: var(--nimbli-dark-red);
+    background: transparent;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.logbook-delete-btn:hover {
+    text-decoration: underline;
+}
+
 .logbook-entry strong {
     display: block;
     margin-bottom: 8px;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .logbook-entry p {
     margin: 0 0 14px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     line-height: 1.6;
 }
 
 .logbook-author {
-    border-top: 1px solid #e5e9ed;
+    border-top: 1px solid var(--nimbli-border);
     padding-top: 12px;
     color: #8a94a6;
     font-size: 13px;
@@ -1050,7 +935,7 @@
     margin-top: 24px;
     border-radius: 18px;
     overflow: hidden;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
 }
 
 .cover-preview-wrapper img {
@@ -1066,7 +951,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 22px;
 }
 
 .exercise-library-header h2 {
@@ -1075,13 +959,11 @@
 
 .exercise-library-header p {
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .exercise-library-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
 }
 
 .exercise-cover-thumb img {
@@ -1093,39 +975,25 @@
 
 .exercise-library-tabs button {
     border: none;
-    background: white;
-    padding: 10px 18px;
-    border-radius: 999px;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-weight: 800;
     cursor: pointer;
 }
 
-.exercise-library-tabs button.active {
-    background: #19a383;
-    color: white;
-}
-
 .exercise-library-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
 }
 
 .exercise-library-card {
     background: white;
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 18px;
+    border: 1px solid var(--nimbli-border);
     display: grid;
-    grid-template-columns: 72px 1fr;
-    gap: 16px;
     text-align: left;
     cursor: pointer;
 }
 
 .exercise-library-card:hover {
-    border-color: #19a383;
+    border-color: var(--nimbli-main-green);
 }
 
 .video-thumb {
@@ -1137,31 +1005,24 @@
 
 .exercise-card-badges {
     display: flex;
-    gap: 8px;
-    margin: 10px 0;
 }
 
 .exercise-card-badges span {
     background: #eef7f5;
-    color: #19a383;
-    padding: 5px 10px;
+    color: var(--nimbli-main-green);
     border-radius: 999px;
-    font-size: 12px;
     font-weight: 800;
 }
 
 .exercise-library-card p {
     margin: 0;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 /* ===== EXERCISE DETAIL ===== */
 
 .exercise-detail-layout {
     display: grid;
-    grid-template-columns: 1.4fr 0.8fr;
-    gap: 24px;
-    margin-bottom: 24px;
 }
 
 .exercise-detail-video,
@@ -1169,7 +1030,6 @@
     width: 100%;
     background: white;
     border-radius: 18px;
-    padding: 24px;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
@@ -1187,13 +1047,42 @@
 }
 
 .video-placeholder {
-    height: 320px;
-    background: #1d232a;
-    border-radius: 16px;
+    position: relative;
     display: grid;
     place-items: center;
     color: white;
     text-align: center;
+    overflow: hidden;
+}
+
+.exercise-video-cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .72;
+}
+
+.video-placeholder-copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    color: var(--nimbli-white);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+}
+
+.video-play-icon {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--nimbli-main-green);
+    background: var(--nimbli-white);
+    font-size: 20px;
+    text-shadow: none;
 }
 
 .video-placeholder button {
@@ -1202,21 +1091,13 @@
     border-radius: 50%;
     border: none;
     background: white;
-    color: #19a383;
+    color: var(--nimbli-main-green);
     font-size: 24px;
     margin-bottom: 12px;
 }
 
 .exercise-info-list {
     display: grid;
-    gap: 16px;
-    margin: 24px 0;
-}
-
-.exercise-info-list div {
-    background: #f8fafb;
-    border-radius: 12px;
-    padding: 14px;
 }
 
 .exercise-info-list small {
@@ -1226,12 +1107,12 @@
 }
 
 .exercise-info-list strong {
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .exercise-description-card p,
 .exercise-description-card li {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     line-height: 1.6;
 }
 
@@ -1245,10 +1126,10 @@
 
 .video-preview-wrapper {
     position: relative;
-    background: #f3f5f6;
+    background: var(--nimbli-page-background);
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
 }
 
 .video-preview-wrapper::before {
@@ -1256,9 +1137,9 @@
     padding: 12px 14px;
     font-size: 13px;
     font-weight: 900;
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     background: white;
-    border-bottom: 1px solid #e5e9ed;
+    border-bottom: 1px solid var(--nimbli-border);
 }
 
 .video-preview-wrapper video {
@@ -1270,41 +1151,13 @@
 
 .delete-video-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    border: none;
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-weight: 900;
-}
-
-.delete-video-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    border: none;
-    background: rgba(0, 0, 0, 0.65);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-weight: 900;
-}
-
-.delete-video-btn {
-    position: absolute;
     top: 14px;
     right: 14px;
     width: 42px;
     height: 42px;
     border: none;
     border-radius: 50%;
-    background: #ff4d4f;
+    background: var(--nimbli-red);
     color: white;
     font-size: 22px;
     font-weight: 900;
@@ -1320,9 +1173,18 @@
     opacity: 1;
 }
 
+.exercise-media-preview {
+    width: 100%;
+    margin-top: 0;
+}
+
+.exercise-media-preview:hover .delete-video-btn {
+    opacity: 1;
+}
+
 .delete-video-btn:hover {
     transform: scale(1.08);
-    background: #e53935;
+    background: var(--nimbli-red);
 }
 
 .exercise-save-btn {
@@ -1332,21 +1194,17 @@
 /* ===== ASSIGN EXERCISE ===== */
 .assign-layout {
     display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
     gap: 24px;
 }
 
 .assign-patient-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
 
 .assign-patient-card {
-    border: 1px solid #e5e9ed;
+    border: 1px solid var(--nimbli-border);
     background: white;
-    border-radius: 14px;
-    padding: 14px;
     display: grid;
     grid-template-columns: 48px 1fr;
     gap: 14px;
@@ -1355,8 +1213,7 @@
 }
 
 .assign-patient-card.selected {
-    border: 2px solid #19a383;
-    background: rgba(25, 163, 131, 0.07);
+    border: 2px solid var(--nimbli-main-green);
 }
 
 .assign-patient-card strong {
@@ -1365,7 +1222,7 @@
 }
 
 .assign-patient-card span {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     font-size: 13px;
 }
 
@@ -1374,29 +1231,153 @@
     width: 100%;
 }
 
+.exercise-schedule-panel {
+    margin-top: 18px;
+    display: grid;
+    gap: 7px;
+    color: var(--kine-ink);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.exercise-schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.exercise-schedule-grid label {
+    display: grid;
+    gap: 6px;
+}
+
+.exercise-schedule-grid input {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid var(--kine-border);
+    border-radius: 7px;
+    color: var(--kine-ink);
+    background: var(--nimbli-white);
+    font: inherit;
+}
+
+.exercise-schedule-panel small,
+.exercise-schedule-summary {
+    color: var(--kine-muted);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.exercise-schedule-summary {
+    margin: -4px 0 12px;
+}
+
+/* ===== MODALS ===== */
+
+.nimbli-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    padding: 24px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, .38);
+}
+
+.nimbli-modal-card {
+    width: min(100%, 440px);
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--nimbli-white);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .2);
+}
+
+.nimbli-modal-card.schedule-edit-modal {
+    width: min(100%, 560px);
+}
+
+.nimbli-modal-card h2 {
+    margin: 0 0 8px;
+    color: var(--kine-ink);
+    font-size: 22px;
+}
+
+.nimbli-modal-card > p {
+    margin: 0;
+    color: var(--kine-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.nimbli-modal-card .exercise-schedule-panel {
+    margin-top: 20px;
+}
+
+.nimbli-modal-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.nimbli-modal-actions .primary-btn,
+.nimbli-modal-actions .secondary-btn,
+.nimbli-modal-actions .danger-btn {
+    width: auto;
+    min-height: 40px;
+    margin: 0;
+    padding: 9px 14px;
+}
+
+.danger-btn {
+    border: 1px solid var(--nimbli-dark-red);
+    border-radius: 7px;
+    color: var(--nimbli-white);
+    background: var(--nimbli-dark-red);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.danger-btn:hover {
+    background: var(--nimbli-red);
+}
+
+.exercise-detail-actions {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.exercise-detail-actions .secondary-btn,
+.exercise-detail-actions .danger-btn {
+    width: 100%;
+}
+
 .assign-success-card {
     background: white;
     border-radius: 20px;
-    padding: 48px;
     text-align: center;
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
-.assign-success-card img {
+.assign-success-card .assign-success-icon {
     width: 64px;
     height: 64px;
-    background: #7bc77e;
+    background: var(--nimbli-light-green);
     border-radius: 50%;
-    padding: 16px;
 }
 
 .empty-text {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
 }
 
 .settings-layout {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
     gap: 24px;
 }
 
@@ -1409,9 +1390,7 @@
 }
 
 .plan-card {
-    border: 1px solid #e5e9ed;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid var(--nimbli-border);
     margin-bottom: 16px;
 }
 
@@ -1423,23 +1402,21 @@
 
 .plan-card strong {
     display: block;
-    font-size: 26px;
     margin: 6px 0;
-    color: #1d232a;
+    color: var(--nimbli-black);
 }
 
 .plan-card p {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     margin: 0 0 14px;
 }
 
 .plan-card.premium {
-    border: 2px solid #19a383;
-    background: rgba(25, 163, 131, 0.06);
+    border: 2px solid var(--nimbli-main-green);
 }
 
 .plan-card ul {
-    color: #67707b;
+    color: var(--nimbli-text-muted);
     padding-left: 20px;
     margin-bottom: 18px;
 }
@@ -1454,9 +1431,6 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1000px) {
-    .kine-page {
-        grid-template-columns: 1fr;
-    }
 
     .kine-page .child-sidebar {
         display: none;
@@ -1476,5 +1450,1103 @@
     .assign-layout,
     .settings-layout {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===== FIGMA-ALIGNED KINESIST PORTAL ===== */
+
+.kine-page {
+    --kine-green: var(--nimbli-main-green);
+    --kine-green-dark: var(--nimbli-main-dark-green);
+    --kine-green-soft: var(--nimbli-offwhite);
+    --kine-blue: var(--nimbli-blue);
+    --kine-blue-soft: color-mix(in srgb, var(--nimbli-blue) 16%, var(--nimbli-white));
+    --kine-sand: var(--nimbli-offwhite);
+    --kine-ink: var(--nimbli-black);
+    --kine-muted: var(--nimbli-text-muted);
+    --kine-border: var(--nimbli-gray);
+    grid-template-columns: 210px minmax(0, 1fr);
+    background: var(--nimbli-page-background);
+    color: var(--kine-ink);
+}
+
+.kine-main {
+    min-width: 0;
+    background: var(--nimbli-page-background);
+}
+
+.kine-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 100vh;
+    min-height: 0;
+    padding: 28px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--kine-border);
+}
+
+.kine-sidebar .child-sidebar-logo {
+    width: 84px;
+    margin: 0 10px 30px;
+}
+
+.kine-sidebar-label {
+    margin: 0 12px 10px;
+    color: #9aa8a3;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.kine-sidebar-nav {
+    display: grid;
+    gap: 5px;
+}
+
+.kine-sidebar .sidebar-link {
+    min-height: 42px;
+    margin: 0;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    border-radius: 8px;
+    color: var(--nimbli-text-muted);
+    font-size: 13px;
+    font-weight: 750;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+
+.kine-sidebar .sidebar-link:hover {
+    color: var(--kine-green-dark);
+    background: var(--kine-green-soft);
+}
+
+.kine-sidebar .sidebar-link.active {
+    color: var(--nimbli-white);
+    background: var(--kine-green);
+    box-shadow: 0 5px 12px rgba(43, 180, 157, .18);
+}
+
+.sidebar-link-icon {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+}
+
+.sidebar-link-icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.kine-sidebar .sidebar-link.active .sidebar-link-icon svg:first-child {
+    fill: rgba(255, 255, 255, .16);
+}
+
+.kine-logout-link {
+    margin-top: auto !important;
+}
+
+.kine-page .child-road-header {
+    height: 62px;
+    padding: 0 38px;
+    border-bottom-color: var(--kine-border);
+}
+
+.kine-page .child-road-header:empty {
+    display: none;
+}
+
+.kine-page .child-road-header h1 {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.kine-content,
+.new-patient-content,
+.patient-detail-content {
+    width: min(100%, 1240px);
+    min-height: auto;
+    margin: 0 auto;
+    padding: 34px 42px 54px;
+}
+
+.kine-eyebrow {
+    margin: 0 0 6px;
+    color: var(--kine-green-dark);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.kine-welcome {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 18px 22px;
+}
+
+.kine-welcome > h2,
+.kine-welcome > .kine-page-intro,
+.kine-welcome > .kine-eyebrow {
+    grid-column: 1 / -1;
+}
+
+.kine-welcome h2 {
+    margin: 0;
+    color: var(--kine-ink);
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.15;
+    letter-spacing: -.035em;
+}
+
+.kine-page-intro {
+    margin: -12px 0 3px;
+    color: var(--kine-muted);
+    font-size: 13px;
+}
+
+.kine-practice-card {
+    max-width: none;
+    height: 100%;
+    margin: 0;
+    padding: 18px;
+    gap: 14px;
+    border: 1px solid var(--kine-border);
+    border-radius: 11px;
+    box-shadow: none;
+}
+
+.practice-avatar {
+    width: 54px;
+    height: 54px;
+    background: var(--kine-green-soft);
+}
+
+.practice-avatar img {
+    width: 38px;
+}
+
+.practice-info h3 {
+    font-size: 14px;
+}
+
+.practice-info p,
+.practice-info span {
+    font-size: 11px;
+}
+
+.kine-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.kine-stat-card {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid #dbeaf4;
+    border-radius: 10px;
+    background: var(--kine-blue-soft);
+    box-shadow: none;
+}
+
+.kine-stat-card strong {
+    margin-bottom: 6px;
+    color: var(--kine-blue);
+    font-size: 27px;
+    line-height: 1;
+}
+
+.kine-stat-card span {
+    color: #63747f;
+    font-size: 11px;
+}
+
+.kine-patients-section {
+    max-width: none;
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 16px;
+}
+
+.section-header {
+    margin: 0;
+}
+
+.section-header h3,
+.patient-detail-card h3 {
+    color: var(--kine-ink);
+    font-size: 16px;
+    letter-spacing: -.015em;
+}
+
+.add-patient-btn {
+    margin: 0;
+}
+
+.kine-search,
+.kine-search.full {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 42px;
+    margin: 16px 0 18px;
+    padding: 11px 14px;
+    border: 1px solid var(--kine-border);
+    border-radius: 8px;
+    background: var(--nimbli-white);
+    color: var(--kine-ink);
+    font-size: 12px;
+    font-weight: 550;
+    outline: none;
+}
+
+input.kine-search:focus {
+    border-color: var(--kine-green);
+    box-shadow: 0 0 0 3px rgba(43, 180, 157, .1);
+}
+
+.patient-list,
+.empty-patients {
+    grid-column: 1 / -1;
+}
+
+.patient-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.patient-list-card {
+    padding: 16px;
+    border-color: var(--kine-border);
+    border-radius: 10px;
+    background: var(--nimbli-white);
+}
+
+.patient-list-card:hover {
+    border-color: var(--kine-green);
+    box-shadow: 0 7px 18px rgba(30, 72, 61, .07);
+}
+
+.patient-list-top {
+    grid-template-columns: 40px 1fr auto;
+    gap: 11px;
+    margin-bottom: 11px;
+}
+
+.patient-list-avatar,
+.patient-list-profile-img {
+    width: 38px;
+    height: 38px;
+}
+
+.patient-goal,
+.patient-session,
+.patient-list-card span {
+    font-size: 11px;
+}
+
+.empty-patients {
+    min-height: 250px;
+    border: 1px dashed #cedbd6;
+    border-radius: 12px;
+    background: var(--nimbli-white);
+}
+
+.empty-patients img {
+    width: 105px;
+}
+
+.empty-patients h3 {
+    font-size: 14px;
+}
+
+.primary-btn,
+.secondary-btn {
+    min-height: 40px;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 800;
+    transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+.primary-btn {
+    background: var(--kine-green);
+}
+
+.primary-btn:hover {
+    background: var(--kine-green-dark);
+}
+
+.secondary-btn {
+    border-width: 1px;
+    border-color: var(--kine-green);
+    color: var(--kine-green-dark);
+}
+
+.patient-back-btn {
+    margin-bottom: 16px;
+    color: #60706a;
+    font-size: 12px;
+}
+
+.new-patient-card {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 28px 32px 32px;
+    border: 1px solid var(--kine-border);
+    border-radius: 12px;
+    background: var(--nimbli-white);
+    box-shadow: none;
+}
+
+.step-label {
+    margin-bottom: 8px;
+    font-size: 11px;
+}
+
+.step-progress {
+    gap: 8px;
+    max-width: 360px;
+    margin-bottom: 26px;
+}
+
+.step-progress div {
+    height: 5px;
+}
+
+.step-progress div.active {
+    background: var(--kine-blue);
+}
+
+.patient-step h2 {
+    margin-bottom: 18px;
+    font-size: 22px;
+    letter-spacing: -.025em;
+}
+
+.patient-step > p {
+    color: var(--kine-muted);
+    font-size: 12px;
+}
+
+.form-grid {
+    gap: 15px;
+    max-width: 680px;
+}
+
+.form-grid label {
+    gap: 6px;
+    color: #475751;
+    font-size: 11px;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select,
+.logbook-form input,
+.logbook-form textarea {
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid var(--kine-border);
+    border-radius: 7px;
+    background: var(--nimbli-white);
+    color: var(--kine-ink);
+    outline: none;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus,
+.form-grid select:focus,
+.logbook-form input:focus,
+.logbook-form textarea:focus {
+    border-color: var(--kine-green);
+    box-shadow: 0 0 0 3px rgba(43, 180, 157, .09);
+}
+
+.tag-list {
+    gap: 8px;
+    margin: 18px 0 24px;
+}
+
+.tag-list span {
+    padding: 7px 10px;
+    border: 1px solid var(--kine-border);
+    background: var(--nimbli-page-background);
+    font-size: 10px;
+}
+
+.exercise-select-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.exercise-select-card,
+.selected-exercise {
+    grid-template-columns: 52px 1fr;
+    gap: 11px;
+    padding: 12px;
+    border-color: var(--kine-border);
+    border-radius: 9px;
+}
+
+.exercise-select-card.selected {
+    border-width: 1px;
+    border-color: var(--kine-green);
+    background: var(--kine-green-soft);
+    box-shadow: inset 3px 0 0 var(--kine-green);
+}
+
+.exercise-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: #edf1ef;
+}
+
+.exercise-select-card strong,
+.selected-exercise strong {
+    font-size: 12px;
+}
+
+.exercise-select-card span,
+.exercise-select-card p,
+.selected-exercise p {
+    font-size: 10px;
+}
+
+.button-row {
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.review-layout {
+    gap: 28px;
+}
+
+.patient-preview-card,
+.info-box,
+.next-steps-box {
+    border: 1px solid #f0e4cf;
+    border-radius: 10px;
+    background: var(--kine-sand);
+}
+
+.patient-preview-card {
+    padding: 20px;
+}
+
+.patient-preview-card img {
+    width: 76px;
+}
+
+.info-box,
+.next-steps-box {
+    padding: 15px;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.final-step {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.final-step .success-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.activation-code {
+    margin: 18px auto;
+    padding: 14px 22px;
+    border-radius: 8px;
+    background: var(--kine-blue);
+    font-size: 27px;
+}
+
+.patient-detail-hero,
+.patient-detail-card,
+.exercise-detail-video,
+.exercise-detail-info,
+.assign-success-card {
+    border: 1px solid var(--kine-border);
+    border-radius: 11px;
+    box-shadow: none;
+}
+
+.patient-detail-hero {
+    padding: 20px 22px;
+    background: var(--kine-sand);
+    border-color: #f0e4cf;
+}
+
+.patient-detail-hero.extended {
+    grid-template-columns: 62px minmax(0, 1fr) auto;
+    gap: 16px;
+}
+
+.patient-photo-placeholder img {
+    width: 62px;
+    height: 62px;
+}
+
+.patient-title-row h2,
+.patient-main-info h2 {
+    font-size: 22px;
+}
+
+.patient-title-row span,
+.patient-main-info p,
+.patient-main-info strong,
+.patient-contact-info span {
+    font-size: 11px;
+}
+
+.patient-contact-info {
+    padding-top: 14px;
+    border-color: #eee1ca;
+}
+
+.patient-detail-stats {
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.patient-tabs {
+    gap: 24px;
+    margin-bottom: 18px;
+    padding: 0 4px;
+    border-bottom: 1px solid var(--kine-border);
+}
+
+.patient-tabs button {
+    margin-bottom: -1px;
+    padding: 10px 2px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    font-size: 11px;
+}
+
+.patient-tabs button.active {
+    color: var(--kine-green-dark);
+    border-bottom-color: var(--kine-green);
+    background: transparent;
+}
+
+.patient-detail-grid {
+    grid-template-columns: minmax(0, 1.3fr) minmax(240px, .7fr);
+    gap: 14px;
+}
+
+.patient-detail-card {
+    padding: 20px;
+    background: var(--nimbli-white);
+}
+
+.patient-detail-card h3 {
+    margin-bottom: 16px;
+}
+
+.progress-chart {
+    width: 100%;
+    margin: 0 0 14px;
+    padding: 8px 6px 0;
+    border-radius: 8px;
+    background: var(--nimbli-page-background);
+}
+
+.progress-chart svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+}
+
+.progress-chart line {
+    stroke: #e6eeeb;
+    stroke-width: 1;
+}
+
+.progress-series polyline {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.progress-series circle {
+    fill: var(--nimbli-white);
+    stroke: currentColor;
+    stroke-width: 3;
+}
+
+.daily-accuracy-series {
+    color: var(--nimbli-main-green);
+}
+
+.progress-chart text {
+    fill: #8a9691;
+    font-size: 10px;
+}
+
+.progress-chart .progress-session-label {
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.progress-chart .progress-value-label {
+    fill: var(--nimbli-main-dark-green);
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.detail-result-row,
+.session-history-card,
+.logbook-form,
+.logbook-entry {
+    border-color: #eee4d4;
+    border-radius: 9px;
+    background: var(--kine-sand);
+}
+
+.detail-result-row {
+    padding: 11px;
+    font-size: 11px;
+}
+
+.exercise-program-list,
+.session-history-list,
+.logbook-list {
+    gap: 12px;
+}
+
+.exercise-program-card {
+    padding: 15px;
+    border-color: #eee4d4;
+    border-radius: 9px;
+    background: var(--nimbli-page-background);
+}
+
+.exercise-header strong {
+    font-size: 14px;
+}
+
+.exercise-details,
+.last-completed {
+    font-size: 11px;
+}
+
+.exercise-library-header {
+    margin-bottom: 18px;
+}
+
+.exercise-library-header h2 {
+    color: var(--kine-ink);
+    font-size: 25px;
+    letter-spacing: -.03em;
+}
+
+.exercise-library-header p {
+    font-size: 12px;
+}
+
+.exercise-library-tabs {
+    gap: 20px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--kine-border);
+}
+
+.exercise-library-tabs button {
+    margin-bottom: -1px;
+    padding: 9px 2px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    font-size: 11px;
+}
+
+.exercise-library-tabs button.active {
+    color: var(--kine-green-dark);
+    border-bottom-color: var(--kine-green);
+    background: transparent;
+}
+
+.exercise-library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.exercise-library-card {
+    grid-template-columns: 82px 1fr;
+    gap: 14px;
+    min-height: 104px;
+    padding: 12px;
+    border-color: var(--kine-border);
+    border-radius: 9px;
+}
+
+.exercise-library-card .exercise-thumb {
+    width: 82px;
+    height: 78px;
+}
+
+.exercise-library-card strong {
+    color: var(--kine-ink);
+    font-size: 13px;
+}
+
+.exercise-card-badges {
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.exercise-card-badges span {
+    padding: 4px 7px;
+    font-size: 9px;
+}
+
+.exercise-library-card p {
+    font-size: 10px;
+}
+
+.exercise-detail-layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr);
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.exercise-detail-video,
+.exercise-detail-info {
+    padding: 18px;
+}
+
+.exercise-detail-info h2 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.video-placeholder {
+    height: 280px;
+    border-radius: 8px;
+    background: var(--nimbli-black);
+}
+
+.exercise-info-list {
+    gap: 9px;
+    margin: 18px 0;
+}
+
+.exercise-info-list div {
+    padding: 11px;
+    border: 1px solid var(--kine-border);
+    border-radius: 7px;
+    background: var(--nimbli-page-background);
+    font-size: 11px;
+}
+
+.exercise-description-card p,
+.exercise-description-card li {
+    font-size: 12px;
+}
+
+.assign-layout,
+.settings-layout {
+    gap: 14px;
+}
+
+.assign-layout {
+    grid-template-columns: minmax(230px, .7fr) minmax(0, 1.3fr);
+}
+
+.assign-patient-list {
+    gap: 8px;
+}
+
+.assign-patient-card {
+    padding: 11px;
+    border-color: var(--kine-border);
+    border-radius: 8px;
+}
+
+.assign-patient-card.selected {
+    border-width: 1px;
+    border-color: var(--kine-green);
+    background: var(--kine-green-soft);
+    box-shadow: inset 3px 0 0 var(--kine-green);
+}
+
+.assign-success-card {
+    max-width: 560px;
+    margin: 40px auto;
+    padding: 36px;
+}
+
+.settings-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr);
+}
+
+.plan-card {
+    padding: 16px;
+    border-color: var(--kine-border);
+    border-radius: 9px;
+}
+
+.plan-card.current {
+    background: var(--kine-blue-soft);
+    border-color: #dbeaf4;
+}
+
+.plan-card.premium {
+    border-width: 1px;
+    border-color: #eedfca;
+    background: var(--kine-sand);
+}
+
+.plan-card strong {
+    font-size: 21px;
+}
+
+.plan-card p,
+.plan-card li {
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+@media (max-width: 1180px) {
+    .kine-welcome {
+        grid-template-columns: 1fr;
+    }
+
+    .kine-welcome > * {
+        grid-column: 1 !important;
+    }
+
+    .kine-practice-card {
+        max-width: 360px;
+    }
+
+    .exercise-select-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1000px) {
+    .kine-page {
+        grid-template-columns: 1fr;
+    }
+
+    .kine-page .kine-sidebar {
+        position: sticky;
+        top: 0;
+        display: flex;
+        height: auto;
+        min-height: 64px;
+        padding: 10px 18px;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        border-right: 0;
+        border-bottom: 1px solid var(--kine-border);
+    }
+
+    .kine-sidebar .child-sidebar-logo {
+        width: 72px;
+        margin: 0;
+    }
+
+    .kine-sidebar-label,
+    .kine-logout-link {
+        display: none !important;
+    }
+
+    .kine-sidebar-nav {
+        margin-left: auto;
+        display: flex;
+    }
+
+    .kine-sidebar .sidebar-link {
+        width: auto;
+        min-height: 38px;
+        padding: 9px 11px;
+    }
+
+    .patient-detail-grid,
+    .exercise-detail-layout,
+    .assign-layout,
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .kine-content,
+    .new-patient-content,
+    .patient-detail-content {
+        padding: 24px 18px 40px;
+    }
+
+    .kine-page .child-road-header {
+        height: 56px;
+        padding: 0 18px;
+    }
+
+    .kine-sidebar .sidebar-link span:last-child {
+        display: none;
+    }
+
+    .kine-stats-grid,
+    .patient-list,
+    .exercise-select-grid,
+    .exercise-library-grid,
+    .exercise-schedule-grid,
+    .exercise-details,
+    .form-grid,
+    .review-layout,
+    .patient-detail-stats,
+    .patient-detail-hero.extended {
+        grid-template-columns: 1fr;
+    }
+
+    .patient-detail-hero .primary-btn {
+        width: 100%;
+    }
+
+    .patient-tabs,
+    .exercise-library-tabs {
+        overflow-x: auto;
+    }
+
+    .new-patient-card {
+        padding: 22px 18px 26px;
+    }
+}
+
+/* ===== PATIENT ACTIVATION CODE ===== */
+
+.kine-practice-card,
+.kine-stat-card,
+.patient-list-card,
+.new-patient-card,
+.patient-preview-card,
+.info-box,
+.next-steps-box,
+.patient-detail-hero,
+.patient-detail-card,
+.detail-result-row,
+.session-history-card,
+.logbook-form,
+.logbook-entry,
+.exercise-program-card,
+.exercise-library-card,
+.exercise-detail-video,
+.exercise-detail-info,
+.exercise-info-list div,
+.assign-patient-card,
+.assign-success-card,
+.plan-card,
+.checkout-user-card,
+.checkout-summary {
+    border: 0;
+    box-shadow: var(--nimbli-card-shadow);
+}
+
+.exercise-select-card.selected,
+.assign-patient-card.selected {
+    border: 1px solid var(--kine-green);
+    box-shadow: inset 3px 0 0 var(--kine-green), var(--nimbli-card-shadow);
+}
+
+.patient-activation-panel {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    padding-left: 20px;
+    border-left: 1px solid #eee1ca;
+}
+
+.patient-activation-panel > div:first-child {
+    display: grid;
+    gap: 3px;
+}
+
+.patient-activation-code-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.patient-activation-code-row code {
+    min-width: 126px;
+    padding: 10px 13px;
+    border: 1px solid #cfe4ee;
+    border-radius: 7px;
+    color: #247aa8;
+    background: #f1f8fd;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 850;
+    letter-spacing: .16em;
+    text-align: center;
+}
+
+.patient-activation-code-row .secondary-btn {
+    min-height: 38px;
+    padding: 8px 13px;
+}
+
+.activation-generate-btn {
+    min-height: 38px;
+}
+
+.patient-activation-panel small {
+    max-width: 360px;
+    color: #8a7d69;
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.activation-feedback {
+    margin: 0;
+    color: var(--nimbli-main-dark-green);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.activation-feedback.error {
+    color: var(--nimbli-dark-red);
+}
+
+@media (max-width: 720px) {
+    .patient-activation-panel {
+        padding: 16px 0 0;
+        border-top: 1px solid #eee1ca;
+        border-left: 0;
+    }
+
+    .patient-activation-code-row {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .patient-activation-code-row .secondary-btn,
+    .activation-generate-btn {
+        width: 100%;
     }
 }

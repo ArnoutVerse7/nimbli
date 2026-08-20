@@ -1,25 +1,28 @@
-export default function CodeInput({ length = 6, values, onChange }) {
-  const digits = values || Array.from({ length }, () => '')
+export default function CodeInput({ length = 6, value = '', onChange }) {
+  const handleChange = (event) => {
+    const nextValue = event.target.value
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, length)
+      .toUpperCase()
 
-  const handleChange = (index, value) => {
-    const next = [...digits]
-    next[index] = value.slice(-1)
-    onChange?.(next)
+    onChange?.(nextValue)
   }
 
   return (
-    <div className="code-inputs">
-      {digits.map((digit, index) => (
-        <input
-          key={index}
-          className="code-digit"
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={digit}
-          onChange={(event) => handleChange(index, event.target.value)}
-        />
-      ))}
-    </div>
+    <label className="code-input-label">
+      <span>Activatiecode</span>
+      <input
+        className="activation-code-field"
+        type="text"
+        inputMode="text"
+        autoComplete="one-time-code"
+        autoCapitalize="characters"
+        spellCheck="false"
+        maxLength={length}
+        placeholder="Bijv. A1B2C3"
+        value={value}
+        onChange={handleChange}
+      />
+    </label>
   )
 }

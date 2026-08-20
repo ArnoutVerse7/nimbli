@@ -1,69 +1,112 @@
+import { useEffect, useState } from 'react'
 import '../styles/ChildFlow.css'
+import ChildSidebar from '../components/ChildSidebar'
+import ChildIcon, { MissionIcon } from '../components/ChildIcon'
+import IconBadge from '../components/IconBadge'
+import { supabase } from '../lib/supabase'
+import { getChildProgress } from '../lib/childProgress'
 
-import logo from '../assets/logos/nimbli-logo.png'
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
-import checkIcon from '../assets/logos/check.png'
-import lockIcon from '../assets/logos/lock.png'
-import exitIcon from '../assets/logos/exit.png'
 
 export default function ChildMissionsPage({ onNavigate }) {
-    const missions = [
-        { title: 'Complete 1 oefening', progress: '80%', icon: checkIcon },
-        { title: 'Verdien 10 XP', progress: '60%', icon: starIcon },
-        { title: 'Completeer je dagmissies', progress: '35%', icon: trophyIcon },
-    ]
+    const [assignedExercises, setAssignedExercises] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
+
+    useEffect(() => {
+        async function loadMissions() {
+            const patientId = localStorage.getItem('patientId')
+
+            if (!patientId) {
+                setLoadError('De gekoppelde patiënt kon niet gevonden worden.')
+                setIsLoading(false)
+                return
+            }
+
+            const { data, error } = await supabase
+                .from('patient_exercises')
+                .select(`
+                    id,
+                    completed,
+                    xp_earned,
+                    completed_at,
+                    start_date,
+                    end_date
+                `)
+                .eq('patient_id', patientId)
+                .order('assigned_at', { ascending: true })
+
+            if (error) {
+                console.error(error)
+                setLoadError('De missies konden niet geladen worden.')
+            } else {
+                setAssignedExercises(data || [])
+            }
+
+            setIsLoading(false)
+        }
+
+        loadMissions()
+    }, [])
+
+    const {
+        completedExercises,
+        totalXp,
+        completionStreak,
+        missions: missionProgress,
+    } = getChildProgress(assignedExercises)
+    const missions = missionProgress
 
     return (
         <main className="child-road-page">
             <section className="child-dashboard-shell">
-                <aside className="child-sidebar">
-                    <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childDashboard')}>
-                        Dashboard
-                    </button>
-
-                    <button className="sidebar-link active" onClick={() => onNavigate('childMissions')}>
-                        Dagelijkse missies
-                    </button>
-
-                    <button className="sidebar-link" onClick={() => onNavigate('childProfile')}>
-                        Profiel
-                    </button>
-                    <button className="sidebar-link" onClick={() => onNavigate('login')}>
-                        <img src={exitIcon} alt="Uitloggen" />
-                    </button>
-                </aside>
+                <ChildSidebar active="missions" onNavigate={onNavigate} />
 
                 <section className="child-main-area">
                     <header className="child-road-header">
                         <h1>Dagelijkse missies</h1>
 
                         <div className="child-road-stats">
-                            <span><img src={trophyIcon} alt="" /> 3</span>
-                            <span><img src={starIcon} alt="" /> 12 XP</span>
-                            <span><img src={streakIcon} alt="" /> 20 days</span>
+                            <span>
+                                <IconBadge src={trophyIcon} />
+                                <span><strong>{completedExercises.length}</strong><small>klaar</small></span>
+                            </span>
+                            <span>
+                                <IconBadge src={starIcon} />
+                                <span><strong>{totalXp} XP</strong><small>verzameld</small></span>
+                            </span>
+                            <span>
+                                <IconBadge src={streakIcon} />
+                                <span><strong>{completionStreak}</strong><small>dagreeks</small></span>
+                            </span>
                         </div>
                     </header>
 
                     <div className="missions-content">
-                        {missions.map((mission, index) => (
-                            <div className="mission-card" key={index}>
-                                <div className="mission-icon">
-                                    <img src={mission.icon} alt="" />
+                        {isLoading && <p>Missies laden...</p>}
+                        {loadError && <p className="form-error">{loadError}</p>}
+
+                        {!isLoading && !loadError && missions.map((mission) => (
+                            <div
+                                className={`mission-card ${mission.id} ${mission.completed ? 'completed' : ''}`}
+                                key={mission.id}
+                            >
+                                <div className={`mission-icon ${mission.id}`}>
+                                    <MissionIcon missionId={mission.id} />
                                 </div>
 
                                 <div className="mission-info">
                                     <strong>{mission.title}</strong>
+                                    <small>{mission.detail}</small>
                                     <div className="mission-progress">
-                                        <div style={{ width: mission.progress }} />
+                                        <div style={{ width: `${mission.progress}%` }} />
                                     </div>
                                 </div>
 
-                                <div className="mission-reward">
-                                    <img src={lockIcon} alt="" />
+                                <div className={`mission-reward ${mission.completed ? 'completed' : ''}`}>
+                                    <ChildIcon name="chest" />
                                 </div>
                             </div>
                         ))}

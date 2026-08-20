@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logos/nimbli-logo.png'
-import exitIcon from '../assets/logos/exit.png'
 import checkIcon from '../assets/logos/check.png'
 import profile from '../assets/logos/profile.png'
+import KinesistSidebar from '../components/KinesistSidebar'
+import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
+import IconBadge from '../components/IconBadge'
+import { getExerciseCover } from '../lib/exerciseMedia'
+import {
+    getDefaultExerciseSchedule,
+    isValidExerciseSchedule,
+} from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
 export default function NewPatientFlowPage({ onNavigate }) {
@@ -12,10 +18,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
     const [selectedExercises, setSelectedExercises] = useState([])
     const [isSaving, setIsSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [schedule, setSchedule] = useState(getDefaultExerciseSchedule)
 
-    const [activationCode] = useState(
-        Math.random().toString(36).substring(2, 8).toUpperCase()
-    )
+    const [activationCode, setActivationCode] = useState('')
 
     const [patientForm, setPatientForm] = useState({
         firstName: '',
@@ -83,33 +88,60 @@ export default function NewPatientFlowPage({ onNavigate }) {
         setStep(2)
     }
 
-    const savePatient = async () => {
-        setIsSaving(true)
+    const goToReview = () => {
         setErrorMessage('')
 
+        if (selectedExercises.length > 0 && !isValidExerciseSchedule(schedule)) {
+            setErrorMessage('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
+        setStep(3)
+    }
+
+    const savePatient = async () => {
+        if (selectedExercises.length > 0 && !isValidExerciseSchedule(schedule)) {
+            setErrorMessage('Kies een geldige einddatum die op of na de startdatum ligt.')
+            return
+        }
+
+        setIsSaving(true)
+        setErrorMessage('')
+        let createdPatientId = null
+
         try {
-            const { data: patientData, error: patientError } = await supabase
-                .from('patients')
-                .insert([
-                    {
-                        first_name: patientForm.firstName.trim(),
-                        last_name: patientForm.lastName.trim(),
-                        age: parseInt(patientForm.age || '7'),
-                        goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
-                        activation_code: activationCode,
-                    },
-                ])
-                .select()
-                .single()
+            const { data: userData, error: userError } = await supabase.auth.getUser()
+
+            if (userError || !userData.user) {
+                throw new Error('Je sessie is verlopen. Log opnieuw in.')
+            }
+
+            const { data, error: patientError } = await supabase.rpc('create_patient', {
+                p_first_name: patientForm.firstName.trim(),
+                p_last_name: patientForm.lastName.trim(),
+                p_age: parseInt(patientForm.age || '7', 10),
+                p_goal: patientForm.goal || 'Motorische ontwikkeling ondersteunen',
+            })
 
             if (patientError) throw patientError
 
+            const patientData = Array.isArray(data) ? data[0] : data
+
+            if (!patientData?.patient_id || !patientData?.activation_code) {
+                throw new Error('De patiënt kon niet worden aangemaakt.')
+            }
+
+            createdPatientId = patientData.patient_id
+
             if (selectedExercises.length > 0) {
                 const exerciseRows = selectedExercises.map((exercise) => ({
-                    patient_id: patientData.id,
+                    patient_id: patientData.patient_id,
                     exercise_id: exercise.id,
+                    assigned_by: userData.user.id,
                     completed: false,
                     completion_percentage: 0,
+                    start_date: schedule.startDate,
+                    end_date: schedule.endDate,
                 }))
 
                 const { error: assignError } = await supabase
@@ -119,10 +151,21 @@ export default function NewPatientFlowPage({ onNavigate }) {
                 if (assignError) throw assignError
             }
 
-            onNavigate('kinesistDashboard')
+            setActivationCode(patientData.activation_code)
+            setStep(4)
         } catch (error) {
             console.error('SAVE PATIENT ERROR:', error)
-            setErrorMessage(error.message || 'Er ging iets mis bij het opslaan.')
+
+            if (createdPatientId) {
+                await supabase.from('patients').delete().eq('id', createdPatientId)
+            }
+
+            const scheduleMigrationMissing = error?.message?.includes('start_date')
+                || error?.message?.includes('end_date')
+
+            setErrorMessage(scheduleMigrationMissing
+                ? 'De planningsvelden ontbreken nog in Supabase. Voer migratie 003_assignment_schedule.sql uit.'
+                : error.message || 'Er ging iets mis bij het opslaan.')
         } finally {
             setIsSaving(false)
         }
@@ -130,25 +173,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
     return (
         <main className="kine-page">
-            <aside className="child-sidebar">
-                <img src={logo} alt="Nimbli logo" className="child-sidebar-logo" />
-
-                <button className="sidebar-link active" onClick={() => onNavigate('kinesistDashboard')}>
-                    Dashboard
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistExercises')}>
-                    Oefeningen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistSettings')}>
-                    Instellingen
-                </button>
-
-                <button className="sidebar-link" onClick={() => onNavigate('kinesistLogin')}>
-                    <img src={exitIcon} alt="" />
-                </button>
-            </aside>
+            <KinesistSidebar active="dashboard" onNavigate={onNavigate} />
 
             <section className="kine-main">
                 <header className="child-road-header">
@@ -243,6 +268,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                         const isSelected = selectedExercises.some(
                                             (item) => item.id === exercise.id
                                         )
+                                        const coverImage = getExerciseCover(exercise)
 
                                         return (
                                             <div
@@ -251,9 +277,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                                 onClick={() => toggleExercise(exercise)}
                                             >
                                                 <div className="exercise-thumb">
-                                                    {exercise.cover_image ? (
+                                                    {coverImage ? (
                                                         <img
-                                                            src={exercise.cover_image}
+                                                            src={coverImage}
                                                             alt={exercise.title}
                                                             className="exercise-thumb-image"
                                                         />
@@ -274,12 +300,28 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                     })}
                                 </div>
 
+                                {selectedExercises.length > 0 && (
+                                    <ExerciseScheduleFields
+                                        schedule={schedule}
+                                        onChange={(nextSchedule) => {
+                                            setSchedule(nextSchedule)
+                                            setErrorMessage('')
+                                        }}
+                                        title="Plan het startprogramma"
+                                        helpText="Alle gekozen oefeningen verschijnen iedere dag tijdens deze periode."
+                                    />
+                                )}
+
+                                {step === 2 && errorMessage && (
+                                    <p className="form-error-message">{errorMessage}</p>
+                                )}
+
                                 <div className="button-row">
                                     <button className="secondary-btn" onClick={() => setStep(1)}>
                                         Terug
                                     </button>
 
-                                    <button className="primary-btn" onClick={() => setStep(3)}>
+                                    <button className="primary-btn" onClick={goToReview}>
                                         Volgende
                                         {selectedExercises.length > 0 && ` (${selectedExercises.length})`}
                                     </button>
@@ -316,14 +358,22 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                                     <h3>Startprogramma</h3>
 
+                                    {selectedExercises.length > 0 && (
+                                        <p className="exercise-schedule-summary">
+                                            Van {new Date(`${schedule.startDate}T00:00:00`).toLocaleDateString('nl-BE')}
+                                            {' '}tot en met{' '}
+                                            {new Date(`${schedule.endDate}T00:00:00`).toLocaleDateString('nl-BE')}
+                                        </p>
+                                    )}
+
                                     <div className="selected-exercises">
                                         {selectedExercises.length > 0 ? (
                                             selectedExercises.map((exercise) => (
                                                 <div className="selected-exercise" key={exercise.id}>
                                                     <div className="exercise-thumb">
-                                                        {exercise.cover_image ? (
+                                                        {getExerciseCover(exercise) ? (
                                                             <img
-                                                                src={exercise.cover_image}
+                                                                src={getExerciseCover(exercise)}
                                                                 alt={exercise.title}
                                                                 className="exercise-thumb-image"
                                                             />
@@ -350,17 +400,25 @@ export default function NewPatientFlowPage({ onNavigate }) {
                                             Terug
                                         </button>
 
-                                        <button className="primary-btn" onClick={() => setStep(4)}>
-                                            Volgende
+                                        <button
+                                            className="primary-btn"
+                                            onClick={savePatient}
+                                            disabled={isSaving}
+                                        >
+                                            {isSaving ? 'Patiënt opslaan...' : 'Patiënt bevestigen'}
                                         </button>
                                     </div>
+
+                                    {errorMessage && (
+                                        <p className="form-error-message">{errorMessage}</p>
+                                    )}
                                 </div>
                             </section>
                         )}
 
                         {step === 4 && (
                             <section className="patient-step final-step">
-                                <img src={checkIcon} alt="" className="success-icon" />
+                                <IconBadge src={checkIcon} className="success-icon" />
 
                                 <h2>Patiënt toegevoegd!</h2>
                                 <p>Deel deze activatiecode met de ouders:</p>
@@ -380,10 +438,9 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                                 <button
                                     className="primary-btn"
-                                    disabled={isSaving}
-                                    onClick={savePatient}
+                                    onClick={() => onNavigate('kinesistDashboard')}
                                 >
-                                    {isSaving ? 'Opslaan...' : 'Terugkeren naar het dashboard'}
+                                    Terugkeren naar het dashboard
                                 </button>
                             </section>
                         )}

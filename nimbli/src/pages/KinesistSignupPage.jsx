@@ -7,6 +7,8 @@ import PageShell from '../components/PageShell'
 
 export default function KinesistSignupPage({ onNavigate }) {
     const [accepted, setAccepted] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const [form, setForm] = useState({
         name: '',
@@ -18,20 +20,47 @@ export default function KinesistSignupPage({ onNavigate }) {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        setErrorMessage('')
 
-        const { error } = await supabase
-            .from('kinesists')
-            .insert([
-                {
-                    name: form.name,
-                    email: form.email,
+        if (!form.name.trim() || !form.practiceName.trim() || !form.email.trim() || !form.password) {
+            setErrorMessage('Vul alle verplichte velden in.')
+            return
+        }
+
+        if (form.password.length < 8) {
+            setErrorMessage('Je wachtwoord moet minstens 8 tekens bevatten.')
+            return
+        }
+
+        setIsLoading(true)
+
+        const { data, error } = await supabase.auth.signUp({
+            email: form.email.trim().toLowerCase(),
+            password: form.password,
+            options: {
+                data: {
+                    full_name: form.name.trim(),
                     role: 'kinesist',
+                    practice_name: form.practiceName.trim(),
+                    location: form.location.trim(),
                 },
-            ])
+            },
+        })
+
+        setIsLoading(false)
 
         if (error) {
             console.error(error)
-            alert('Fout bij account aanmaken')
+            setErrorMessage(error.message || 'Fout bij account aanmaken.')
+            return
+        }
+
+        if (!data.session) {
+            localStorage.setItem(
+                'authNotice',
+                'Account aangemaakt. Bevestig indien nodig je e-mailadres en log daarna in.'
+            )
+            onNavigate('kinesistLogin')
             return
         }
 
@@ -39,9 +68,7 @@ export default function KinesistSignupPage({ onNavigate }) {
     }
 
     return (
-        <PageShell>
-            <div className="status-bar" />
-
+        <PageShell activeRole="kinesist" onNavigate={onNavigate}>
             <div className="page-row">
                 <Button variant="icon" type="button" onClick={() => onNavigate('kinesistLogin')}>
                     ←
@@ -50,8 +77,8 @@ export default function KinesistSignupPage({ onNavigate }) {
             </div>
 
             <div className="hero-copy">
-                <h1>Maak een kinesistaccount aan.</h1>
-                <p>Registreer je praktijk en start met Nimbli.</p>
+                <h1>Maak een account aan.</h1>
+                <p>Vul je gegevens in om je praktijk te registreren.</p>
             </div>
 
             <form className="login-form" onSubmit={handleSubmit}>
@@ -59,6 +86,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     label="Naam"
                     placeholder="Bijv. Anne Peeters"
                     value={form.name}
+                    autoComplete="name"
                     onChange={(event) => setForm({ ...form, name: event.target.value })}
                 />
 
@@ -66,6 +94,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     label="Praktijknaam"
                     placeholder="Bijv. Kinderkine Mechelen"
                     value={form.practiceName}
+                    autoComplete="organization"
                     onChange={(event) => setForm({ ...form, practiceName: event.target.value })}
                 />
 
@@ -73,6 +102,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     label="Locatie"
                     placeholder="Bijv. Stationsstraat 12, Mechelen"
                     value={form.location}
+                    autoComplete="street-address"
                     onChange={(event) => setForm({ ...form, location: event.target.value })}
                 />
 
@@ -81,6 +111,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     type="email"
                     placeholder="E-mail"
                     value={form.email}
+                    autoComplete="email"
                     onChange={(event) => setForm({ ...form, email: event.target.value })}
                 />
 
@@ -89,6 +120,7 @@ export default function KinesistSignupPage({ onNavigate }) {
                     type="password"
                     placeholder="Wachtwoord"
                     value={form.password}
+                    autoComplete="new-password"
                     onChange={(event) => setForm({ ...form, password: event.target.value })}
                 />
 
@@ -98,8 +130,12 @@ export default function KinesistSignupPage({ onNavigate }) {
                     onChange={(event) => setAccepted(event.target.checked)}
                 />
 
-                <Button type="submit" disabled={!accepted}>
-                    Account aanmaken
+                {errorMessage && (
+                    <p className="form-error-message">{errorMessage}</p>
+                )}
+
+                <Button type="submit" disabled={!accepted || isLoading}>
+                    {isLoading ? 'Account aanmaken...' : 'Account aanmaken'}
                 </Button>
             </form>
         </PageShell>

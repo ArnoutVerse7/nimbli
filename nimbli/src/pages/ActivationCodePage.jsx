@@ -4,14 +4,14 @@ import CodeInput from '../components/CodeInput'
 import PageShell from '../components/PageShell'
 import { supabase } from '../lib/supabase'
 export default function ActivationCodePage({ onNavigate }) {
-  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const [code, setCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    const activationCode = code.join('').trim().toUpperCase()
+    const activationCode = code.trim().toUpperCase()
 
     if (activationCode.length !== 6) {
       setErrorMessage('Voer een geldige activatiecode in.')
@@ -22,21 +22,25 @@ export default function ActivationCodePage({ onNavigate }) {
     setErrorMessage('')
 
     try {
-      const { data: patient, error } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('activation_code', activationCode)
-        .single()
+      const { data: userData } = await supabase.auth.getUser()
 
-      if (error || !patient) {
-        setErrorMessage('Activatiecode niet gevonden.')
-        setIsLoading(false)
+      if (userData.user) {
+        const { data: patientId, error } = await supabase.rpc('claim_patient', {
+          p_activation_code: activationCode,
+        })
+
+        if (error) {
+          setErrorMessage('Activatiecode is ongeldig of verlopen.')
+          return
+        }
+
+        localStorage.setItem('patientId', patientId)
+        localStorage.removeItem('pendingActivationCode')
+        onNavigate('profileSelection')
         return
       }
 
-      localStorage.setItem('patientId', patient.id)
-      localStorage.setItem('activationCode', activationCode)
-
+      localStorage.setItem('pendingActivationCode', activationCode)
       onNavigate('signup')
     } catch (error) {
       console.error(error)
@@ -47,9 +51,7 @@ export default function ActivationCodePage({ onNavigate }) {
   }
 
   return (
-    <PageShell>
-      <div className="status-bar" />
-
+    <PageShell activeRole="parent" onNavigate={onNavigate}>
       <div className="page-row">
         <Button
           variant="icon"
@@ -61,21 +63,15 @@ export default function ActivationCodePage({ onNavigate }) {
       </div>
 
       <div className="hero-copy">
-        <h1>Voer je activatiecode in:</h1>
-        <p>Deze app werkt enkel met een code van je kinesist.</p>
+        <h1>Voer je activatiecode in.</h1>
+        <p>Daarmee koppelen we het juiste kindprofiel aan je account.</p>
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <CodeInput values={code} onChange={setCode} />
+        <CodeInput value={code} onChange={setCode} />
 
         {errorMessage && (
-          <p
-            style={{
-              color: '#dc2626',
-              textAlign: 'center',
-              marginTop: '12px',
-            }}
-          >
+          <p className="form-error-message">
             {errorMessage}
           </p>
         )}
@@ -85,7 +81,7 @@ export default function ActivationCodePage({ onNavigate }) {
           type="button"
           className="help-link"
         >
-          Geen code gekregen? Opnieuw versturen
+          Geen code ontvangen? Neem contact op met je kinesist
         </Button>
 
         <Button type="submit" disabled={isLoading}>

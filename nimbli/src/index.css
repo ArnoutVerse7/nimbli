@@ -1,8 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
 :root {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nimbli-yellow: #fbb92a;
+  --nimbli-purple: #c27aff;
+  --nimbli-blue: #82b3e1;
+  --nimbli-light-green: #81c784;
+  --nimbli-gray: #bdbdbd;
+  --nimbli-red: #ef5350;
+  --nimbli-white: #ffffff;
+  --nimbli-main-green: #2bb39b;
+  --nimbli-offwhite: #faf5ee;
+  --nimbli-dark-red: #c14b48;
+  --nimbli-dark-green: #639865;
+  --nimbli-dark-blue: #688fb3;
+  --nimbli-dark-yellow: #bd9546;
+  --nimbli-main-dark-green: #259783;
+  --nimbli-black: #000000;
+  --nimbli-page-background: var(--nimbli-white);
+  --nimbli-surface: var(--nimbli-white);
+  --nimbli-border: var(--nimbli-gray);
+  --nimbli-text: var(--nimbli-black);
+  --nimbli-text-muted: rgba(0, 0, 0, 0.58);
+  --nimbli-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 16px;
-  color: #1d232a;
-  background: #f4f9f6;
+  color: var(--nimbli-text);
+  background: var(--nimbli-page-background);
 }
 
 * {
@@ -16,8 +39,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f4f9f6;
-  color: #1d232a;
+  background: var(--nimbli-page-background);
+  color: var(--nimbli-text);
 }
 
 button,
