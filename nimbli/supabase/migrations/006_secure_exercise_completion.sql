@@ -1,5 +1,12 @@
 begin;
 
+alter table public.patient_exercises
+  add column if not exists completed boolean not null default false,
+  add column if not exists completion_percentage integer not null default 0,
+  add column if not exists accuracy_percentage integer,
+  add column if not exists xp_earned integer not null default 0,
+  add column if not exists completed_at timestamptz;
+
 create or replace function public.complete_patient_exercise(
   p_patient_id uuid,
   p_exercise_id uuid,
