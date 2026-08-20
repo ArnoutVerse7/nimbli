@@ -6,6 +6,7 @@ import {
     isAssignmentPlannedForDate,
 } from '../lib/exerciseSchedule'
 import { getExerciseCover } from '../lib/exerciseMedia'
+import { getChildProgress, toProgress } from '../lib/childProgress'
 import ChildSidebar from '../components/ChildSidebar'
 import '../styles/ChildFlow.css'
 
@@ -15,32 +16,6 @@ import mascotIcon from '../assets/logos/mascotte.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
 import trophyIcon from '../assets/logos/trophy.png'
-
-const toProgress = (value, target) =>
-    target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0
-
-const getCompletionStreak = (assignments) => {
-    const completedDates = new Set(
-        assignments
-            .filter((item) => item.completed_at)
-            .map((item) => new Date(item.completed_at).toDateString())
-    )
-
-    const cursor = new Date()
-
-    if (!completedDates.has(cursor.toDateString())) {
-        cursor.setDate(cursor.getDate() - 1)
-    }
-
-    let streak = 0
-
-    while (completedDates.has(cursor.toDateString())) {
-        streak += 1
-        cursor.setDate(cursor.getDate() - 1)
-    }
-
-    return streak
-}
 
 export default function ChildDashboardPage({ onNavigate }) {
     const [selectedExercise, setSelectedExercise] = useState(null)
@@ -110,14 +85,14 @@ export default function ChildDashboardPage({ onNavigate }) {
     }, [])
 
     const weekDays = useMemo(() => getWeekDates(0, 1), [])
-    const todayExercises = assignedExercises.filter((item) =>
-        isAssignmentPlannedForDate(item, new Date())
-    )
-    const completedExercises = assignedExercises.filter((item) => item.completed)
-    const completedToday = todayExercises.filter((item) => item.completed)
-    const totalXp = assignedExercises.reduce((total, item) => total + (item.xp_earned || 0), 0)
-    const todayXp = completedToday.reduce((total, item) => total + (item.xp_earned || 0), 0)
-    const completionStreak = getCompletionStreak(assignedExercises)
+    const {
+        todayExercises,
+        completedExercises,
+        completedToday,
+        totalXp,
+        completionStreak,
+        missions: missionProgress,
+    } = getChildProgress(assignedExercises)
     const firstIncompleteIndex = todayExercises.findIndex((item) => !item.completed)
 
     const roadNodes = Array.from({ length: 6 }, (_, index) => {
@@ -147,26 +122,15 @@ export default function ChildDashboardPage({ onNavigate }) {
         ? toProgress(completedToday.length, todayExercises.length)
         : 0
     const selectedCover = getExerciseCover(selectedExercise)
-    const missions = [
-        {
-            title: 'Voltooi één oefening',
-            detail: `${Math.min(completedToday.length, 1)}/1 voltooid`,
-            progress: toProgress(completedToday.length, 1),
-            icon: checkIcon,
-        },
-        {
-            title: 'Verdien 50 XP',
-            detail: `${todayXp}/50 XP`,
-            progress: toProgress(todayXp, 50),
-            icon: starIcon,
-        },
-        {
-            title: 'Maak je dag compleet',
-            detail: `${completedToday.length}/${todayExercises.length} oefeningen`,
-            progress: toProgress(completedToday.length, todayExercises.length),
-            icon: trophyIcon,
-        },
-    ]
+    const missionIcons = {
+        exercise: checkIcon,
+        xp: starIcon,
+        day: trophyIcon,
+    }
+    const missions = missionProgress.map((mission) => ({
+        ...mission,
+        icon: missionIcons[mission.id],
+    }))
 
     return (
         <main className="child-road-page">
