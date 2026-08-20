@@ -4,6 +4,7 @@ import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
+import IconBadge from '../components/IconBadge'
 import KinesistSidebar from '../components/KinesistSidebar'
 import { getExerciseCover } from '../lib/exerciseMedia'
 import {
@@ -658,7 +659,10 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                 ) : (
                                     recentResults.map((item) => (
                                         <div className="detail-result-row" key={item.id}>
-                                            <img src={checkIcon} alt="" />
+                                            <IconBadge
+                                                src={checkIcon}
+                                                className="detail-result-icon"
+                                            />
                                             <span>{item.exercises?.title || 'Oefening'} voltooid</span>
                                             <strong>
                                                 {getAccuracy(item) === null

@@ -507,13 +507,11 @@
   background: var(--parent-sand);
 }
 
-.parent-recent-item img {
+.parent-recent-item .parent-recent-icon {
   width: 28px;
   height: 28px;
-  padding: 7px;
   border-radius: 50%;
   background: var(--nimbli-light-green);
-  filter: brightness(0) invert(1);
 }
 
 .parent-recent-item b {

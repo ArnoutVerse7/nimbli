@@ -8,6 +8,7 @@ import {
   isAssignmentPlannedForDate,
 } from '../lib/exerciseSchedule'
 import ParentSidebar from '../components/ParentSidebar'
+import IconBadge from '../components/IconBadge'
 import profileIcon from '../assets/logos/profile.png'
 import checkIcon from '../assets/logos/check.png'
 import '../styles/ParentDashboard.css'
@@ -96,7 +97,7 @@ function RecentActivityList({ activities }) {
 
   return activities.map((item) => (
     <div className="parent-recent-item" key={item.id}>
-      <img src={checkIcon} alt="" />
+      <IconBadge src={checkIcon} className="parent-recent-icon" />
       <div>
         <strong>{item.exercises?.title || 'Oefening'}</strong>
         <span>{new Date(item.completed_at).toLocaleDateString('nl-BE')}</span>

@@ -4,6 +4,7 @@ import { getChildProgress } from '../lib/childProgress'
 import '../styles/ChildFlow.css'
 import ChildSidebar from '../components/ChildSidebar'
 import ChildIcon, { MissionIcon } from '../components/ChildIcon'
+import IconBadge from '../components/IconBadge'
 
 import mascotte from '../assets/logos/mascotte.png'
 import trophyIcon from '../assets/logos/trophy.png'
@@ -77,15 +78,15 @@ export default function ChildProfilePage({ onNavigate }) {
 
                         <div className="child-road-stats">
                             <span>
-                                <img src={trophyIcon} alt="" />
+                                <IconBadge src={trophyIcon} />
                                 <span><strong>{completedExercises.length}</strong><small>klaar</small></span>
                             </span>
                             <span>
-                                <img src={starIcon} alt="" />
+                                <IconBadge src={starIcon} />
                                 <span><strong>{totalXp} XP</strong><small>verzameld</small></span>
                             </span>
                             <span>
-                                <img src={streakIcon} alt="" />
+                                <IconBadge src={streakIcon} />
                                 <span><strong>{completionStreak}</strong><small>dagreeks</small></span>
                             </span>
                         </div>

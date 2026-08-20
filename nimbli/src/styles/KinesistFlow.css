@@ -407,10 +407,7 @@
     height: 58px;
     background: var(--nimbli-light-green);
     border-radius: 50%;
-    padding: 14px;
-    object-fit: contain;
     margin-bottom: 18px;
-    filter: brightness(0) invert(1);
 }
 
 .activation-code {
@@ -592,13 +589,11 @@
     margin-bottom: 12px;
 }
 
-.detail-result-row img {
+.detail-result-row .detail-result-icon {
     width: 28px;
     height: 28px;
-    padding: 7px;
     border-radius: 50%;
     background: var(--nimbli-light-green);
-    filter: brightness(0) invert(1);
 }
 
 .detail-result-row strong {
@@ -1370,13 +1365,11 @@
     box-shadow: var(--shadow, 0 10px 30px rgba(0, 0, 0, 0.08));
 }
 
-.assign-success-card img {
+.assign-success-card .assign-success-icon {
     width: 64px;
     height: 64px;
     background: var(--nimbli-light-green);
     border-radius: 50%;
-    padding: 16px;
-    filter: brightness(0) invert(1);
 }
 
 .empty-text {

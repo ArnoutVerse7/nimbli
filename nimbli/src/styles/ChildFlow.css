@@ -180,24 +180,21 @@
   color: var(--text-dark);
 }
 
-.child-road-stats img {
+.child-road-stats .icon-badge {
   width: 34px;
   height: 34px;
-  object-fit: contain;
-  padding: 8px;
   border-radius: 50%;
-  filter: brightness(0) invert(1);
 }
 
-.child-road-stats > span:nth-child(1) img {
+.child-road-stats > span:nth-child(1) .icon-badge {
   background: var(--nimbli-yellow);
 }
 
-.child-road-stats > span:nth-child(2) img {
+.child-road-stats > span:nth-child(2) .icon-badge {
   background: var(--nimbli-blue);
 }
 
-.child-road-stats > span:nth-child(3) img {
+.child-road-stats > span:nth-child(3) .icon-badge {
   background: var(--nimbli-purple);
 }
 
@@ -1590,13 +1587,6 @@
 
 .result-icon-circle.purple {
   background: var(--nimbli-purple);
-}
-
-.result-icon-img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 .result-label {

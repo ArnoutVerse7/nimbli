@@ -4,6 +4,7 @@ import checkIcon from '../assets/logos/check.png'
 import profile from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
 import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
+import IconBadge from '../components/IconBadge'
 import { getExerciseCover } from '../lib/exerciseMedia'
 import {
     getDefaultExerciseSchedule,
@@ -417,7 +418,7 @@ export default function NewPatientFlowPage({ onNavigate }) {
 
                         {step === 4 && (
                             <section className="patient-step final-step">
-                                <img src={checkIcon} alt="" className="success-icon" />
+                                <IconBadge src={checkIcon} className="success-icon" />
 
                                 <h2>Patiënt toegevoegd!</h2>
                                 <p>Deel deze activatiecode met de ouders:</p>

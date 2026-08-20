@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import checkIcon from '../assets/logos/check.png'
 import KinesistSidebar from '../components/KinesistSidebar'
+import IconBadge from '../components/IconBadge'
 import '../styles/KinesistFlow.css'
 
 export default function PremiumCheckoutPage({ onNavigate }) {
@@ -124,7 +125,7 @@ export default function PremiumCheckoutPage({ onNavigate }) {
                         </section>
                     ) : (
                         <section className="assign-success-card">
-                            <img src={checkIcon} alt="" />
+                            <IconBadge src={checkIcon} className="assign-success-icon" />
                             <h2>Praktijkaccount geactiveerd!</h2>
                             <p>Je abonnement werd bijgewerkt naar Premium.</p>
 

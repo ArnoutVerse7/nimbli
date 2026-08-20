@@ -4,6 +4,7 @@ import checkIcon from '../assets/logos/check.png'
 import profileIcon from '../assets/logos/profile.png'
 import KinesistSidebar from '../components/KinesistSidebar'
 import ExerciseScheduleFields from '../components/ExerciseScheduleFields'
+import IconBadge from '../components/IconBadge'
 import { getExerciseCover } from '../lib/exerciseMedia'
 import {
     getDefaultExerciseSchedule,
@@ -281,7 +282,7 @@ export default function AssignExercisePage({ exerciseId, onNavigate }) {
                         </section>
                     ) : (
                         <section className="assign-success-card">
-                            <img src={checkIcon} alt="" />
+                            <IconBadge src={checkIcon} className="assign-success-icon" />
                             <h2>Oefening toegewezen!</h2>
 
                             <p>

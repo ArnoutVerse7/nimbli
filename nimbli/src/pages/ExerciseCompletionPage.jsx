@@ -5,6 +5,7 @@ import '../styles/ChildFlow.css'
 import mascotIcon from '../assets/logos/mascotte.png'
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
+import IconBadge from '../components/IconBadge'
 
 const emptyResult = {
   completed: false,
@@ -150,17 +151,13 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
 
           <div className="results-cards">
             <div className="result-card">
-              <div className="result-icon-circle yellow">
-                <img src={starIcon} alt="" className="result-icon-img" />
-              </div>
+              <IconBadge src={starIcon} className="result-icon-circle yellow" />
               <span className="result-label">XP verdiend</span>
               <span className="result-value">+{result.xp}</span>
             </div>
 
             <div className="result-card">
-              <div className="result-icon-circle purple">
-                <img src={trophyIcon} alt="" className="result-icon-img" />
-              </div>
+              <IconBadge src={trophyIcon} className="result-icon-circle purple" />
               <span className="result-label">Juistheid</span>
               <span className="result-value">{result.accuracy}%</span>
             </div>

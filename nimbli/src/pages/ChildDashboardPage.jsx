@@ -9,6 +9,7 @@ import { getExerciseCover } from '../lib/exerciseMedia'
 import { getChildProgress, toProgress } from '../lib/childProgress'
 import ChildSidebar from '../components/ChildSidebar'
 import ChildIcon, { MissionIcon } from '../components/ChildIcon'
+import IconBadge from '../components/IconBadge'
 import '../styles/ChildFlow.css'
 
 import mascotIcon from '../assets/logos/mascotte.png'
@@ -136,15 +137,15 @@ export default function ChildDashboardPage({ onNavigate }) {
 
                         <div className="child-road-stats">
                             <span>
-                                <img src={trophyIcon} alt="" />
+                                <IconBadge src={trophyIcon} />
                                 <span><strong>{completedExercises.length}</strong><small>klaar</small></span>
                             </span>
                             <span>
-                                <img src={starIcon} alt="" />
+                                <IconBadge src={starIcon} />
                                 <span><strong>{totalXp} XP</strong><small>verzameld</small></span>
                             </span>
                             <span>
-                                <img src={streakIcon} alt="" />
+                                <IconBadge src={streakIcon} />
                                 <span><strong>{completionStreak}</strong><small>dagreeks</small></span>
                             </span>
                         </div>
