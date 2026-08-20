@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import '../styles/ChildFlow.css'
 
@@ -15,6 +15,7 @@ const emptyResult = {
 }
 
 export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
+  const saveInProgressRef = useRef(false)
   const [exercise, setExercise] = useState(null)
   const [result] = useState(() => {
     try {
@@ -34,6 +35,8 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
       return
     }
 
+    if (saveInProgressRef.current) return
+
     const patientId = localStorage.getItem('patientId')
 
     if (!patientId) {
@@ -42,21 +45,47 @@ export default function ExerciseCompletionPage({ exerciseId, onNavigate }) {
       return
     }
 
+    saveInProgressRef.current = true
     setIsSavingResult(true)
     setSaveError('')
 
-    const { data, error } = await supabase.rpc('complete_patient_exercise', {
-      p_patient_id: patientId,
-      p_exercise_id: exerciseId,
-      p_accuracy_percentage: result.accuracy,
-      p_xp_earned: result.xp,
-    })
+    const completion = {
+      completed: true,
+      completion_percentage: 100,
+      accuracy_percentage: Math.min(100, Math.max(0, Math.round(result.accuracy))),
+      xp_earned: Math.min(50, Math.max(0, Math.round(result.xp))),
+      completed_at: result.completedAt || new Date().toISOString(),
+    }
+
+    let { data, error } = await supabase
+      .from('patient_exercises')
+      .update(completion)
+      .eq('patient_id', patientId)
+      .eq('exercise_id', exerciseId)
+      .select('id')
+      .maybeSingle()
+
+    // Compatibility fallback for databases where only the secure RPC may update results.
+    if (error || !data) {
+      const rpcResult = await supabase.rpc('complete_patient_exercise', {
+        p_patient_id: patientId,
+        p_exercise_id: exerciseId,
+        p_accuracy_percentage: completion.accuracy_percentage,
+        p_xp_earned: completion.xp_earned,
+      })
+
+      data = rpcResult.data
+      error = rpcResult.error
+    }
 
     if (error || !data) {
       console.error(error || 'Geen oefentoewijzing gevonden.')
       setSaveError('Het resultaat kon niet worden opgeslagen. Probeer opnieuw.')
+    } else {
+      sessionStorage.removeItem(`exerciseResult:${exerciseId}`)
     }
 
+    saveInProgressRef.current = false
     setIsSavingResult(false)
   }, [exerciseId, result])
 

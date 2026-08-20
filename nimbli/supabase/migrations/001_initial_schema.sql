@@ -696,6 +696,13 @@ grant update (full_name, practice_name, location) on public.profiles to authenti
 grant select, update, delete on public.patients to authenticated;
 grant select, insert, update, delete on public.exercises to authenticated;
 grant select, insert, delete on public.patient_exercises to authenticated;
+grant update (
+  completed,
+  completion_percentage,
+  accuracy_percentage,
+  xp_earned,
+  completed_at
+) on public.patient_exercises to authenticated;
 grant select, insert, update, delete on public.logbook_entries to authenticated;
 grant select, insert, update on public.subscriptions to authenticated;
 
