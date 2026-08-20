@@ -13,40 +13,119 @@ import {
 } from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
-function ProgressChart({ items }) {
-    const width = 560
-    const height = 190
-    const paddingX = 34
-    const paddingY = 24
-    const usableWidth = width - paddingX * 2
-    const usableHeight = height - paddingY * 2
-    const points = items.map((item, index) => {
-        const x = items.length === 1
-            ? width / 2
-            : paddingX + (index / (items.length - 1)) * usableWidth
-        const y = paddingY + (1 - item.progress / 100) * usableHeight
+const categoryColors = {
+    Conditie: '#C27AFF',
+    Mobiliteit: '#FBB92A',
+    Evenwicht: '#82B3E1',
+    Kracht: '#81C784',
+    Overig: '#2BB39B',
+}
 
-        return { ...item, x, y }
-    })
+const getAccuracy = (item) => {
+    if (item.accuracy_percentage === null || item.accuracy_percentage === undefined) {
+        return null
+    }
+
+    const accuracy = Number(item.accuracy_percentage)
+    return Number.isFinite(accuracy) ? accuracy : null
+}
+
+function ProgressChart({ sessions }) {
+    const width = 640
+    const height = 230
+    const padding = { top: 18, right: 18, bottom: 42, left: 46 }
+    const usableWidth = width - padding.left - padding.right
+    const usableHeight = height - padding.top - padding.bottom
+    const measuredSessions = sessions.filter((item) => getAccuracy(item) !== null)
+    const sessionPoints = measuredSessions.map((item, index) => ({
+        ...item,
+        sessionIndex: index,
+        x: measuredSessions.length === 1
+            ? padding.left + usableWidth / 2
+            : padding.left + (index / (measuredSessions.length - 1)) * usableWidth,
+        y: padding.top + (1 - getAccuracy(item) / 100) * usableHeight,
+    }))
+    const series = Object.values(
+        sessionPoints.reduce((categories, point) => {
+            const category = point.exercises?.category || 'Overig'
+            const current = categories[category] || {
+                category,
+                color: categoryColors[category] || categoryColors.Overig,
+                points: [],
+            }
+
+            current.points.push(point)
+            categories[category] = current
+            return categories
+        }, {})
+    )
 
     return (
-        <div className="progress-chart" aria-label="Voortgangsgrafiek">
+        <div className="progress-chart" aria-label="Juistheid per voltooide sessie">
             <svg viewBox={`0 0 ${width} ${height}`} role="img">
                 {[0, 25, 50, 75, 100].map((value) => {
-                    const y = paddingY + (1 - value / 100) * usableHeight
-                    return <line key={value} x1={paddingX} x2={width - paddingX} y1={y} y2={y} />
+                    const y = padding.top + (1 - value / 100) * usableHeight
+                    return (
+                        <g key={value} className="progress-grid-line">
+                            <line x1={padding.left} x2={width - padding.right} y1={y} y2={y} />
+                            <text x={padding.left - 9} y={y + 4} textAnchor="end">{value}%</text>
+                        </g>
+                    )
                 })}
-                <polyline points={points.map(({ x, y }) => `${x},${y}`).join(' ')} />
-                {points.map(({ category, progress, x, y }) => (
-                    <g key={category}>
-                        <circle cx={x} cy={y} r="5" />
-                        <text x={x} y={height - 4} textAnchor="middle">
-                            {category.slice(0, 10)}
-                        </text>
-                        <title>{category}: {progress}%</title>
+
+                {series.map((categorySeries) => (
+                    <g
+                        className="progress-series"
+                        key={categorySeries.category}
+                        style={{ color: categorySeries.color }}
+                    >
+                        {categorySeries.points.length > 1 && (
+                            <polyline
+                                points={categorySeries.points
+                                    .map(({ x, y }) => `${x},${y}`)
+                                    .join(' ')}
+                            />
+                        )}
+                        {categorySeries.points.map((point) => (
+                            <circle
+                                key={point.id}
+                                cx={point.x}
+                                cy={point.y}
+                                r="5"
+                            >
+                                <title>
+                                    {point.exercises?.title || 'Oefening'} ·{' '}
+                                    {getAccuracy(point)}% ·{' '}
+                                    {point.completed_at
+                                        ? new Date(point.completed_at).toLocaleDateString('nl-BE')
+                                        : 'datum onbekend'}
+                                </title>
+                            </circle>
+                        ))}
                     </g>
                 ))}
+
+                {sessionPoints.map((point) => (
+                    <text
+                        className="progress-session-label"
+                        key={`label-${point.id}`}
+                        x={point.x}
+                        y={height - 12}
+                        textAnchor="middle"
+                    >
+                        S{point.sessionIndex + 1}
+                    </text>
+                ))}
             </svg>
+
+            <div className="progress-chart-legend">
+                {series.map((categorySeries) => (
+                    <span key={categorySeries.category}>
+                        <i style={{ background: categorySeries.color }} />
+                        {categorySeries.category}
+                    </span>
+                ))}
+            </div>
         </div>
     )
 }
@@ -372,14 +451,6 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
     }
 
     const completedExercises = assignedExercises.filter((item) => item.completed)
-    const getAccuracy = (item) => {
-        if (item.accuracy_percentage === null || item.accuracy_percentage === undefined) {
-            return null
-        }
-
-        const accuracy = Number(item.accuracy_percentage)
-        return Number.isFinite(accuracy) ? accuracy : null
-    }
     const measuredExercises = completedExercises.filter(
         (item) => getAccuracy(item) !== null
     )
@@ -392,11 +463,11 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
         )
         : 0
     const categoryProgress = Object.values(
-        assignedExercises.reduce((categories, item) => {
+        measuredExercises.reduce((categories, item) => {
             const category = item.exercises?.category || 'Overig'
             const current = categories[category] || { category, total: 0, count: 0 }
 
-            current.total += item.completion_percentage || 0
+            current.total += getAccuracy(item)
             current.count += 1
             categories[category] = current
 
@@ -596,7 +667,7 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                                     <p className="empty-text">Nog geen voortgang beschikbaar.</p>
                                 ) : (
                                     <>
-                                        <ProgressChart items={categoryProgress} />
+                                        <ProgressChart sessions={sessionResults} />
                                         <div className="category-progress-list">
                                             {categoryProgress.map((item) => (
                                                 <div className="category-progress-item" key={item.category}>

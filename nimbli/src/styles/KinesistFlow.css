@@ -2118,23 +2118,51 @@ input.kine-search:focus {
     stroke-width: 1;
 }
 
-.progress-chart polyline {
+.progress-series polyline {
     fill: none;
-    stroke: var(--kine-green);
-    stroke-width: 4;
+    stroke: currentColor;
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
-.progress-chart circle {
+.progress-series circle {
     fill: var(--nimbli-white);
-    stroke: var(--kine-green);
+    stroke: currentColor;
     stroke-width: 3;
 }
 
 .progress-chart text {
     fill: #8a9691;
     font-size: 10px;
+}
+
+.progress-chart .progress-session-label {
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.progress-chart-legend {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+}
+
+.progress-chart-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--nimbli-text-muted);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.progress-chart-legend i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
 }
 
 .category-progress-list {
