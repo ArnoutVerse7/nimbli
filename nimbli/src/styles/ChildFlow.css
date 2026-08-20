@@ -399,8 +399,37 @@
   object-fit: contain;
 }
 
+.child-symbol {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.road-node.done .child-symbol,
+.road-node.active .child-symbol,
+.road-node.open .child-symbol {
+  color: var(--nimbli-white);
+}
+
+.road-node.active .child-symbol {
+  fill: var(--nimbli-white);
+  stroke: var(--nimbli-white);
+}
+
+.road-node.locked .child-symbol {
+  color: #626b67;
+}
+
 .road-node.selected .road-node-circle {
   outline: 4px solid rgba(43, 179, 155, .15);
+}
+
+.road-node.active.selected .road-node-circle {
+  outline-color: rgba(251, 185, 42, .28);
 }
 
 .road-node.done .road-node-circle {
@@ -579,7 +608,7 @@
 .dashboard-mission {
   padding: 12px 0;
   display: grid;
-  grid-template-columns: 42px 1fr;
+  grid-template-columns: 42px minmax(0, 1fr) 30px;
   gap: 11px;
   align-items: center;
   border-bottom: 1px solid #edf1ef;
@@ -605,6 +634,56 @@
   object-fit: contain;
 }
 
+.dashboard-mission-icon.exercise,
+.mission-icon.exercise,
+.mini-mission-icon.exercise {
+  color: var(--nimbli-light-green);
+  background: #edf9ef;
+}
+
+.dashboard-mission-icon.xp,
+.mission-icon.xp,
+.mini-mission-icon.xp {
+  color: var(--nimbli-yellow);
+  background: #fff7dc;
+}
+
+.dashboard-mission-icon.day,
+.mission-icon.day,
+.mini-mission-icon.day {
+  color: var(--nimbli-red);
+  background: #fff0ef;
+}
+
+.dashboard-mission-icon.xp .child-symbol,
+.mission-icon.xp .child-symbol,
+.mini-mission-icon.xp .child-symbol {
+  fill: currentColor;
+}
+
+.dashboard-mission-reward,
+.mini-mission-reward {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #9ca5a1;
+  background: #eef1ef;
+}
+
+.dashboard-mission-reward.completed,
+.mini-mission-reward.completed {
+  color: var(--nimbli-dark-yellow);
+  background: #fff1bf;
+}
+
+.dashboard-mission-reward .child-symbol,
+.mini-mission-reward .child-symbol {
+  width: 20px;
+  height: 20px;
+}
+
 .dashboard-mission strong,
 .dashboard-mission small {
   display: block;
@@ -624,6 +703,24 @@
 
 .mission-progress.small {
   height: 6px;
+}
+
+.dashboard-mission.exercise .mission-progress div,
+.mission-card.exercise .mission-progress div,
+.mini-mission.exercise .mission-progress div {
+  background: var(--nimbli-light-green);
+}
+
+.dashboard-mission.xp .mission-progress div,
+.mission-card.xp .mission-progress div,
+.mini-mission.xp .mission-progress div {
+  background: var(--nimbli-yellow);
+}
+
+.dashboard-mission.day .mission-progress div,
+.mission-card.day .mission-progress div,
+.mini-mission.day .mission-progress div {
+  background: var(--nimbli-red);
 }
 
 .child-motivation-card {
@@ -916,11 +1013,24 @@
   place-items: center;
 }
 
+.mission-icon {
+  color: var(--nimbli-main-green);
+}
+
+.mission-reward {
+  color: #9ca5a1;
+}
+
 .mission-icon img,
 .mission-reward img {
   width: 26px;
   height: 26px;
   object-fit: contain;
+}
+
+.mission-reward.completed {
+  color: var(--nimbli-dark-yellow);
+  background: #fff1bf;
 }
 
 .mission-info strong {
@@ -934,10 +1044,6 @@
   margin-bottom: 10px;
   color: var(--text-light);
   font-size: 13px;
-}
-
-.mission-card.completed .mission-reward {
-  background: color-mix(in srgb, var(--nimbli-light-green) 24%, white);
 }
 
 .mission-progress {
@@ -1054,10 +1160,18 @@
   font-size: 12px;
 }
 
-.mini-mission img {
-  width: 26px;
-  height: 26px;
-  object-fit: contain;
+.mini-mission-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.mini-mission-icon .child-symbol {
+  width: 22px;
+  height: 22px;
 }
 
 /* ===== EXERCISE EXECUTION ===== */

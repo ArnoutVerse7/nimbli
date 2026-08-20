@@ -8,10 +8,9 @@ import {
 import { getExerciseCover } from '../lib/exerciseMedia'
 import { getChildProgress, toProgress } from '../lib/childProgress'
 import ChildSidebar from '../components/ChildSidebar'
+import ChildIcon, { MissionIcon } from '../components/ChildIcon'
 import '../styles/ChildFlow.css'
 
-import checkIcon from '../assets/logos/check.png'
-import lockIcon from '../assets/logos/lock.png'
 import mascotIcon from '../assets/logos/mascotte.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
@@ -112,7 +111,6 @@ export default function ChildDashboardPage({ onNavigate }) {
                 : exercise
                     ? `Oefening ${index + 1}`
                     : 'Vergrendeld',
-            icon: exercise?.completed ? checkIcon : exercise ? starIcon : lockIcon,
             status,
             exercise,
         }
@@ -122,15 +120,7 @@ export default function ChildDashboardPage({ onNavigate }) {
         ? toProgress(completedToday.length, todayExercises.length)
         : 0
     const selectedCover = getExerciseCover(selectedExercise)
-    const missionIcons = {
-        exercise: checkIcon,
-        xp: starIcon,
-        day: trophyIcon,
-    }
-    const missions = missionProgress.map((mission) => ({
-        ...mission,
-        icon: missionIcons[mission.id],
-    }))
+    const missions = missionProgress
 
     return (
         <main className="child-road-page">
@@ -227,7 +217,17 @@ export default function ChildDashboardPage({ onNavigate }) {
                                                 }}
                                             >
                                                 <span className="road-node-circle">
-                                                    <img src={node.icon} alt="" />
+                                                    <ChildIcon
+                                                        name={
+                                                            node.status === 'done'
+                                                                ? 'check'
+                                                                : node.status === 'active'
+                                                                    ? 'star'
+                                                                    : node.status === 'open'
+                                                                        ? 'moon'
+                                                                        : 'lock'
+                                                        }
+                                                    />
                                                 </span>
                                                 <span className="road-node-label">{node.label}</span>
                                             </button>
@@ -293,9 +293,9 @@ export default function ChildDashboardPage({ onNavigate }) {
                                 </div>
 
                                 {missions.map((mission) => (
-                                    <div className="dashboard-mission" key={mission.title}>
-                                        <span className="dashboard-mission-icon">
-                                            <img src={mission.icon} alt="" />
+                                    <div className={`dashboard-mission ${mission.id}`} key={mission.title}>
+                                        <span className={`dashboard-mission-icon ${mission.id}`}>
+                                            <MissionIcon missionId={mission.id} />
                                         </span>
                                         <div>
                                             <strong>{mission.title}</strong>
@@ -304,6 +304,9 @@ export default function ChildDashboardPage({ onNavigate }) {
                                                 <div style={{ width: `${mission.progress}%` }} />
                                             </div>
                                         </div>
+                                        <span className={`dashboard-mission-reward ${mission.completed ? 'completed' : ''}`}>
+                                            <ChildIcon name="chest" />
+                                        </span>
                                     </div>
                                 ))}
                             </section>

@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import '../styles/ChildFlow.css'
 import ChildSidebar from '../components/ChildSidebar'
+import ChildIcon, { MissionIcon } from '../components/ChildIcon'
 import { supabase } from '../lib/supabase'
 import { getChildProgress } from '../lib/childProgress'
 
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
-import checkIcon from '../assets/logos/check.png'
-import lockIcon from '../assets/logos/lock.png'
 
 export default function ChildMissionsPage({ onNavigate }) {
     const [assignedExercises, setAssignedExercises] = useState([])
@@ -57,15 +56,7 @@ export default function ChildMissionsPage({ onNavigate }) {
         completionStreak,
         missions: missionProgress,
     } = getChildProgress(assignedExercises)
-    const missionIcons = {
-        exercise: checkIcon,
-        xp: starIcon,
-        day: trophyIcon,
-    }
-    const missions = missionProgress.map((mission) => ({
-        ...mission,
-        icon: missionIcons[mission.id],
-    }))
+    const missions = missionProgress
 
     return (
         <main className="child-road-page">
@@ -98,11 +89,11 @@ export default function ChildMissionsPage({ onNavigate }) {
 
                         {!isLoading && !loadError && missions.map((mission) => (
                             <div
-                                className={`mission-card ${mission.completed ? 'completed' : ''}`}
+                                className={`mission-card ${mission.id} ${mission.completed ? 'completed' : ''}`}
                                 key={mission.id}
                             >
-                                <div className="mission-icon">
-                                    <img src={mission.icon} alt="" />
+                                <div className={`mission-icon ${mission.id}`}>
+                                    <MissionIcon missionId={mission.id} />
                                 </div>
 
                                 <div className="mission-info">
@@ -114,10 +105,7 @@ export default function ChildMissionsPage({ onNavigate }) {
                                 </div>
 
                                 <div className={`mission-reward ${mission.completed ? 'completed' : ''}`}>
-                                    <img
-                                        src={mission.completed ? checkIcon : lockIcon}
-                                        alt={mission.completed ? 'Voltooid' : 'Nog niet voltooid'}
-                                    />
+                                    <ChildIcon name="chest" />
                                 </div>
                             </div>
                         ))}

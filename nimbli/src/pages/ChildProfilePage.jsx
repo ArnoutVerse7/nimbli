@@ -3,12 +3,12 @@ import { supabase } from '../lib/supabase'
 import { getChildProgress } from '../lib/childProgress'
 import '../styles/ChildFlow.css'
 import ChildSidebar from '../components/ChildSidebar'
+import ChildIcon, { MissionIcon } from '../components/ChildIcon'
 
 import mascotte from '../assets/logos/mascotte.png'
 import trophyIcon from '../assets/logos/trophy.png'
 import starIcon from '../assets/logos/star.png'
 import streakIcon from '../assets/logos/streak.png'
-import checkIcon from '../assets/logos/check.png'
 
 export default function ChildProfilePage({ onNavigate }) {
     const [patient, setPatient] = useState(null)
@@ -66,12 +66,6 @@ export default function ChildProfilePage({ onNavigate }) {
         completionStreak,
         missions,
     } = getChildProgress(assignedExercises)
-    const missionIcons = {
-        exercise: checkIcon,
-        xp: starIcon,
-        day: trophyIcon,
-    }
-
     return (
         <main className="child-road-page">
             <section className="child-dashboard-shell">
@@ -128,13 +122,12 @@ export default function ChildProfilePage({ onNavigate }) {
 
                             {!isLoading && !loadError && missions.map((mission) => (
                                 <div
-                                    className={`mini-mission ${mission.completed ? 'completed' : ''}`}
+                                    className={`mini-mission ${mission.id} ${mission.completed ? 'completed' : ''}`}
                                     key={mission.id}
                                 >
-                                    <img
-                                        src={mission.completed ? checkIcon : missionIcons[mission.id]}
-                                        alt=""
-                                    />
+                                    <span className={`mini-mission-icon ${mission.id}`}>
+                                        <MissionIcon missionId={mission.id} />
+                                    </span>
                                     <div>
                                         <strong>{mission.title}</strong>
                                         <small>{mission.detail}</small>
@@ -142,6 +135,9 @@ export default function ChildProfilePage({ onNavigate }) {
                                             <div style={{ width: `${mission.progress}%` }} />
                                         </div>
                                     </div>
+                                    <span className={`mini-mission-reward ${mission.completed ? 'completed' : ''}`}>
+                                        <ChildIcon name="chest" />
+                                    </span>
                                 </div>
                             ))}
 
