@@ -2132,6 +2132,10 @@ input.kine-search:focus {
     stroke-width: 3;
 }
 
+.daily-accuracy-series {
+    color: var(--nimbli-main-green);
+}
+
 .progress-chart text {
     fill: #8a9691;
     font-size: 10px;
@@ -2142,27 +2146,16 @@ input.kine-search:focus {
     font-weight: 800;
 }
 
-.progress-chart-legend {
-    padding: 0 12px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px 16px;
-}
-
-.progress-chart-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--nimbli-text-muted);
+.progress-chart .progress-value-label {
+    fill: var(--nimbli-main-dark-green);
     font-size: 10px;
-    font-weight: 800;
+    font-weight: 900;
 }
 
-.progress-chart-legend i {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
+.category-progress-title {
+    margin: 4px 0 12px;
+    color: var(--nimbli-black);
+    font-size: 12px;
 }
 
 .category-progress-list {

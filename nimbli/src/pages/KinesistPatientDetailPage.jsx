@@ -13,14 +13,6 @@ import {
 } from '../lib/exerciseSchedule'
 import '../styles/KinesistFlow.css'
 
-const categoryColors = {
-    Conditie: '#C27AFF',
-    Mobiliteit: '#FBB92A',
-    Evenwicht: '#82B3E1',
-    Kracht: '#81C784',
-    Overig: '#2BB39B',
-}
-
 const getAccuracy = (item) => {
     if (item.accuracy_percentage === null || item.accuracy_percentage === undefined) {
         return null
@@ -36,32 +28,49 @@ function ProgressChart({ sessions }) {
     const padding = { top: 18, right: 18, bottom: 42, left: 46 }
     const usableWidth = width - padding.left - padding.right
     const usableHeight = height - padding.top - padding.bottom
-    const measuredSessions = sessions.filter((item) => getAccuracy(item) !== null)
-    const sessionPoints = measuredSessions.map((item, index) => ({
-        ...item,
-        sessionIndex: index,
-        x: measuredSessions.length === 1
-            ? padding.left + usableWidth / 2
-            : padding.left + (index / (measuredSessions.length - 1)) * usableWidth,
-        y: padding.top + (1 - getAccuracy(item) / 100) * usableHeight,
-    }))
-    const series = Object.values(
-        sessionPoints.reduce((categories, point) => {
-            const category = point.exercises?.category || 'Overig'
-            const current = categories[category] || {
-                category,
-                color: categoryColors[category] || categoryColors.Overig,
-                points: [],
+    const dailyResults = Object.values(
+        sessions.reduce((days, item) => {
+            const accuracy = getAccuracy(item)
+
+            if (accuracy === null || !item.completed_at) return days
+
+            const completedDate = new Date(item.completed_at)
+            if (Number.isNaN(completedDate.getTime())) return days
+
+            const dateKey = completedDate.toLocaleDateString('nl-BE')
+            const current = days[dateKey] || {
+                dateKey,
+                dateLabel: completedDate.toLocaleDateString('nl-BE', {
+                    day: 'numeric',
+                    month: 'short',
+                }),
+                timestamp: completedDate.getTime(),
+                totalAccuracy: 0,
+                sessionCount: 0,
             }
 
-            current.points.push(point)
-            categories[category] = current
-            return categories
+            current.totalAccuracy += accuracy
+            current.sessionCount += 1
+            current.timestamp = Math.min(current.timestamp, completedDate.getTime())
+            days[dateKey] = current
+            return days
         }, {})
     )
+        .sort((first, second) => first.timestamp - second.timestamp)
+        .map((day) => ({
+            ...day,
+            accuracy: Math.round(day.totalAccuracy / day.sessionCount),
+        }))
+    const points = dailyResults.map((day, index) => ({
+        ...day,
+        x: dailyResults.length === 1
+            ? padding.left + usableWidth / 2
+            : padding.left + (index / (dailyResults.length - 1)) * usableWidth,
+        y: padding.top + (1 - day.accuracy / 100) * usableHeight,
+    }))
 
     return (
-        <div className="progress-chart" aria-label="Juistheid per voltooide sessie">
+        <div className="progress-chart" aria-label="Gemiddelde juistheid per dag">
             <svg viewBox={`0 0 ${width} ${height}`} role="img">
                 {[0, 25, 50, 75, 100].map((value) => {
                     const y = padding.top + (1 - value / 100) * usableHeight
@@ -73,59 +82,40 @@ function ProgressChart({ sessions }) {
                     )
                 })}
 
-                {series.map((categorySeries) => (
-                    <g
-                        className="progress-series"
-                        key={categorySeries.category}
-                        style={{ color: categorySeries.color }}
-                    >
-                        {categorySeries.points.length > 1 && (
-                            <polyline
-                                points={categorySeries.points
-                                    .map(({ x, y }) => `${x},${y}`)
-                                    .join(' ')}
-                            />
-                        )}
-                        {categorySeries.points.map((point) => (
-                            <circle
-                                key={point.id}
-                                cx={point.x}
-                                cy={point.y}
-                                r="5"
-                            >
+                <g className="progress-series daily-accuracy-series">
+                    {points.length > 1 && (
+                        <polyline
+                            points={points.map(({ x, y }) => `${x},${y}`).join(' ')}
+                        />
+                    )}
+                    {points.map((point) => (
+                        <g key={point.dateKey}>
+                            <circle cx={point.x} cy={point.y} r="5">
                                 <title>
-                                    {point.exercises?.title || 'Oefening'} ·{' '}
-                                    {getAccuracy(point)}% ·{' '}
-                                    {point.completed_at
-                                        ? new Date(point.completed_at).toLocaleDateString('nl-BE')
-                                        : 'datum onbekend'}
+                                    {point.dateKey}: {point.accuracy}% gemiddeld uit{' '}
+                                    {point.sessionCount} oefening{point.sessionCount === 1 ? '' : 'en'}
                                 </title>
                             </circle>
-                        ))}
-                    </g>
-                ))}
-
-                {sessionPoints.map((point) => (
-                    <text
-                        className="progress-session-label"
-                        key={`label-${point.id}`}
-                        x={point.x}
-                        y={height - 12}
-                        textAnchor="middle"
-                    >
-                        S{point.sessionIndex + 1}
-                    </text>
-                ))}
+                            <text
+                                className="progress-value-label"
+                                x={point.x}
+                                y={point.y - 11}
+                                textAnchor="middle"
+                            >
+                                {point.accuracy}%
+                            </text>
+                            <text
+                                className="progress-session-label"
+                                x={point.x}
+                                y={height - 12}
+                                textAnchor="middle"
+                            >
+                                {point.dateLabel}
+                            </text>
+                        </g>
+                    ))}
+                </g>
             </svg>
-
-            <div className="progress-chart-legend">
-                {series.map((categorySeries) => (
-                    <span key={categorySeries.category}>
-                        <i style={{ background: categorySeries.color }} />
-                        {categorySeries.category}
-                    </span>
-                ))}
-            </div>
         </div>
     )
 }
@@ -661,13 +651,16 @@ export default function KinesistPatientDetailPage({ onNavigate }) {
                     {activeTab === 'overview' && (
                         <section className="patient-detail-grid">
                             <div className="patient-detail-card">
-                                <h3>Voortgang per categorie</h3>
+                                <h3>Juistheid per dag</h3>
 
                                 {categoryProgress.length === 0 ? (
                                     <p className="empty-text">Nog geen voortgang beschikbaar.</p>
                                 ) : (
                                     <>
                                         <ProgressChart sessions={sessionResults} />
+                                        <h4 className="category-progress-title">
+                                            Gemiddelde juistheid per categorie
+                                        </h4>
                                         <div className="category-progress-list">
                                             {categoryProgress.map((item) => (
                                                 <div className="category-progress-item" key={item.category}>
